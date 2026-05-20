@@ -1,0 +1,649 @@
+openapi: 3.0.0
+
+info:
+  title: Contrato de API
+  version: 1.0.0
+  description: API para gestión de reservas, menú, servicios y administración.
+
+servers:
+  - url: http://localhost:5000
+
+paths:
+  /api/login:
+    post:
+      summary: Inicio de sesión de administrador
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+
+      responses:
+        "200":
+          description: Inicio de sesión exitoso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+        "401":
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/login/logout:
+    post:
+      summary: Cierre de sesión
+      tags:
+        - Auth
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Sesión cerrada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /api/menu:
+    get:
+      summary: Obtener menú completo
+      description: |
+        El cliente regular solo recibe productos activos.
+        El administrador recibe todos los productos.
+      tags:
+        - Menu
+
+      responses:
+        "200":
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elementos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Producto"
+
+    post:
+      summary: Crear nuevo producto
+      tags:
+        - Menu
+      security:
+        - sessionAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductoRequest"
+
+      responses:
+        "201":
+          description: Producto creado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - id
+                properties:
+                  status:
+                    type: string
+                    example: success
+
+                  id:
+                    type: integer
+                    example: 15
+
+        "400":
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "401":
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/menu/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      summary: Modificar producto existente
+      tags:
+        - Menu
+      security:
+        - sessionAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductoUpdateRequest"
+
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Producto inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas:
+    get:
+      summary: Obtener todas las reservas
+      tags:
+        - Reservas
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elementos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Reserva"
+
+    post:
+      summary: Crear reserva
+      tags:
+        - Reservas
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservaRequest"
+
+      responses:
+        "201":
+          description: Reserva creada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - reserva_id
+                properties:
+                  status:
+                    type: string
+                    example: success
+
+                  message:
+                    type: string
+                    example: Reserva creada correctamente
+
+                  reserva_id:
+                    type: integer
+                    example: 22
+
+                  qr_code:
+                    type: string
+                    description: QR en base64 o URL
+                    example: qr_reserva_22.png
+
+        "400":
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      summary: Cancelar reserva manualmente
+      description: Baja lógica de la reserva
+      tags:
+        - Reservas
+      security:
+        - sessionAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - activo
+              properties:
+                activo:
+                  type: boolean
+                  example: false
+
+      responses:
+        "200":
+          description: Reserva actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Reserva inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas/cancelar/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+
+    patch:
+      summary: Cancelar reserva mediante token
+      tags:
+        - Reservas
+
+      responses:
+        "200":
+          description: Reserva cancelada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/servicios:
+    get:
+      summary: Obtener servicios
+      tags:
+        - Servicios
+
+      responses:
+        "200":
+          description: Lista de servicios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elementos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Servicio"
+
+  /api/servicios/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    patch:
+      summary: Modificar servicio
+      tags:
+        - Servicios
+      security:
+        - sessionAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicioUpdateRequest"
+
+      responses:
+        "200":
+          description: Servicio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /api/resenas:
+    get:
+      summary: Obtener reseñas aprobadas
+      tags:
+        - Reseñas
+
+      responses:
+        "200":
+          description: Lista de reseñas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elementos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Resena"
+
+    post:
+      summary: Crear reseña
+      tags:
+        - Reseñas
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResenaRequest"
+
+      responses:
+        "201":
+          description: Reseña enviada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /api/dashboard/metricas:
+    get:
+      summary: Obtener métricas del dashboard
+      tags:
+        - Dashboard
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Métricas obtenidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardMetricas"
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@mail.com
+
+        password:
+          type: string
+          format: password
+          example: admin123
+
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+
+        message:
+          type: string
+          example: Login exitoso
+
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+
+        nombre:
+          type: string
+          example: Juan Pérez
+
+        rol:
+          type: string
+          example: admin
+
+    Producto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+
+        nombre:
+          type: string
+          example: Pizza Napolitana
+
+        precio:
+          type: number
+          example: 12500
+
+        descripcion:
+          type: string
+          example: Pizza con mozzarella y tomate
+
+        activo:
+          type: boolean
+          example: true
+
+    ProductoRequest:
+      type: object
+      required:
+        - nombre
+        - precio
+      properties:
+        nombre:
+          type: string
+
+        precio:
+          type: number
+
+        descripcion:
+          type: string
+
+    ProductoUpdateRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+
+        precio:
+          type: number
+
+        descripcion:
+          type: string
+
+        activo:
+          type: boolean
+
+    Reserva:
+      type: object
+      properties:
+        id:
+          type: integer
+
+        email:
+          type: string
+          format: email
+
+        fecha:
+          type: string
+          format: date
+
+        hora:
+          type: string
+          format: time
+
+        cantidad_personas:
+          type: integer
+
+        activo:
+          type: boolean
+
+    ReservaRequest:
+      type: object
+      required:
+        - email
+        - fecha
+        - hora
+        - cantidad_personas
+      properties:
+        email:
+          type: string
+          format: email
+
+        fecha:
+          type: string
+          format: date
+
+        hora:
+          type: string
+          format: time
+
+        cantidad_personas:
+          type: integer
+          minimum: 1
+
+    Servicio:
+      type: object
+      properties:
+        id:
+          type: integer
+
+        nombre:
+          type: string
+
+        activo:
+          type: boolean
+
+    ServicioUpdateRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+
+        activo:
+          type: boolean
+
+    Resena:
+      type: object
+      properties:
+        id:
+          type: integer
+
+        comentario:
+          type: string
+
+        calificacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+
+    ResenaRequest:
+      type: object
+      required:
+        - comentario
+        - calificacion
+      properties:
+        comentario:
+          type: string
+
+        calificacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+
+    DashboardMetricas:
+      type: object
+      properties:
+        cantidad_reservas:
+          type: integer
+
+        cantidad_cancelaciones:
+          type: integer
+
+        historial_reservas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Reserva"
+
+    SuccessResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          example: success
+
+        message:
+          type: string
+          example: Operación realizada correctamente
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          example: error
+
+        message:
+          type: string
+          example: Ocurrió un error
