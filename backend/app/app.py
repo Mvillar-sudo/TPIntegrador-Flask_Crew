@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from routes import menu_bp, reseñas_bp, login_bp, reservas_bp, servicios_bp
+from routes import menu_bp, reseñas_bp, login_bp, reservas_bp, servicios_bp, dashboard_bp
 
 def create_app():
     app = Flask(__name__)
@@ -11,7 +11,8 @@ def create_app():
     app.register_blueprint(login_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
-
+    app.register_blueprint(dashboard_bp)
+    
     # Manejo de errores
     @app.errorhandler(404)
     def page_not_found(e):
