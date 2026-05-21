@@ -6,7 +6,7 @@ reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 def get_reservas():
     return jsonify({"mensaje": "Endpoint de Reservas funcionando"})
 
-@reservas_bp.route('/<int: id_reserva>', methods=['GET'])
+@reservas_bp.route('/<int:id_reserva>', methods=['GET'])
 def get_reserva(id_reserva):
     return jsonify({"mensaje": "Endpoint de Reservas funcionando"})
 
@@ -14,6 +14,6 @@ def get_reserva(id_reserva):
 def crear_reserva():
     return jsonify({"mensaje": "Endpoint de Reservas funcionando"})
 
-@reservas_bp.route('/<int: id_reserva>', methods=['PUT'])
+@reservas_bp.route('/<int:id_reserva>', methods=['PUT'])
 def modificar_reserva(id_reserva):
     return jsonify({"mensaje": "Endpoint de Reservas funcionando"})
