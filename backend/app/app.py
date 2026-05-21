@@ -1,10 +1,15 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from routes import menu_bp, reseñas_bp, login_bp, reservas_bp, servicios_bp, dashboard_bp
+import db
 
 def create_app():
     app = Flask(__name__)
     CORS(app, origins=["http://localhost:3000"])
+    
+    # Inicializar Base de Datos
+    db.init_app(app)
+    
     # Registro de Blueprints
     app.register_blueprint(menu_bp)
     app.register_blueprint(reseñas_bp)
