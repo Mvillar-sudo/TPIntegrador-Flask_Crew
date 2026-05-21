@@ -250,11 +250,12 @@ paths:
             schema:
               type: object
               required:
-                - activo
+                - estado
               properties:
-                activo:
-                  type: boolean
-                  example: false
+                estado:
+                  type: string
+                  enum: [cancelada]
+                  example: cancelada
 
       responses:
         "200":
@@ -294,6 +295,36 @@ paths:
 
         "404":
           description: Token inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas/validar/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+
+    patch:
+      summary: Validar reserva mediante QR (canjeo)
+      tags:
+        - Reservas
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Reserva validada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Token inválido o reserva ya cancelada
           content:
             application/json:
               schema:
@@ -452,9 +483,10 @@ components:
           type: string
           example: Juan Pérez
 
-        rol:
+        email:
           type: string
-          example: admin
+          format: email
+          example: admin@mail.com
 
     Producto:
       type: object
@@ -530,8 +562,10 @@ components:
         cantidad_personas:
           type: integer
 
-        activo:
-          type: boolean
+        estado:
+          type: string
+          enum: [pendiente, validada, cancelada]
+          example: pendiente
 
     ReservaRequest:
       type: object
