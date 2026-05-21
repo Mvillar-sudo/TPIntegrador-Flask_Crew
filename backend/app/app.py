@@ -13,6 +13,11 @@ def create_app():
     app.register_blueprint(servicios_bp)
     app.register_blueprint(dashboard_bp)
     
+    @app.route('/')
+    def index():
+        return 'Backend funcionando correctamente en el puerto 5000'
+    
+    
     # Manejo de errores
     @app.errorhandler(404)
     def page_not_found(e):
