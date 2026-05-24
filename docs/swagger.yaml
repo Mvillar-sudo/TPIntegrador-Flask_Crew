@@ -158,6 +158,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+    delete:
+      summary: Eliminar producto
+      tags:
+        - Menu
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Producto eliminado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Producto inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /api/reservas:
     get:
       summary: Obtener todas las reservas
