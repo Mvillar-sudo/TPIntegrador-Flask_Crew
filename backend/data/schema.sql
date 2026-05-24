@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS reservas (
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     cantidad_personas INT NOT NULL,
-    estado VARCHAR(20) NOT NULL DEFAULT 'pendiente', -- 'pendiente', 'validada', 'cancelada'
-    token_cancelacion VARCHAR(255) NOT NULL UNIQUE,
+    estado VARCHAR(20) NOT NULL DEFAULT 'pendiente', -- 'pendiente', 'confirmada', 'cancelada'
+    token VARCHAR(255) NOT NULL UNIQUE,
     qr_code VARCHAR(255) NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
