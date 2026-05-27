@@ -1,11 +1,11 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_mail import Mail
-from routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
-from config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
-import db
+from .routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
+from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
+from . import db
 
-mail = Mail()
+from app import mail
 
 def create_app():
     app = Flask(__name__)
