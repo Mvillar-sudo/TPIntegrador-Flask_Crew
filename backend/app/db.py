@@ -17,6 +17,13 @@ def get_db():
 
     return g.db
 
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="valen183252",
+        database="tpintegrador_db"
+    )
 
 def close_db(e=None):
     db = g.pop('db', None)
