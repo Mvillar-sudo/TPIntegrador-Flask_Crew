@@ -5,11 +5,6 @@ app.secret_key = 'clave_secreta_para_hamburgueseria'
 
 @app.route('/', methods=['GET', 'POST'])
 def landing():
-    """
-    Página Principal. 
-    Mapea 'landing' (como pide base.html) pero renderiza 'landing.html'.
-    Procesa reservas rápidas y suscripciones.
-    """
     if request.method == 'POST':
         if 'email' in request.form and 'persons' not in request.form:
             # Formulario de suscripción
@@ -29,10 +24,6 @@ def landing():
 
 @app.route('/menu')
 def menu():
-    """
-    Menú de Platos.
-    Envía los datos dinámicos a 'menu.html' para evitar repetir código.
-    """
     platos_hamburgueseria = [
         {"nombre": "Fresh Mushrooms", "descripcion": "Far far away, behind the word...", "precio": 19.15, "imagen": "img_2.jpg"},
         {"nombre": "Cheese and Garlic Toast", "descripcion": "Far far away, behind the word...", "precio": 20.99, "imagen": "img_3.jpg"},
@@ -46,9 +37,6 @@ def menu():
 
 @app.route('/reservas', methods=['GET', 'POST'])
 def reservas():
-    """
-    Página independiente de Reservas.
-    """
     if request.method == 'POST':
         return redirect(url_for('landing'))
     return render_template('reservas.html')
@@ -56,10 +44,6 @@ def reservas():
 
 @app.route('/resenas', methods=['GET', 'POST'])
 def resenas():
-    """
-    Página de Reseñas (resenas.html).
-    Muestra el formulario (GET) y procesa la opinión enviada (POST).
-    """
     if request.method == 'POST':
         nombre = request.form.get('name')
         email = request.form.get('email')
