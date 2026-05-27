@@ -13,8 +13,7 @@ def login_process():
     
     if usuario == "admin" and contrasena == "123":
         session['admin_logeado'] = True
-        return "¡Bienvenido al panel!"
-    return redirect(url_for('admin.dashboard')) 
+        return redirect(url_for('admin.dashboard')) 
 
 @admin_bp.route('/admin/dashboard')
 def dashboard():
