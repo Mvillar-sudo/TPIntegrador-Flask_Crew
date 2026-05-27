@@ -56,15 +56,13 @@
             <div class="gtco-container">
                 <div class="row">
                     <div class="col-sm-4 col-xs-12">
-                        <div id="gtco-logo"><a href="{{ url_for('index') }}">Hamburgueseria <em>.</em></a></div>
+                        <div id="gtco-logo"><a href="{{ url_for('landing') }}">Hamburgueseria <em>.</em></a></div>
                     </div>
                     <div class="col-xs-8 text-right menu-1">
                         <ul>
                             <li><a href="{{ url_for('menu') }}">Menu</a></li>
-                                <a href="{{ url_for('reservas') }}">Reservar</a>
-								<li class="btn-cta"><a href="#"><span>Reservar</span></a></li>
                             <li><a href="{{ url_for('resenas') }}">Resenas</a></li>
-                            <li class="btn-cta"><a href="#"><span>Resenas</span></a></li>
+							<li class="btn-cta"><a href="{{ url_for('reservas') }}"><span>Reservar</span></a></li>
                         </ul>   
                     </div>
                 </div>
