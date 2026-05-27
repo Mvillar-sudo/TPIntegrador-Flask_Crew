@@ -1,7 +1,5 @@
-import mysql.connector
 from db import execute_db, query_db
 
-from flask_cors import CORS
 def post_servicio(datos):
     nombre = datos.get('nombre')
     descripcion = datos.get('descripcion')
