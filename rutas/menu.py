@@ -17,6 +17,7 @@ def mostrar_plato():
     platos = cursor.fetchall()
 
     cursor.close()
+    conn.close()
 
     
     return jsonify(platos), 200
