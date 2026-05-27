@@ -1,5 +1,5 @@
-from .menu import menu_bp
-from .reseñas import reseñas_bp
-from .login import login_bp
-from .reservas import reservas_bp
-from .servicios import servicios_bp
+#from .menu_service import
+#from .reseñas_service import
+#from .auth_service import
+#from .reservas_service import
+from .servicio_service import get_servicio, post_servicio, actualizar_servicio
