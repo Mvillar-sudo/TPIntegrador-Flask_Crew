@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Panel - Servicios Extras{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+        
+        <div class="admin-table-container">
+            <h2 style="font-weight: 300; margin-bottom: 20px;">Servicios Adicionales</h2>
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th>ID Servicio</th>
+                        <th>Nombre del Servicio</th>
+                        <th>Estado</th>
+                        <th>Fecha de Alta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.id }}</td>
+                        <td><strong>{{ servicio.nombre }}</strong></td>
+                        <td>
+                            {% if servicio.activo %}
+                                <span class="badge-status badge-active">Activo</span>
+                            {% else %}
+                                <span class="badge-status badge-inactive">Deshabilitado</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ servicio.fecha_creacion }}</td>
+                        <td>
+                            <button class="btn btn-default btn-actions">Alternar Estado</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

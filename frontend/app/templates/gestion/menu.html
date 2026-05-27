@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Panel - Gestión de Menú{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+        
+        <div class="admin-table-container">
+            <h2 style="font-weight: 300; margin-bottom: 20px;">Platos del Menú</h2>
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plato in platos %}
+                    <tr>
+                        <td>{{ plato.id }}</td>
+                        <td><strong>{{ plato.nombre }}</strong></td>
+                        <td><small>{{ plato.descripcion }}</small></td>
+                        <td>${{ plato.precio }}</td>
+                        <td>
+                            {% if plato.activo %}
+                                <span class="badge-status badge-active">Activo</span>
+                            {% else %}
+                                <span class="badge-status badge-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ plato.fecha_creacion }}</td>
+                        <td>
+                            <button class="btn btn-default btn-actions">Editar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

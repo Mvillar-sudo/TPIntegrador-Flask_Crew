@@ -3953,4 +3953,112 @@ main {
 .star-rating input:checked ~ label {
     color: #FBB403; 
 }
+.login-section {
+  padding: 7em 0;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 450px;
+  padding: 40px;
+  margin: 0 auto;
+  -webkit-box-shadow: 0px 14px 30px -15px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0px 14px 30px -15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 14px 30px -15px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+.login-box h2 {
+  font-weight: 300;
+  margin-bottom: 5px;
+  color: #000;
+}
+.login-box p {
+  font-size: 14px;
+  color: gray;
+  margin-bottom: 30px;
+}
+.form-group-custom {
+  margin-bottom: 25px;
+}
+.form-group-custom label {
+  font-weight: normal;
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+}
+.btn-block-custom {
+  width: 100%;
+  height: 46px;
+  margin-top: 10px;
+}
+.dashboard-wrapper {
+  padding: 5em 0;
+  background-color: #f9f9f9;
+}
+.dashboard-card {
+  background: #ffffff;
+  padding: 30px 20px;
+  margin-bottom: 30px;
+  border-radius: 4px;
+  border: 1px solid #e6e6e6;
+  transition: all 0.3s ease;
+}
+.dashboard-card.text-centerHighlight {
+  background: #ffffff;
+  padding: 30px 20px;
+  margin-bottom: 30px;
+  border-radius: 4px;
+  border: 1px solid #FBB448; /* Color dorado de tu marca */
+  box-shadow: 0px 10px 20px -10px rgba(251, 180, 72, 0.3);
+  text-align: center;
+}
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 15px 30px -10px rgba(0, 0, 0, 0.1);
+}
+.card-icon {
+  font-size: 40px;
+  color: #FBB448; /* Usa el color dorado principal */
+  margin-bottom: 15px;
+  display: inline-block;
+}
+.dashboard-card h3 {
+  font-size: 20px;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+}
+.dashboard-card p {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  min-height: 68px; /* Mantiene la alineación de los botones */
+}
+.metrics-row {
+  margin-top: 4em;
+  padding: 30px 0;
+  border-top: 1px solid #e6e6e6;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.02);
+}
+.metric-number {
+  display: block;
+  font-size: 36px;
+  font-weight: 700;
+  color: #FBB448;
+  font-family: "Lato", Arial, sans-serif;
+}
+.metric-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #888888;
+  font-weight: 700;
+}
 /*# sourceMappingURL=style.css.map */
