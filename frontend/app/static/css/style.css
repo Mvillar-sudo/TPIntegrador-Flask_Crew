@@ -3936,4 +3936,31 @@ form label {
 main {
     min-height: 60vh;
 }
+.reviews-header-bg {
+    background-image: url('../img/img_1.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    font-size: 1.8em;
+    padding: 10px 0;
+}
+.star-rating input {
+    display: none;
+}
+.star-rating label {
+    color: #ccc;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: color 0.2s ease-in-out;
+}
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #FBB403; 
+}
 /*# sourceMappingURL=style.css.map */
