@@ -1,4 +1,13 @@
 def validar_servicio(datos, es_actualizacion=False):
+    """Valida los datos de un servicio extra para creación o actualización.
+
+    Args:
+        datos (dict): Datos recibidos del request JSON.
+        es_actualizacion (bool): Si es True, el 'nombre' es opcional. Por defecto False.
+
+    Returns:
+        list: Lista de mensajes de error. Vacía si los datos son válidos.
+    """
     errores = []
     
     if not datos:
