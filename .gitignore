@@ -1,0 +1,28 @@
+# --- Entorno Virtual ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- Archivos de Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# --- Variables de Entorno y Credenciales ---
+.env
+*.env
+instance/
+config.local.py
+
+# --- Base de Datos local ---
+*.sqlite
+*.db
+*.sql.bak
+
+# --- Archivos del Sistema Operativo / IDEs ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
