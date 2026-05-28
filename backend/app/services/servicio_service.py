@@ -13,7 +13,7 @@ def get_servicio():
     servicios = query_db(query)
     return servicios
 
-def actualizar_servicio(id, datos):
+def patch_servicio(id, datos):
     nombre = datos.get('nombre')
     descripcion = datos.get('descripcion')
     activo = datos.get('activo')

@@ -2,4 +2,4 @@
 #from .reseñas_service import
 #from .auth_service import
 #from .reservas_service import
-from .servicio_service import get_servicio, post_servicio, actualizar_servicio
+from .servicio_service import get_servicio, post_servicio, patch_servicio
