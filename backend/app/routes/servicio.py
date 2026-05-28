@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from services import post_servicio, get_servicio
+from services import post_servicio, get_servicio, patch_servicio
+from validators import validar_crear_servicio, validar_actualizar_servicio
 servicio_bp = Blueprint('servicios', __name__)
 
 # 1. ENDPOINT PARA MOSTRAR LOS SERVICIOS (GET)
@@ -12,12 +13,24 @@ def listar_servicios():
 @servicio_bp.route('/api/servicios', methods=['POST'])
 def agregar_servicio():
     datos = request.get_json()
+    
+    # Validar
+    errores = validar_crear_servicio(datos)
+    if errores:
+        return jsonify({"errores": errores}), 400
+
     respuesta_servicio = post_servicio(datos)
-    return jsonify({respuesta_servicio}), 201
+    return jsonify(respuesta_servicio), 201
 
 #3. ENDPOINT PARA ACTUALIZAR UN SERVICIO (PATCH)
 @servicio_bp.route('/api/servicios/<int:id>', methods=['PATCH'])
 def actualizar_servicio(id):
     datos = request.get_json()
-    respuesta_servicio = post_servicio(id, datos)
-    return jsonify({respuesta_servicio}), 200
+
+    # Validar
+    errores = validar_actualizar_servicio(datos)
+    if errores:
+        return jsonify({"errores": errores}), 400
+
+    respuesta_servicio = patch_servicio(id, datos)
+    return jsonify(respuesta_servicio), 200
