@@ -3,8 +3,7 @@ from services.resenas_service import (
     obtener_resenas,
     obtener_resena_id,
     crear_resena_db,
-    aprobar_resena_db,
-    eliminar_resena_db
+   eliminar_resena_db
 )
 from validators.resena_validator import validar_resena
 
@@ -47,17 +46,6 @@ def crear_resena():
 
 
 # privada (admin)
-
-@reseñas_bp.route('/<int:id_resena>/aprobar', methods=['PATCH'])
-def aprobar_resena(id_resena):
-    try:
-        filas = aprobar_resena_db(id_resena)
-        if filas == 0:
-            return jsonify({"error": "Reseña no encontrada"}), 404
-        return jsonify({"mensaje": "Reseña aprobada correctamente"}), 200
-    except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500
-
 
 @reseñas_bp.route('/<int:id_resena>', methods=['DELETE'])
 def eliminar_resena(id_resena):

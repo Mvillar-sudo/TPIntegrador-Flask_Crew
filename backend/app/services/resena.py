@@ -2,15 +2,13 @@ from db import query_db, execute_db
 
 def obtener_resenas():
     return query_db("""
-        SELECT id, comentario, calificacion, aprobado,
-               nombre_cliente, reserva_id, fecha_creacion
+        SELECT id, comentario, calificacion, nombre_cliente, reserva_id, fecha_creacion
         FROM resenas
     """)
 
 def obtener_resena_id(id_resena):
     return query_db("""
-        SELECT id, comentario, calificacion, aprobado,
-               nombre_cliente, reserva_id, fecha_creacion
+        SELECT id, comentario, calificacion, nombre_cliente, reserva_id, fecha_creacion
         FROM resenas
         WHERE id = %s
     """, (id_resena,), one=True)
@@ -25,13 +23,6 @@ def crear_resena_db(data):
         data['nombre_cliente'],
         data.get('reserva_id')
     ))
-
-def aprobar_resena_db(id_resena):
-    return execute_db("""
-        UPDATE resenas
-        SET aprobado = TRUE
-        WHERE id = %s
-    """, (id_resena,))
 
 def eliminar_resena_db(id_resena):
     return execute_db("DELETE FROM resenas WHERE id = %s", (id_resena,))

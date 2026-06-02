@@ -50,7 +50,6 @@ CREATE TABLE IF NOT EXISTS resenas (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     comentario      TEXT NOT NULL,
     calificacion    INT NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
-    aprobado        BOOLEAN NOT NULL DEFAULT FALSE,
     nombre_cliente  VARCHAR(100) NOT NULL,
     reserva_id      INT NULL,
     fecha_creacion  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
