@@ -4,7 +4,7 @@ admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin/login')
 def login():
-    return render_template('login.html')
+    return render_template('admin.login.html')
 
 @admin_bp.route('/admin/login_process', methods=['POST'])
 def login_process():
@@ -18,14 +18,14 @@ def login_process():
 @admin_bp.route('/admin/dashboard')
 def dashboard():
     if not session.get('admin_logeado'):
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.login.html'))
         
     return render_template('gestion/dashboard.html')
 
 @admin_bp.route('/admin/dashboard/menu')
 def menu():
     if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.login.html'))
     
     platos = [
         {
@@ -51,7 +51,7 @@ def menu():
 @admin_bp.route('/admin/dashboard/reservas')
 def reservas():
     if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.login.html'))
         
     reservas_lista = [
         {
@@ -72,7 +72,7 @@ def reservas():
 @admin_bp.route('/admin/dashboard/servicios')
 def servicios():
     if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
+        return redirect(url_for('admin.login.html'))
         
     servicios_lista = [
         {"id": 1, "nombre": "Catering Eventos", "activo": True, "fecha_creacion": "2026-03-01"},

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 minDate: "today",
                 dateFormat: "Y-m-d",
                 disable: [
-                    function(date) { return (date.getDay() === 7); } // Domingo cerrado
+                    function(date) { return (date.getDay() === 7); } 
                 ],
                 onChange: function(selectedDates, dateStr) {
                     if (!dateStr) return;
