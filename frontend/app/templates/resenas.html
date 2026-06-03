@@ -73,4 +73,50 @@
             </div>
         </div>
     </div>
+    <hr class="seccion-divisor">
+
+    <div id="gtco-features" class="gtco-section" style="padding-top: 0;">
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+                    <h2 class="cursive-font primary-color">Lo que dicen nuestros clientes</h2>
+                    <p>Opiniones reales de personas que ya probaron la experiencia Savory.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                {% if resenas %}
+                    {% for resena in resenas %}
+                        <div class="col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
+                            <div class="feature-center resena-card">
+                                <span class="icon">
+                                    <i class="ti-user"></i>
+                                </span>
+                                <h3 style="margin-bottom: 5px; font-weight: bold;">{{ resena.nombre }}</h3>
+                                
+                                <div class="stars-display">
+                                    {% for i in range(resena.calificacion|int) %}
+                                        <i class="ti-star"></i>
+                                    {% endfor %}
+                                    {% for i in range(5 - resena.calificacion|int) %}
+                                        <i class="ti-star" style="color: #ddd;"></i>
+                                    {% endfor %}
+                                </div>
+
+                                <p>"{{ resena.opinion }}"</p>
+                                
+                                {% if resena.fecha %}
+                                    <small class="text-muted resena-fecha">{{ resena.fecha }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-12 text-center">
+                        <p>Sé el primero en dejar una reseña para Savory.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

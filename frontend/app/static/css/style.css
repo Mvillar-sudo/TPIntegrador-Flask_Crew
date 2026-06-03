@@ -2106,4 +2106,39 @@ main {
   color: #888888;
   font-weight: 700;
 }
+.resena-card {
+    background: #fff; 
+    padding: 30px; 
+    border-radius: 4px; 
+    box-shadow: 0px 10px 30px -5px rgba(0,0,0,0.05); 
+    margin-bottom: 30px; 
+    text-align: left;
+}
+.stars-display {
+    color: #FBB403; 
+    margin-bottom: 15px;
+}
+.resena-card .icon {
+    margin-bottom: 15px; 
+    width: 50px; 
+    height: 50px; 
+    line-height: 50px;
+}
+.resena-card .icon i {
+    font-size: 20px;
+}
+.resena-card p {
+    font-style: italic; 
+    color: #555;
+}
+.resena-card .resena-fecha {
+    display: block; 
+    margin-top: 15px; 
+    color: #999;
+}
+.seccion-divisor {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 4em 0;
+}
 /*# sourceMappingURL=style.css.map */
