@@ -4,8 +4,7 @@ from flask_mail import Mail
 from .routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
 from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
 from . import db
-
-from app import mail
+from . import mail
 
 def create_app():
     app = Flask(__name__)
