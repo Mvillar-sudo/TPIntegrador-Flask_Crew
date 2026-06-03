@@ -14,12 +14,14 @@ def create_app():
     app.config['MAIL_SERVER'] = MAIL_SERVER
     app.config['MAIL_PORT'] = MAIL_PORT
     app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
+    app.config['MAIL_USE_SSL'] = False
     app.config['MAIL_USERNAME'] = MAIL_USERNAME
     app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 
     # inicializar extensiones
     db.init_app(app)
     mail.init_app(app)
+    mail.app = app
 
     # registro de blueprints
     app.register_blueprint(menu_bp)
