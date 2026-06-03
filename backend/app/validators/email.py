@@ -1,6 +1,6 @@
 from flask_mail import Message
 from flask import current_app
-from app.config import MAIL_USERNAME
+from ..config import MAIL_USERNAME
 from app import mail
 import os
 
