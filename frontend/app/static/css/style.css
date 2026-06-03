@@ -2141,4 +2141,8 @@ main {
     border-top: 1px solid #eee;
     margin: 4em 0;
 }
+.ti-star-unselected {
+    color: #ddd;
+}
+
 /*# sourceMappingURL=style.css.map */
