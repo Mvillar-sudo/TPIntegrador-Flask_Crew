@@ -28,23 +28,30 @@
             </div>
             
             <div class="row">
-                {% for plato in platos %}
-                <div class="col-lg-4 col-md-4 col-sm-6">
-                    <a href="{{ url_for('static', filename='img/' ~ plato.imagen) }}" class="fh5co-card-item image-popup">
-                        <figure>
-                            <div class="overlay"><i class="ti-plus"></i></div>
-                            <img src="{{ url_for('static', filename='img/' ~ plato.imagen) }}" alt="{{ plato.nombre }}" class="img-responsive">
-                        </figure>
-                        <div class="fh5co-text">
-                            <h2>{{ plato.nombre }}</h2>
-                            <p>{{ plato.descripcion }}</p>
-                            <p><span class="price cursive-font">${{ plato.precio }}</span></p>
-                        </div>
-                    </a>
-                </div>
-                {% endfor %}
-                </div>
-
+                {% if platos %}
+                    {% for plato in platos %}
+                    <div class="col-lg-4 col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
+                        <a href="{{ url_for('static', filename='img/' ~ (plato.imagen if plato.imagen else 'burger-default.jpg')) }}" class="fh5co-card-item image-popup">
+                            <figure>
+                                <div class="overlay"><i class="ti-plus"></i></div>
+                                <img src="{{ url_for('static', filename='img/' ~ (plato.imagen if plato.imagen else 'burger-default.jpg')) }}" alt="{{ plato.nombre }}" class="img-responsive">
+                            </figure>
+                            <div class="fh5co-text">
+                                <h2>{{ plato.nombre }}</h2>
+                                <p>{{ plato.descripcion }}</p>
+                                <p><span class="price cursive-font">${{ plato.precio }}</span></p>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-12 text-center">
+                        <p>
+                            Estamos actualizando nuestra cocina. ¡Vuelve pronto para ver nuestras especialidades!
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}

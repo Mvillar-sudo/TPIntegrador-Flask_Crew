@@ -75,42 +75,66 @@
         </div>
     </header>
 
-    <div id="gtco-features">
+<div id="gtco-features">
         <div class="gtco-container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading animate-box">
                     <h2 class="cursive-font">Our Services</h2>
-                    <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                    <p>Descubre los servicios adicionales y la dedicación que hacen de cada experiencia con nosotros algo único e inolvidable.</p>
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4 col-sm-6">
-                    <div class="feature-center animate-box" data-animate-effect="fadeIn">
-                        <span class="icon">
-                            <i class="ti-face-smile"></i>
-                        </span>
-                        <h3>Happy People</h3>
-                        <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                {% if servicios %}
+                    {% for servicio in servicios %}
+                        {% if servicio.activo %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="feature-center animate-box" data-animate-effect="fadeIn">
+                                <span class="icon">
+                                    {% if 'happy' in servicio.nombre|lower or 'gente' in servicio.nombre|lower %}
+                                        <i class="ti-face-smile"></i>
+                                    {% elif 'culinary' in servicio.nombre|lower or 'cocina' in servicio.nombre|lower or 'creativ' in servicio.nombre|lower %}
+                                        <i class="ti-thought"></i>
+                                    {% elif 'delivery' in servicio.nombre|lower or 'envio' in servicio.nombre|lower or 'repart' in servicio.nombre|lower %}
+                                        <i class="ti-truck"></i>
+                                    {% else %}
+                                        <i class="ti-star"></i>
+                                    {% endif %}
+                                </span>
+                                <h3>{{ servicio.nombre }}</h3>
+                                <p>
+                                    {% if servicio.descripcion %}
+                                        {{ servicio.descripcion }}
+                                    {% else %}
+                                        Ofrecemos la mejor calidad y un compromiso absoluto en nuestro servicio de {{ servicio.nombre }}.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-4 col-sm-6">
+                        <div class="feature-center animate-box" data-animate-effect="fadeIn">
+                            <span class="icon"><i class="ti-face-smile"></i></span>
+                            <h3>Happy People</h3>
+                            <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident.</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4 col-sm-6">
-                    <div class="feature-center animate-box" data-animate-effect="fadeIn">
-                        <span class="icon">
-                            <i class="ti-thought"></i>
-                        </span>
-                        <h3>Creative Culinary</h3>
-                        <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="feature-center animate-box" data-animate-effect="fadeIn">
+                            <span class="icon"><i class="ti-thought"></i></span>
+                            <h3>Creative Culinary</h3>
+                            <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident.</p>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4 col-sm-6">
-                    <div class="feature-center animate-box" data-animate-effect="fadeIn">
-                        <span class="icon">
-                            <i class="ti-truck"></i>
-                        </span>
-                        <h3>Food Delivery</h3>
-                        <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                    <div class="col-md-4 col-sm-6">
+                        <div class="feature-center animate-box" data-animate-effect="fadeIn">
+                            <span class="icon"><i class="ti-truck"></i></span>
+                            <h3>Food Delivery</h3>
+                            <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident.</p>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>

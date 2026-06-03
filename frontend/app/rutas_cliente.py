@@ -20,6 +20,11 @@ def landing():
         
     return render_template('landing.html')
 
+@cliente_bp.route('/')
+def index():
+    lista_servicios = get_servicio() 
+    
+    return render_template('index.html', servicios=lista_servicios)
 
 @cliente_bp.route('/menu')
 def menu():
@@ -34,24 +39,24 @@ def menu():
     return render_template('menu.html', platos=platos_hamburgueseria)
 
 
-@cliente_bp.route('/reservas', methods=['GET', 'POST'])
-def reservas():
-    if request.method == 'POST':
-        return redirect(url_for('cliente.landing'))
-    return render_template('reservas.html')
+@cliente_bp.route('/dejar-resena', methods=['GET'])
+def pagina_resenas():
+    try:
+        todas_las_resenas = obtener_resenas()
+        
+        ultimas_resenas = todas_las_resenas[:6] 
+    except Exception:
+        ultimas_resenas = []
 
+    return render_template('resenas.html', resenas=ultimas_resenas)
 
-@cliente_bp.route('/resenas', methods=['GET', 'POST'])
-def resenas():
-    if request.method == 'POST':
-        nombre = request.form.get('name')
-        email = request.form.get('email')
-        calificacion = request.form.get('rating') 
-        opinion = request.form.get('opinion')
+@cliente_bp.route('/menu', methods=['GET'])
+def ver_menu_publico():
+    try:
+        todos_los_platos = obtener_menu_admin_service()
         
-        print(f"[Nueva Reseña] {nombre} ({email}) le dio {calificacion} estrellas.")
-        print(f"Comentario: {opinion}")
-        
-        return redirect(url_for('cliente.resenas'))
-        
-    return render_template('resenas.html')
+        platos_activos = [p for p in todos_los_platos if p.get('activo') == True or p.get('activo') == 1]
+    except Exception:
+        platos_activos = []
+
+    return render_template('menu.html', platos=platos_activos)
