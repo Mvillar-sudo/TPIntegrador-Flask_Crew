@@ -1,30 +1,30 @@
 import secrets
 
 from flask import Blueprint, jsonify, request
-from ..db import get_connection
+from ..db import get_db
+from ..config import MAX_RESERVAS_POR_FRANJA
 from ..validators.qr import generar_qr
 from ..validators.email import enviar_email_reserva
-
-# Capacidad máxima de reservas por franja horaria
-MAX_RESERVAS_POR_FRANJA = 10
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
 @reservas_bp.route('/<int:id_reserva>', methods=['GET'])
 def detalle_de_una_reserva(id_reserva):
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado FROM reservas WHERE id_reserva = %s" , (id_reserva,))
         resultado = cursor.fetchone()
+        print(resultado)  
+        print(type(resultado)) 
         if resultado:
             return jsonify({
                 "id_reserva": resultado[0],
                 "nombre": resultado[1],
                 "email": resultado[2],
                 "telefono": resultado[3],
-                "fecha": resultado[4],
-                "hora": resultado[5],
+                "fecha": str(resultado[4]),
+                "hora": str(resultado[5]),
                 "cantidad_personas": resultado[6],
                 "estado": resultado[7]
             })
@@ -34,12 +34,11 @@ def detalle_de_una_reserva(id_reserva):
         return jsonify({"mensaje": "Error al obtener la reserva", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
 
 
 @reservas_bp.route('/', methods=['GET'])
 def listar_todas_las_reservas():
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT * FROM reservas")
@@ -58,7 +57,6 @@ def listar_todas_las_reservas():
         return jsonify({"mensaje": "Error al listar las reservas", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
 
 
 @reservas_bp.route('/', methods=['POST'])
@@ -71,7 +69,7 @@ def crear_reserva():
     hora = data["hora"]
     cantidad_personas = data["cantidad_personas"]
 
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         # verificar disponibilidad
@@ -112,12 +110,11 @@ def crear_reserva():
         return jsonify({"mensaje": "Error al crear la reserva", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
 
 @reservas_bp.route('/cancelar/<string:token>', methods=['GET'])
 def cancelar_por_token(token):
     
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -142,12 +139,11 @@ def cancelar_por_token(token):
         return jsonify({"mensaje": "Error al cancelar la reserva", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
 
         
 @reservas_bp.route('/<int:id_reserva>/cancelar', methods=['PATCH'])
 def modificar_reserva(id_reserva):
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT estado FROM reservas WHERE id_reserva = %s", (id_reserva,))
@@ -167,7 +163,6 @@ def modificar_reserva(id_reserva):
         return jsonify({"mensaje":" Error al cancelar la reserva", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
         
 
 
@@ -177,7 +172,7 @@ def validar_qr():
     id_reserva = data.get("id_reserva")
     qr_code = data.get("qr_code")
 
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
 
     try:
@@ -205,7 +200,6 @@ def validar_qr():
         return jsonify({"mensaje": "Error al validar el QR", "error": str(e)}), 500
     finally:
         cursor.close()
-        conn.close()
 
 
 @reservas_bp.route('/disponibilidad', methods=['GET'])
@@ -213,7 +207,7 @@ def verificar_disponibilidad():
     fecha = request.args.get("fecha")
     hora = request.args.get("hora")
 
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
     try:
         cursor.execute("""
@@ -229,4 +223,3 @@ def verificar_disponibilidad():
         return jsonify({"mensaje": "Error al consultar la disponibilidad"}), 400
     finally:
         cursor.close()
-        conn.close()
