@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for
+from backend.app.routes.reservas import reservas_bp
 
 cliente_bp = Blueprint('cliente', __name__)
+
+cliente_bp.register_blueprint(reservas_bp)
 
 @cliente_bp.route('/', methods=['GET', 'POST'])
 def landing():
