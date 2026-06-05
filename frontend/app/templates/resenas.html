@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Reseñas &mdash; Contanos tu experiencia{% endblock %}
+
+{% block content %}
+    <header id="gtco-header" class="gtco-cover gtco-cover-sm reviews-header-bg" role="banner" data-stellar-background-ratio="0.5">
+        <div class="overlay"></div>
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-12 col-md-offset-0 text-center">
+                    <div class="row row-mt-15em">
+                        <div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
+                            <span class="intro-text-small">Tu opinión nos importa</span>
+                            <h1 class="cursive-font">Deja tu Reseña</h1>   
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Formulario de reseñas -->
+    <div class="gtco-section">
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+                    <h2 class="cursive-font primary-color">¿Qué te pareció Flaskburger?</h2>
+                    <p>Queremos brindarte la mejor experiencia culinaria. Comparti tus comentarios con nosotros.</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 animate-box">
+                    <form action="{{ url_for('cliente.resenas') }}" method="POST" class="review-form">
+                        
+                        <div class="row form-group">
+                            <div class="col-md-6">
+                                <label for="name">Nombre Completo</label>
+                                <input type="text" id="name" name="name" class="form-control" placeholder="Tu nombre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email">Correo Electrónico</label>
+                                <input type="email" id="email" name="email" class="form-control" placeholder="tu@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                <label for="rating">Calificación</label>
+                                <div class="star-rating">
+                                    <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 estrellas"><i class="ti-star"></i></label>
+                                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 estrellas"><i class="ti-star"></i></label>
+                                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 estrellas"><i class="ti-star"></i></label>
+                                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 estrellas"><i class="ti-star"></i></label>
+                                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 estrella"><i class="ti-star"></i></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row form-group">
+                            <div class="col-md-12">
+                                <label for="opinion">Tu Opinión</label>
+                                <textarea name="opinion" id="opinion" cols="30" rows="6" class="form-control" placeholder="Cuéntanos los detalles de tu visita, qué plato te gustó más..." required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <input type="submit" value="Enviar Reseña" class="btn btn-primary btn-lg">
+                        </div>
+
+                    </form>		
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="seccion-divisor">
+
+    <div id="gtco-features" class="gtco-section" style="padding-top: 0;">
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+                    <h2 class="cursive-font primary-color">Lo que dicen nuestros clientes</h2>
+                    <p>Opiniones reales de personas que ya probaron la experiencia Flaskburger.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                {% if resenas %}
+                    {% for resena in resenas %}
+                        <div class="col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
+                            <div class="feature-center resena-card">
+                                <span class="icon">
+                                    <i class="ti-user"></i>
+                                </span>
+                                <h3 style="margin-bottom: 5px; font-weight: bold;">{{ resena.nombre }}</h3>
+                                
+                                <div class="stars-display">
+                                    {% for i in range(resena.calificacion|int) %}
+                                        <i class="ti-star"></i>
+                                    {% endfor %}
+                                    {% for i in range(5 - resena.calificacion|int) %}
+                                        <i class="ti-star-unselected"></i>
+                                    {% endfor %}
+                                </div>
+
+                                <p>"{{ resena.opinion }}"</p>
+                                
+                                {% if resena.fecha %}
+                                    <small class="text-muted resena-fecha">{{ resena.fecha }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-md-12 text-center">
+                        <p>Sé el primero en dejar una reseña para Flaskburger.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
