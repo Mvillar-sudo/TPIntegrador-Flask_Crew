@@ -54,10 +54,3 @@ CREATE TABLE IF NOT EXISTS resenas (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE SET NULL
 );
-
-INSERT INTO menu (nombre_plato, precio, descripcion, estado) 
-VALUES 
-('Milanesa con Papas Fritas', 4500.00, 'Milanesa de lomo con papas fritas crujientes', 1),
-('Pizza Mozzarella Grande', 6000.00, 'Pizza artesanal al horno de barro', 1),
-('Flan con Dulce de Leche', 1800.00, 'Flan casero clásico argentino', 1)
-ON DUPLICATE KEY UPDATE id_plato=id_plato;

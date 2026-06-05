@@ -2232,4 +2232,7 @@ main {
 .btn-cancelar:hover {
     background-color: #e1e1e1;
 }
+.cambios {
+  padding: 10px 10px;
+}
 /*# sourceMappingURL=style.css.map */

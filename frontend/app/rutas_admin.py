@@ -1,13 +1,18 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, flash
 from backend.app.routes.auth import auth_bp
 from backend.app.routes.admin_menu import admin_menu_bp
+from backend.app.routes.servicios import servicios_bp
+from backend.app.services.servicios_service import (obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db)
 from backend.app.services.admin_menu_service import (obtener_menu_admin_service, obtener_plato_service, cambiar_estado_plato_service, actualizar_parcial_plato_service, eliminar_plato_service, crear_plato_service)
 from backend.app.db import query_db, execute_db
+from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
+from backend.app.validators.servicios_validator import (validar_servicio)
 
 admin_bp = Blueprint('admin', __name__)
 
 admin_bp.register_blueprint(auth_bp)
 admin_bp.register_blueprint(admin_menu_bp)
+admin_bp.register_blueprint(servicios_bp)
 
 @admin_bp.route('/admin/login')
 def login():
@@ -110,12 +115,75 @@ def reservas():
 
 
 @admin_bp.route('/admin/dashboard/servicios')
-def servicios():
+def ver_servicios():
     if not session.get('admin_logeado'): 
         return redirect(url_for('admin.login'))
-        
-    servicios_lista = [
-        {"id": 1, "nombre": "Catering Eventos", "activo": True, "fecha_creacion": "2026-03-01"},
-        {"id": 2, "nombre": "Delivery VIP", "activo": False, "fecha_creacion": "2026-04-10"}
-    ]
-    return render_template('gestion/servicios.html', servicios=servicios_lista)
+    try:
+        servicios = obtener_servicios()
+        return render_template('gestion/servicios.html', servicios=servicios)
+    except RuntimeError as e:
+        return "No se encontro el abm", 500 
+    
+@admin_bp.route("/admin/dashboard/servicios/crear", methods=["GET"])
+def crear_servicio_vista():
+    return render_template('gestion/crear_servicio.html')
+
+
+@admin_bp.route('/admin/dashboard/servicios/crear_proceso', methods=['POST'])
+def crear_servicio_proceso():
+    try:
+        data = {"nombre": request.form.get("nombre")}
+
+        crear_servicio_db(data)
+
+        return redirect(url_for('admin.ver_servicios'))
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500 
+       
+@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET', 'POST']) # 👈 Soporta ambos métodos
+def actualizar_servicio_proceso(id_servicio):
+    try:
+        servicio = obtener_servicio_id(id_servicio)
+        if not servicio:
+            flash('Servicio no encontrado', 'danger')
+            return redirect(url_for('admin.ver_servicios'))
+
+        estado_real = 1 if request.form.get("activo") else 0
+        if request.method == "POST":
+            data = {
+                "nombre": request.form.get("nombre"),
+                "activo": estado_real
+            }
+
+            
+            error = validar_servicio(data, es_actualizacion=True)
+            if error:
+                flash(f"Error de validación: {error}", "danger")
+                return render_template("gestion/editar_servicio.html", servicio=servicio), 400
+            
+            actualizar_servicio_db(id_servicio, data)
+            
+            flash('¡Servicio actualizado con éxito!', 'success')
+            return redirect(url_for('admin.ver_servicios'))
+
+        return render_template("gestion/editar_servicio.html", servicio=servicio)
+
+    except Exception as e:
+        print(f"Error crítico en controlador de servicios: {e}")
+        return "Error interno del servidor", 500
+    
+@admin_bp.route('/<int:id_servicio>', methods=['POST'])
+def eliminar_servicio(id_servicio):
+    try:
+        filas = eliminar_servicio_db(id_servicio)
+
+        if filas == 0:
+            return jsonify({
+                "error": "Servicio no encontrado"
+            }), 404
+
+        return redirect(url_for('admin.ver_servicios'))
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
