@@ -55,39 +55,31 @@ def obtener_plato_service(id_plato):
 
 
 def actualizar_parcial_plato_service(id_plato, data):
-
     conn = get_db()
     cursor = conn.cursor()
 
-    campos_actualizados = 0
+    campos_permitidos = ["nombre_plato", "descripcion", "precio", "estado"]
+    query_parts = []
+    valores = []
 
-    if "nombre_plato" in data:
-        cursor.execute(
-            "UPDATE menu SET nombre_plato = %s WHERE id_plato = %s",
-            (data["nombre_plato"], id_plato)
-        )
-        campos_actualizados += cursor.rowcount
+    for campo in campos_permitidos:
+        if campo in data:
+            query_parts.append(f"{campo} = %s")
+            valores.append(data[campo])
 
-    if "descripcion" in data:
-        cursor.execute(
-            "UPDATE menu SET descripcion = %s WHERE id_plato = %s",
-            (data["descripcion"], id_plato)
-        )
-        campos_actualizados += cursor.rowcount
+    if not query_parts:
+        cursor.close()
+        conn.close()
+        return True 
 
-    if "precio" in data:
-        cursor.execute(
-            "UPDATE menu SET precio = %s WHERE id_plato = %s",
-            (data["precio"], id_plato)
-        )
-        campos_actualizados += cursor.rowcount
+    sql = f"UPDATE menu SET {', '.join(query_parts)} WHERE id_plato = %s"
+    valores.append(id_plato)
 
+    cursor.execute(sql, tuple(valores))
     conn.commit()
+
     cursor.close()
     conn.close()
-
-    if campos_actualizados == 0:
-        return None
 
     return True
 
@@ -118,7 +110,7 @@ def cambiar_estado_plato_service(id_plato, estado):
 
 
 def eliminar_plato_service(id_plato):
-
+    
     conn = get_db()
     cursor = conn.cursor()
 
@@ -134,7 +126,4 @@ def eliminar_plato_service(id_plato):
     cursor.close()
     conn.close()
 
-    if filas_afectadas == 0:
-        return None
-
-    return True
+    return filas_afectadas > 0
