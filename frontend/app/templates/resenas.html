@@ -2,6 +2,10 @@
 
 {% block title %}Reseñas &mdash; Cuéntanos tu experiencia{% endblock %}
 
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
 {% block content %}
     <header id="gtco-header" class="gtco-cover gtco-cover-sm reviews-header-bg" role="banner" data-stellar-background-ratio="0.5">
         <div class="overlay"></div>

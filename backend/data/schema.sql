@@ -15,13 +15,12 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- 2. Tabla: productos (Menú)
-CREATE TABLE IF NOT EXISTS productos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    precio DECIMAL(10, 2) NOT NULL,
+CREATE TABLE menu (
+	id_plato INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_plato VARCHAR(100) NOT NULL,
     descripcion TEXT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    precio DECIMAL(10,2) NOT NULL,
+    estado BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- 3. Tabla: reservas
@@ -56,3 +55,9 @@ CREATE TABLE IF NOT EXISTS resenas (
     FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE SET NULL
 );
 
+INSERT INTO menu (nombre_plato, precio, descripcion, estado) 
+VALUES 
+('Milanesa con Papas Fritas', 4500.00, 'Milanesa de lomo con papas fritas crujientes', 1),
+('Pizza Mozzarella Grande', 6000.00, 'Pizza artesanal al horno de barro', 1),
+('Flan con Dulce de Leche', 1800.00, 'Flan casero clásico argentino', 1)
+ON DUPLICATE KEY UPDATE id_plato=id_plato;

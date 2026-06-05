@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..db import get_connection
+from ..db import get_db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 auth_bp = Blueprint("auth", __name__)
@@ -16,7 +16,7 @@ def login():
     usuario = data["usuario"]
     password = data["password"]
 
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute(
@@ -56,7 +56,7 @@ def register():
 
     password_hash = generate_password_hash(password)
 
-    conn = get_connection()
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute(

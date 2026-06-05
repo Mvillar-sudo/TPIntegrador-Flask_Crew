@@ -1,15 +1,20 @@
 import os
 import mysql.connector
 from flask import g
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_db():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host=os.getenv('DB_HOST'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            database=os.getenv('DB_NAME'),
-            port=os.getenv('DB_PORT', 3306)
+            host=os.getenv('DB_HOST', 'localhost'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', ''),
+            database=os.getenv('DB_NAME', 'tpintegrador_db'),
+            port=os.getenv('DB_PORT', 3306),
+
+            ssl_disabled=True
         )
 
     return g.db
@@ -62,16 +67,6 @@ def execute_db(query, args=()):
     cursor.close()
 
     return affected
-
-import mysql.connector
-
-def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="1234",
-        database="sitio_gastronomico"
-    )
 
 def init_app(app):
     app.teardown_appcontext(close_db)

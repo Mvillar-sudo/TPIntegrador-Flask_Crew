@@ -4,6 +4,7 @@ from frontend.app.rutas_admin import admin_bp
 from backend.app.routes.reservas import reservas_bp
 from backend.app.routes.reseñas import reseñas_bp
 from backend.app.routes.auth import auth_bp
+from backend.app.routes.admin_menu import admin_menu_bp
 
 app = Flask(__name__)
 app.secret_key = 'burger'
@@ -12,6 +13,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(reservas_bp)
 app.register_blueprint(reseñas_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(admin_menu_bp)
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)

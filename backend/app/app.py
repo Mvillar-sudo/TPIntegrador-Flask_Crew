@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from routes import menu_bp, reseñas_bp, login_bp, reservas_bp, servicios_bp, dashboard_bp
+from routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
 import db
 
 def create_app():

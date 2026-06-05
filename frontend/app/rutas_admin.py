@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from backend.app.routes.auth import auth_bp
+from backend.app.routes.admin_menu import admin_menu_bp
+from backend.app.services.admin_menu_service import (obtener_menu_admin_service, obtener_plato_service, actualizar_parcial_plato_service)
+from backend.app.db import query_db, execute_db
 
 admin_bp = Blueprint('admin', __name__)
 
 admin_bp.register_blueprint(auth_bp)
+admin_bp.register_blueprint(admin_menu_bp)
 
 @admin_bp.route('/admin/login')
 def login():
@@ -25,31 +29,37 @@ def dashboard():
         
     return render_template('gestion/dashboard.html')
 
-@admin_bp.route('/admin/dashboard/menu')
-def menu():
-    if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
-    
-    platos = [
-        {
-            "id": 1, 
-            "nombre": "Fresh Mushrooms", 
-            "precio": 19.15, 
-            "descripcion": "Far far away, behind the word...", 
-            "activo": True, 
-            "fecha_creacion": "2026-01-15"
-        },
-        {
-            "id": 2, 
-            "nombre": "Cheese and Garlic Toast", 
-            "precio": 20.99, 
-            "descripcion": "Delicious toast with garlic butter...", 
-            "activo": True, 
-            "fecha_creacion": "2026-02-20"
-        }
-    ]
-    return render_template('gestion/menu.html', platos=platos)
+@admin_bp.route("/admin/menu", methods=["GET"])
+def ver_menu():
+    try:
+        platos = query_db("SELECT id_plato, nombre_plato, precio, descripcion, estado FROM menu")
 
+        return render_template('gestion/menu.html', platos=platos)
+    except Exception as e:
+        print(f"Error crítico en /admin/menu: {e}")
+        return f"Error interno del servidor: {e}", 500
+    
+@admin_bp.route("/admin/menu/editar/<int:id_plato>", methods=["GET", "POST"])
+def editar_plato(id_plato):
+    if request.method == "POST":
+        data_actualizada = {
+            "nombre_plato": request.form.get("nombre_plato"),
+            "descripcion": request.form.get("descripcion"),
+            "precio": float(request.form.get("precio", 0)),
+            "estado": int(request.form.get("estado", 1))
+        }
+        
+        exito = actualizar_parcial_plato_service(id_plato, data_actualizada)
+        if exito:
+            return redirect(url_for('admin.ver_menu'))
+        else:
+            return "No se pudo actualizar el plato", 400
+
+    plato = obtener_plato_service(id_plato)
+    if not plato:
+        return "Plato no encontrado", 404
+        
+    return render_template('gestion/editar_plato.html', plato=plato)
 
 @admin_bp.route('/admin/dashboard/reservas')
 def reservas():
