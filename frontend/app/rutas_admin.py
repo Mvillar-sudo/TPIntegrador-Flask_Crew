@@ -1,10 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
+from backend.app.routes.auth import auth_bp
 
 admin_bp = Blueprint('admin', __name__)
 
+admin_bp.register_blueprint(auth_bp)
+
 @admin_bp.route('/admin/login')
 def login():
-    return render_template('login.html')
+    return render_template('gestion/login.html')
 
 @admin_bp.route('/admin/login_process', methods=['POST'])
 def login_process():
