@@ -85,6 +85,13 @@ def crear_reserva():
 
         token_cancelacion = secrets.token_urlsafe(32)
 
+        
+        cursor.execute("SELECT COUNT(*) FROM reservas WHERE email = %s AND fecha = %s AND hora = %s AND estado != 'cancelada'", (email, fecha, hora))
+        resultado = cursor.fetchone()
+        if resultado[0] > 0:
+            return jsonify({"mensaje": "Ya tenés una reserva para ese día y horario"}), 400
+
+        
         cursor.execute(
             """INSERT INTO reservas 
             (nombre, email, telefono, fecha, hora, cantidad_personas, token_cancelacion) 
