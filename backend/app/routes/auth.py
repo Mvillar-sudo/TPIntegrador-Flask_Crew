@@ -28,6 +28,8 @@ def logout():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    if "usuario" not in session:
+        return jsonify({"mensaje": "No hay sesión activa"}), 401
     data = request.json
 
     error, mensaje = validar_login(data)

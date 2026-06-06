@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from validators import validar_id_plato, validar_crear_plato
 from services import (
     crear_plato_service,
@@ -9,6 +9,11 @@ from services import (
     eliminar_plato_service)
 
 admin_menu_bp = Blueprint("admin_menu", __name__)
+
+@admin_menu_bp.before_request
+def verificar_sesion():
+    if "usuario" not in session:
+        return jsonify({"mensaje": "No autorizado. Inicia sesión primero."}), 401
 
 #para que el admin pueda crear un plato
 @admin_menu_bp.route("/admin/menu", methods=["POST"])
