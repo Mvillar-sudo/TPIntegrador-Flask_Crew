@@ -1,71 +1,119 @@
-from flask import Blueprint, request, jsonify
-from ..db import get_db
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Blueprint, jsonify, request
 
-auth_bp = Blueprint("auth", __name__)
+from ..services.servicios_service import (
+    obtener_servicios,
+    obtener_servicio_id,
+    crear_servicio_db,
+    actualizar_servicio_db,
+    eliminar_servicio_db
+)
 
-
-#para que el administrador pueda autenticarse y entrar con el rol que le permite hacer cambios en la página web
-@auth_bp.route("/login", methods=["POST"])
-def login():
-    data = request.json
-
-    if not data or "usuario" not in data or "password" not in data:
-       return {"mensaje": "Faltan campos"}, 400
-
-    usuario = data["usuario"]
-    password = data["password"]
-
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute(
-        "SELECT * FROM login WHERE usuario = %s",
-        (usuario,)
-    )
-
-    user = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if not user:
-        return {"mensaje": "Credenciales inválidas"}, 401
-    
-    if not check_password_hash(user["contraseña"], password):
-        return {"mensaje": "Credenciales inválidas"}, 401
+from ..validators.servicios_validator import validar_servicio
 
 
-    if user["rol"] == "administrador":
-        return {"mensaje": "Login correcto", "rol": "administrador"}, 200
-    else:
-        return {"mensaje": "Login correcto", "rol": "usuario"}, 200  
-    
+servicios_bp = Blueprint('servicios',__name__,url_prefix='/api/servicios')
 
-@auth_bp.route("/register", methods=["POST"])
-def register():
-    data = request.json
+# get todos
+@servicios_bp.route('/', methods=['GET'])
+def get_servicios():
+    try:
+        servicios = obtener_servicios()
+        return jsonify(servicios), 200
 
-    if not data or "usuario" not in data or "password" not in data:
-        return {"mensaje": "Faltan campos"}, 400
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
 
-    usuario = data["usuario"]
-    password = data["password"]
 
-    rol = "usuario"
+# get por id
+@servicios_bp.route('/<int:id_servicio>', methods=['GET'])
+def get_servicio(id_servicio):
+    try:
+        servicio = obtener_servicio_id(id_servicio)
 
-    password_hash = generate_password_hash(password)
+        if not servicio:
+            return jsonify({
+                "error": "Servicio no encontrado"
+            }), 404
 
-    conn = get_db()
-    cursor = conn.cursor()
+        return jsonify(servicio), 200
 
-    cursor.execute(
-        "INSERT INTO login (usuario, contraseña, rol) VALUES (%s, %s, %s)",
-        (usuario, password_hash, rol)
-    )
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
 
-    conn.commit()
-    cursor.close()
-    conn.close()
 
-    return {"mensaje": "Usuario creado correctamente"}, 201    
+# POST
+@servicios_bp.route('/', methods=['POST'])
+def crear_servicio():
+    try:
+        data = request.get_json()
+
+        error = validar_servicio(data)
+
+        if error:
+            return jsonify({
+                "error": error
+            }), 400
+
+        crear_servicio_db(data)
+
+        return jsonify({
+            "mensaje": "Servicio creado correctamente"
+        }), 201
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# patch
+@servicios_bp.route('/<int:id_servicio>', methods=['PATCH'])
+def actualizar_servicio(id_servicio):
+    try:
+        data = request.get_json()
+
+        error = validar_servicio(
+            data,
+            es_actualizacion=True
+        )
+
+        if error:
+            return jsonify({
+                "error": error
+            }), 400
+
+        servicio = obtener_servicio_id(id_servicio)
+
+        if not servicio:
+            return jsonify({
+                "error": "Servicio no encontrado"
+            }), 404
+
+        actualizar_servicio_db(
+            id_servicio,
+            data
+        )
+
+        return jsonify({
+            "mensaje": "Servicio actualizado correctamente"
+        }), 200
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# delete
+@servicios_bp.route('/<int:id_servicio>', methods=['DELETE'])
+def eliminar_servicio(id_servicio):
+    try:
+        filas = eliminar_servicio_db(id_servicio)
+
+        if filas == 0:
+            return jsonify({
+                "error": "Servicio no encontrado"
+            }), 404
+
+        return jsonify({
+            "mensaje": "Servicio eliminado correctamente"
+        }), 200
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500 
