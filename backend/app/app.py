@@ -1,11 +1,16 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 from routes import (menu_bp, resenas_bp, auth_bp, reservas_bp, servicio_bp, dashboard_bp)
 import db
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, origins=["http://localhost:3000"])
+    app.secret_key = os.getenv('SECRET_KEY')
+    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
     
     # Inicializar Base de Datos
     db.init_app(app)
