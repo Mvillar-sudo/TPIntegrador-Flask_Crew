@@ -1,0 +1,80 @@
+{% extends 'gestion/base_admin.html' %}
+{% block title %}Panel - Servicios Extras{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        
+        <div class="flex-header-container">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+            <button class="btn btn-primary btn-sm" onclick="abrirModalCrear()">+ Nuevo Servicio</button>
+        </div>
+        
+        <div class="admin-table-container">
+            <h2 class="admin-title-heading">Servicios Adicionales</h2>
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th>ID Servicio</th>
+                        <th>Nombre del Servicio</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Fecha de Alta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.id }}</td>
+                        <td><strong>{{ servicio.nombre }}</strong></td>
+                        <td><small>{{ servicio.descripcion if servicio.descripcion else 'Sin descripción' }}</small></td>
+                        <td>
+                            {% if servicio.activo %}
+                                <span class="badge-status badge-active">Activo</span>
+                            {% else %}
+                                <span class="badge-status badge-danger">Deshabilitado</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ servicio.fecha_creacion }}</td>
+                        <td>
+                            <button class="btn btn-default btn-actions" 
+                                    onclick="alternarEstadoServicio('{{ servicio.id }}', {% if servicio.activo %}false{% else %}true{% endif %})">
+                                Alternar Estado
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<dialog id="servicioModal" class="admin-modal">
+    <h3 class="admin-modal-title">Nuevo Servicio Extra</h3>
+    <form id="servicioForm" class="admin-modal-form">
+        
+        <div class="form-group">
+            <label for="modal_nombre">Nombre del Servicio</label>
+            <input type="text" id="modal_nombre" name="nombre" class="form-control" required placeholder="Ej: Creative Culinary">
+        </div>
+
+        <div class="form-group">
+            <label for="modal_descripcion">Descripción del Servicio</label>
+            <textarea id="modal_descripcion" name="descripcion" class="form-control" rows="3" maxlength="100" placeholder="Breve descripción para el landing público..."></textarea>
+        </div>
+
+        <div class="modal-actions-container">
+            <button type="button" class="btn btn-default btn-sm" onclick="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+        </div>
+    </form>
+</dialog>
+
+<script src="{{ url_for('static', filename='js/abm-servicios.js') }}"></script>
+{% endblock %}

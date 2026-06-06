@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from routes import menu_bp, reseñas_bp, login_bp, reservas_bp, servicios_bp, dashboard_bp
+from routes import (menu_bp, resenas_bp, auth_bp, reservas_bp, servicio_bp, dashboard_bp)
 import db
 
 def create_app():
@@ -12,10 +12,10 @@ def create_app():
     
     # Registro de Blueprints
     app.register_blueprint(menu_bp)
-    app.register_blueprint(reseñas_bp)
-    app.register_blueprint(login_bp)
+    app.register_blueprint(resenas_bp)
+    app.register_blueprint(auth_bp)
     app.register_blueprint(reservas_bp)
-    app.register_blueprint(servicios_bp)
+    app.register_blueprint(servicio_bp)
     app.register_blueprint(dashboard_bp)
     
     @app.route('/')

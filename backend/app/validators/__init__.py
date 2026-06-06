@@ -1,5 +1,5 @@
-from .menu import menu_bp
-from .reseñas import reseñas_bp
-from .login import login_bp
-from .reservas import reservas_bp
-from .servicios import servicios_bp
+from .menu_validator import validar_id_plato, validar_crear_plato
+#from .reseñas_validator import
+#from .auth_validator import
+#from .reservas_validator import
+from .servicios import validar_servicio

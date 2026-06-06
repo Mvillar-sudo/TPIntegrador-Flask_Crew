@@ -1,0 +1,49 @@
+{% extends 'gestion/base_admin.html' %}
+
+{% block title %}Admin Login - Flaskburger{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="login-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                
+                <div class="login-box">
+                    <div class="text-center">
+                        <h2 class="cursive-font primary-color">Acceso Seguro</h2>
+                        <p class="uppercase">Panel de Administración</p>
+                    </div>
+
+                    <div id="errorContainer" class="login-error-message"></div>
+
+                    <form id="loginForm" data-action="{{ url_for('admin.login.html') }}">
+                        
+                        <div class="form-group-custom">
+                            <label for="username">Usuario Administrador</label>
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Ej: admin_burger" required autocomplete="username">
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label for="password">Contraseña</label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block-custom">
+                            Ingresar al Panel
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

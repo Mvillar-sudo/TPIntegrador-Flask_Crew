@@ -1,18 +1,18 @@
 from flask import Blueprint, jsonify, request
-from services.resenas_service import (
+from services.resena import (
     obtener_resenas,
     obtener_resena_id,
     crear_resena_db,
    eliminar_resena_db
 )
-from validators.resena_validator import validar_resena
+from validators.resena import validar_resena
 
-reseñas_bp = Blueprint('reseñas', __name__, url_prefix='/api/resenas')
+resenas_bp = Blueprint('resenas', __name__, url_prefix='/api/resenas')
 
 
 # pública (clientes)
 
-@reseñas_bp.route('/', methods=['GET'])
+@resenas_bp.route('/', methods=['GET'])
 def get_resenas():
     try:
         resenas = obtener_resenas()
@@ -21,7 +21,7 @@ def get_resenas():
         return jsonify({"error": str(e)}), 500
 
 
-@reseñas_bp.route('/<int:id_resena>', methods=['GET'])
+@resenas_bp.route('/<int:id_resena>', methods=['GET'])
 def get_resena(id_resena):
     try:
         resena = obtener_resena_id(id_resena)
@@ -32,7 +32,7 @@ def get_resena(id_resena):
         return jsonify({"error": str(e)}), 500
 
 
-@reseñas_bp.route('/', methods=['POST'])
+@resenas_bp.route('/', methods=['POST'])
 def crear_resena():
     try:
         data = request.get_json()
@@ -47,7 +47,7 @@ def crear_resena():
 
 # privada (admin)
 
-@reseñas_bp.route('/<int:id_resena>', methods=['DELETE'])
+@resenas_bp.route('/<int:id_resena>', methods=['DELETE'])
 def eliminar_resena(id_resena):
     try:
         filas = eliminar_resena_db(id_resena)
