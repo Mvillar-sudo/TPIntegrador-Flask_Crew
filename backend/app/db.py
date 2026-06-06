@@ -12,13 +12,11 @@ def get_db():
             user=os.getenv('DB_USER', 'root'),
             password=os.getenv('DB_PASSWORD', ''),
             database=os.getenv('DB_NAME', 'tpintegrador_db'),
-            port=os.getenv('DB_PORT', 3306),
-
+            port=int(os.getenv('DB_PORT', 3306)),
             ssl_disabled=True
         )
 
     return g.db
-
 
 def close_db(e=None):
     db = g.pop('db', None)
