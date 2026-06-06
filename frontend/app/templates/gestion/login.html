@@ -1,6 +1,6 @@
 {% extends 'gestion/base_admin.html' %}
 
-{% block title %}Admin Login - Hamburguesería{% endblock %}
+{% block title %}Admin Login - Flaskburger{% endblock %}
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -18,7 +18,9 @@
                         <p class="uppercase">Panel de Administración</p>
                     </div>
 
-                    <form action="{{ url_for('admin.login_process') }}" method="POST">
+                    <div id="errorContainer" class="login-error-message"></div>
+
+                    <form id="loginForm" data-action="{{ url_for('admin.login.html') }}">
                         
                         <div class="form-group-custom">
                             <label for="username">Usuario Administrador</label>

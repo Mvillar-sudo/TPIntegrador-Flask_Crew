@@ -2235,4 +2235,8 @@ main {
 .cambios {
   padding: 10px 10px;
 }
+.ti-star-unselected {
+    color: #ddd;
+}
+
 /*# sourceMappingURL=style.css.map */

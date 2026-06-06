@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Reseñas &mdash; Cuéntanos tu experiencia{% endblock %}
+{% block title %}Reseñas &mdash; Contanos tu experiencia{% endblock %}
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -28,8 +28,8 @@
         <div class="gtco-container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
-                    <h2 class="cursive-font primary-color">¿Qué te pareció Savory?</h2>
-                    <p>Queremos brindarte la mejor experiencia culinaria. Comparte tus comentarios con nosotros.</p>
+                    <h2 class="cursive-font primary-color">¿Qué te pareció Flaskburger?</h2>
+                    <p>Queremos brindarte la mejor experiencia culinaria. Comparti tus comentarios con nosotros.</p>
                 </div>
             </div>
             
@@ -84,7 +84,7 @@
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
                     <h2 class="cursive-font primary-color">Lo que dicen nuestros clientes</h2>
-                    <p>Opiniones reales de personas que ya probaron la experiencia Savory.</p>
+                    <p>Opiniones reales de personas que ya probaron la experiencia Flaskburger.</p>
                 </div>
             </div>
 
@@ -103,7 +103,7 @@
                                         <i class="ti-star"></i>
                                     {% endfor %}
                                     {% for i in range(5 - resena.calificacion|int) %}
-                                        <i class="ti-star" style="color: #ddd;"></i>
+                                        <i class="ti-star-unselected"></i>
                                     {% endfor %}
                                 </div>
 
@@ -117,7 +117,7 @@
                     {% endfor %}
                 {% else %}
                     <div class="col-md-12 text-center">
-                        <p>Sé el primero en dejar una reseña para Savory.</p>
+                        <p>Sé el primero en dejar una reseña para Flaskburger.</p>
                     </div>
                 {% endif %}
             </div>

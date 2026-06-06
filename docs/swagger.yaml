@@ -9,7 +9,7 @@ servers:
   - url: http://localhost:5000
 
 paths:
-  /api/login:
+  /api/auth/login:
     post:
       summary: Inicio de sesión de administrador
       tags:
@@ -36,7 +36,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/login/logout:
+  /api/auth/logout:
     post:
       summary: Cierre de sesión
       tags:
@@ -146,6 +146,28 @@ paths:
       responses:
         "200":
           description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "404":
+          description: Producto inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Eliminar producto
+      tags:
+        - Menu
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Producto eliminado correctamente
           content:
             application/json:
               schema:
@@ -272,7 +294,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/reservas/cancelar/{token}:
+  /api/reservas/token/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      summary: Obtener reserva mediante token QR
+      description: |
+        Busca una reserva asociada al token QR.
+        No modifica el estado de la reserva.
+        Endpoint público, no requiere autenticación.
+      tags:
+        - Reservas
+
+      responses:
+        "200":
+          description: Reserva encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reserva"
+
+        "404":
+          description: Token inválido o reserva inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas/token/{token}/validar:
     parameters:
       - name: token
         in: path
@@ -281,7 +335,59 @@ paths:
           type: string
 
     patch:
-      summary: Cancelar reserva mediante token
+      summary: Confirmar reserva mediante QR
+      description: |
+        Valida una reserva pendiente utilizando el token QR.
+        Cambia el estado de la reserva a "confirmada".
+        Requiere autenticación de administrador.
+      tags:
+        - Reservas
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Reserva confirmada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "400":
+          description: La reserva no puede ser confirmada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "401":
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "404":
+          description: Token inválido o reserva inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/reservas/token/{token}/cancelar:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+
+    patch:
+      summary: Cancelar reserva mediante QR
+      description: |
+        Realiza la baja lógica de una reserva pendiente utilizando el token QR.
+        Cambia el estado de la reserva a "cancelada".
+        No requiere autenticación.
       tags:
         - Reservas
 
@@ -299,37 +405,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
-  /api/reservas/validar/{token}:
-    parameters:
-      - name: token
-        in: path
-        required: true
-        schema:
-          type: string
-
-    patch:
-      summary: Validar reserva mediante QR (canjeo)
-      tags:
-        - Reservas
-      security:
-        - sessionAuth: []
-
-      responses:
-        "200":
-          description: Reserva validada correctamente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "404":
-          description: Token inválido o reserva ya cancelada
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
   /api/servicios:
     get:
       summary: Obtener servicios
@@ -381,7 +456,7 @@ paths:
 
   /api/resenas:
     get:
-      summary: Obtener reseñas aprobadas
+      summary: Obtener reseñas
       tags:
         - Reseñas
 
@@ -400,6 +475,9 @@ paths:
 
     post:
       summary: Crear reseña
+      description: |
+        Solo pueden crear reseñas usuarios con al menos
+        una reserva previamente confirmada.
       tags:
         - Reseñas
 
@@ -417,6 +495,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+        "403":
+          description: El usuario no posee reservas confirmadas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/resenas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    delete:
+      summary: Eliminar reseña
+      tags:
+        - Reseñas
+      security:
+        - sessionAuth: []
+
+      responses:
+        "200":
+          description: Reseña eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+        "401":
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "404":
+          description: Reseña inexistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/dashboard/metricas:
     get:
@@ -564,8 +685,13 @@ components:
 
         estado:
           type: string
-          enum: [pendiente, validada, cancelada]
+          enum: [pendiente, confirmada, cancelada]
           example: pendiente
+
+        token:
+          type: string
+          description: Token QR único de la reserva
+          example: abc123xyz
 
     ReservaRequest:
       type: object
@@ -629,9 +755,14 @@ components:
     ResenaRequest:
       type: object
       required:
+        - email
         - comentario
         - calificacion
       properties:
+        email:
+          type: string
+          format: email
+
         comentario:
           type: string
 

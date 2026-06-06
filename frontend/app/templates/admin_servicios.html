@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chez Jérôme - Panel de Servicios Extras</title>
+</head>
+<body>
+    <h1>Administración de Servicios Extras</h1>
+    
+    <form action="/admin/servicios/agregar" method="POST">
+        <label>Nombre del Servicio:</label>
+        <input type="text" name="nombre" placeholder="Ej: Zona Infantil" required>
+        <br><br>
+        <label>Descripción:</label>
+        <textarea name="descripcion" placeholder="Detalles del servicio..."></textarea>
+        <br><br>
+        <button type="submit">Guardar Servicio</button>
+    </form>
+
+    <hr>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Servicio</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Estacionamiento</td>
+                <td>Estacionamiento privado</td>
+                <td>Disponible</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
