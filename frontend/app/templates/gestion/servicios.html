@@ -1,6 +1,9 @@
 {% extends 'gestion/base_dashboard.html' %}
 {% block title %}Panel - Servicios Extras{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
 
 {% block boton_crear %}
     <a href="{{ url_for('admin.crear_servicio_vista') }}" class="btn btn-primary btn-lg shadow-sm">
