@@ -54,6 +54,5 @@ CREATE TABLE IF NOT EXISTS resenas (
     nombre_cliente  VARCHAR(100) NOT NULL,
     reserva_id INT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE SET NULL
+    FOREIGN KEY (reserva_id) REFERENCES reservas(id_reserva) ON DELETE SET NULL
 );
-
