@@ -1,6 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for
+from backend.app.routes.reservas import reservas_bp
+from backend.app.routes.reseñas import reseñas_bp
+from backend.app.services.admin_menu_service import obtener_menu_admin_service
+from backend.app.services.servicios_service import obtener_servicios
 
 cliente_bp = Blueprint('cliente', __name__)
+
+cliente_bp.register_blueprint(reservas_bp)
+cliente_bp.register_blueprint(reseñas_bp)
 
 @cliente_bp.route('/', methods=['GET', 'POST'])
 def landing():
@@ -18,7 +25,11 @@ def landing():
             
         return redirect(url_for('cliente.landing'))
         
-    return render_template('landing.html')
+    try:
+        servicios = obtener_servicios()
+        return render_template('landing.html', servicios=servicios)
+    except RuntimeError as e:
+        return "No se encontro el abm", 500 
 
 @cliente_bp.route('/')
 def index():
@@ -28,16 +39,14 @@ def index():
 
 @cliente_bp.route('/menu')
 def menu():
-    platos_hamburgueseria = [
-        {"nombre": "Fresh Mushrooms", "descripcion": "Far far away, behind the word...", "precio": 19.15, "imagen": "img_2.jpg"},
-        {"nombre": "Cheese and Garlic Toast", "descripcion": "Far far away, behind the word...", "precio": 20.99, "imagen": "img_3.jpg"},
-        {"nombre": "Grilled Chicken Salad", "descripcion": "Far far away, behind the word...", "precio": 8.99, "imagen": "img_4.jpg"},
-        {"nombre": "Organic Egg", "descripcion": "Far far away, behind the word...", "precio": 12.99, "imagen": "img_5.jpg"},
-        {"nombre": "Tomato Soup with Chicken", "descripcion": "Far far away, behind the word...", "precio": 23.10, "imagen": "img_6.jpg"},
-        {"nombre": "Salad with Crispy Chicken", "descripcion": "Far far away, behind the word...", "precio": 5.59, "imagen": "img_7.jpg"}
-    ]
-    return render_template('menu.html', platos=platos_hamburgueseria)
+    try:
+        platos = obtener_menu_admin_service()
 
+        return render_template('menu.html', platos=platos)
+    except Exception as e:
+        print(f"Error crítico en /admin/menu: {e}")
+        return f"Error interno del servidor: {e}", 500
+    
 
 @cliente_bp.route('/dejar-resena', methods=['GET'])
 def pagina_resenas():

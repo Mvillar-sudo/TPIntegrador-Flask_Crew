@@ -68,4 +68,4 @@ def register():
     cursor.close()
     conn.close()
 
-    return {"mensaje": "Usuario creado correctamente"}, 201     
+    return {"mensaje": "Usuario creado correctamente"}, 201    

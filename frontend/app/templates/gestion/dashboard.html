@@ -22,17 +22,16 @@
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
                     <div class="card-icon">
-                        <i class="ti-list"></i> </div>
+                    </div>
                     <h3>Gestión de Menú</h3>
                     <p>Modifica platos, actualiza precios, descripciones y disponibilidad de las hamburguesas.</p>
-                    <a href="{{ url_for('admin.menu') }}" class="btn btn-primary btn-sm">Ver Reporte</a>
+                    <a href="{{ url_for('admin.ver_menu') }}" class="btn btn-primary btn-sm">Ver Reporte</a>
                 </div>
             </div>
 
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-centerHighlight">
                     <div class="card-icon">
-                        <i class="ti-calendar"></i>
                     </div>
                     <h3>Reservas</h3>
                     <p>Monitorea las mesas reservadas, aprueba solicitudes y revisa los horarios pico del comedor.</p>
@@ -43,11 +42,20 @@
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
                     <div class="card-icon">
-                        <i class="ti-package"></i>
                     </div>
                     <h3>Servicios Extras</h3>
                     <p>Administra opciones adicionales como eventos privados, catering o zonas de delivery especial.</p>
-                    <a href="{{ url_for('admin.servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
+                    <a href="{{ url_for('admin.ver_servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <div class="dashboard-card text-center">
+                    <div class="card-icon">
+                    </div>
+                    <h3>Scanear QR</h3>
+                    <p>Verificar QR de reserva.</p>
+                    <a href="{{ url_for('admin.ver_servicios') }}" class="btn btn-primary btn-sm">Scanear</a>
                 </div>
             </div>
 

@@ -8,15 +8,15 @@ load_dotenv()
 def get_db():
     if 'db' not in g:
         g.db = mysql.connector.connect(
-            host=os.getenv('DB_HOST'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            database=os.getenv('DB_NAME'),
-            port=os.getenv('DB_PORT', 3306)
+            host=os.getenv('DB_HOST', 'localhost'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', ''),
+            database=os.getenv('DB_NAME', 'tpintegrador_db'),
+            port=int(os.getenv('DB_PORT', 3306)),
+            ssl_disabled=True
         )
 
     return g.db
-
 
 def close_db(e=None):
     db = g.pop('db', None)
@@ -65,7 +65,6 @@ def execute_db(query, args=()):
     cursor.close()
 
     return affected
-
 
 def init_app(app):
     app.teardown_appcontext(close_db)

@@ -116,4 +116,4 @@ def eliminar_servicio(id_servicio):
         }), 200
 
     except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500 
+        return jsonify({"error": str(e)}), 500
