@@ -1,16 +1,73 @@
 {% extends "base.html" %}
 
-{% block title %}Menu &mdash; Flaskburger{% endblock %}
+{% block title %}Hamburgueseria Pagina Principal{% endblock %}
 
 {% block content %}
-    <header id="gtco-header" class="gtco-cover gtco-cover-sm menu-header-bg" role="banner" data-stellar-background-ratio="0.5">
+    <header id="gtco-header" class="gtco-cover gtco-cover-md landing-header-bg" role="banner" data-stellar-background-ratio="0.5">
         <div class="overlay"></div>
         <div class="gtco-container">
             <div class="row">
-                <div class="col-md-12 col-md-offset-0 text-center">
+                <div class="col-md-12 col-md-offset-0 text-left">
                     <div class="row row-mt-15em">
-                        <div class="col-md-12 mt-text animate-box" data-animate-effect="fadeInUp">
-                            <h1 class="cursive-font">Pruebe nuestro menu</h1>   
+                        <div class="col-md-7 mt-text animate-box" data-animate-effect="fadeInUp">
+                            <span class="intro-text-small">Hand-crafted by <a href="http://gettemplates.co" target="_blank">GetTemplates.co</a></span>
+                            <h1 class="cursive-font">All in good taste!</h1>    
+                        </div>
+                        <div class="col-md-4 col-md-push-1 animate-box" data-animate-effect="fadeInRight">
+                            <div class="form-wrap">
+                                <div class="tab">
+                                    <div class="tab-content">
+                                        <div class="tab-content-inner active" data-content="signup">
+                                            <h3 id='reservar'class="cursive-font">Table Reservation</h3>
+                                            <form action="{{ url_for('reservas.crear_reserva') }}" method="POST"> 
+                                                <div class="row form-group">
+                                                    <div class="col-md-12">
+                                                        <label for="activities">Personas</label>
+                                                        <select name="persons" id="activities" class="form-control" required>
+                                                            <option value="">Personas</option>
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5+</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-12">
+                                                        <label for="name">Nombre</label>
+                                                        <input type="text" id="name" name="name" class="form-control" placeholder="Ej. Tomi" required>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group"> 
+                                                    <div class="col-md-12">
+                                                        <label for="mail">Correo Electrónico</label>
+                                                        <input type="text" id="Email" name="Email" class="form-control" placeholder="Tu correo electrónico" required>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group"> 
+                                                    <div class="col-md-12">
+                                                        <label for="reserva-fecha">Selecciona la Fecha</label>
+                                                        <input type="text" id="reserva-fecha" name="fecha" class="form-control" placeholder="Elige un día..." required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row form-group"> 
+                                                    <div class="col-md-12">
+                                                        <label for="reserva-hora">Selecciona la Hora</label>
+                                                        <input type="text" id="reserva-hora" name="hora" class="form-control" placeholder="Elige una hora..." required>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <div class="col-md-12">
+                                                        <input type="submit" class="btn btn-primary btn-block" value="Reserve Now">
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -18,39 +75,73 @@
         </div>
     </header>
 
-    <div class="gtco-section">
+    <div id="gtco-features">
         <div class="gtco-container">
             <div class="row">
-                <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
-                    <h2 class="cursive-font primary-color">Platos populares</h2>
+                <div class="col-md-8 col-md-offset-2 text-center gtco-heading animate-box">
+                    <h2 class="cursive-font">Our Services</h2>
+                    <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
                 </div>
             </div>
-            
             <div class="row">
-                {% if platos %}
-                    {% for plato in platos %}
-                    <div class="col-lg-4 col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
-                        <a href="{{ url_for('static', filename='img/' ~ (plato.imagen if plato.imagen else 'burger-default.jpg')) }}" class="fh5co-card-item image-popup">
-                            <figure>
-                                <div class="overlay"><i class="ti-plus"></i></div>
-                                <img src="{{ url_for('static', filename='img/' ~ (plato.imagen if plato.imagen else 'burger-default.jpg')) }}" alt="{{ plato.nombre }}" class="img-responsive">
-                            </figure>
-                            <div class="fh5co-text">
-                                <h2>{{ plato.nombre }}</h2>
-                                <p>{{ plato.descripcion }}</p>
-                                <p><span class="price cursive-font">${{ plato.precio }}</span></p>
-                            </div>
-                        </a>
+                {% for servicio in servicios %}
+                {% if servicio.activo ==1 %}
+                <div class="col-md-4 col-sm-6">
+                    <div class="feature-center animate-box" data-animate-effect="fadeIn">
+                        <span class="icon">
+                            <i class="{{ servicio.icono }}"></i>
+                        </span>
+                        <p>{{ servicio.nombre }}</p>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="col-md-12 text-center">
-                        <p>
-                            Estamos actualizando nuestra cocina. ¡Vuelva pronto para ver nuestras especialidades!
-                        </p>
-                    </div>
+                </div>
                 {% endif %}
+                {% endfor %}
             </div>
         </div>
     </div>
+
+    <div id="gtco-counter" class="gtco-section">
+        <div class="gtco-container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2 text-center gtco-heading animate-box">
+                    <h2 class="cursive-font primary-color">Fun Facts</h2>
+                    <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
+                    <div class="feature-center">
+                        <span class="counter js-counter" data-from="0" data-to="5" data-speed="5000" data-refresh-interval="50">1</span>
+                        <span class="counter-label">Avg. Rating</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
+                    <div class="feature-center">
+                        <span class="counter js-counter" data-from="0" data-to="43" data-speed="5000" data-refresh-interval="50">1</span>
+                        <span class="counter-label">Food Types</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
+                    <div class="feature-center">
+                        <span class="counter js-counter" data-from="0" data-to="32" data-speed="5000" data-refresh-interval="50">1</span>
+                        <span class="counter-label">Chef Cook</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
+                    <div class="feature-center">
+                        <span class="counter js-counter" data-from="0" data-to="1985" data-speed="5000" data-refresh-interval="50">1</span>
+                        <span class="counter-label">Year Started</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 
+
+{% block extra_scripts %} 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="{{ url_for('static', filename='js/fecha-hora.js') }}"></script>
 {% endblock %}

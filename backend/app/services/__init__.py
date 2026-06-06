@@ -1,5 +1,5 @@
-#from .menu_service import
-#from .reseñas_service import
-#from .auth_service import
-#from .reservas_service import
-from .servicio_service import get_servicio, post_servicio, actualizar_servicio
+from backend.app.routes.menu import menu_bp
+from backend.app.routes.reseñas import reseñas_bp
+from backend.app.routes.auth import auth_bp
+from backend.app.routes.dashboard import dashboard_bp
+from backend.app.routes.reservas import reservas_bp

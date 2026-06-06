@@ -1,5 +1,3 @@
-#from .menu_validator import
-#from .reseñas_validator import
-#from .auth_validator import
-#from .reservas_validator import
-#from .servicio_validator import
+from backend.app.routes.menu import menu_bp
+from backend.app.routes.reseñas import reseñas_bp
+from backend.app.routes.auth import auth_bp
