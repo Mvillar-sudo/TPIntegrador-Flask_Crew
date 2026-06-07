@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from backend.app.routes.reservas import reservas_bp
 from backend.app.routes.reseñas import reseñas_bp
 from backend.app.services.admin_menu_service import obtener_menu_admin_service
-from backend.app.services.servicios_service import obtener_servicios
+from backend.app.services.servicios_service import (obtener_servicios)
+from backend.app.services.resenas_service import obtener_resenas
 
 cliente_bp = Blueprint('cliente', __name__)
 
@@ -30,12 +31,6 @@ def landing():
         return render_template('landing.html', servicios=servicios)
     except RuntimeError as e:
         return "No se encontro el abm", 500 
-
-@cliente_bp.route('/')
-def index():
-    lista_servicios = get_servicio() 
-    
-    return render_template('index.html', servicios=lista_servicios)
 
 @cliente_bp.route('/menu')
 def menu():
