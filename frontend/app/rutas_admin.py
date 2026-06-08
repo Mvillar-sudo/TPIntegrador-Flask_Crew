@@ -8,24 +8,36 @@ from backend.app.db import query_db, execute_db
 from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
 from backend.app.validators.servicios_validator import (validar_servicio)
 
+import requests
+
 admin_bp = Blueprint('admin', __name__)
 
 admin_bp.register_blueprint(auth_bp)
 admin_bp.register_blueprint(admin_menu_bp)
 admin_bp.register_blueprint(servicios_bp)
 
-@admin_bp.route('/admin/login')
+@admin_bp.route('/admin/login', methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        data = {
+            "usuario": request.form.get("usuario"),
+            "password": request.form.get("password")
+        }
+        response = requests.post("http://127.0.0.1:5000/login", json=data)
+        respuesta = response.json()
+        if response.status_code == 200:
+            session['admin_logeado'] = True
+            session['usuario'] = respuesta.get('usuario')
+            return redirect(url_for('admin.dashboard'))
+
+        return render_template('gestion/login.html', error=respuesta.get("mensaje"))
+
     return render_template('gestion/login.html')
 
-@admin_bp.route('/admin/login_process', methods=['POST'])
-def login_process():
-    usuario = request.form.get('username')
-    contrasena = request.form.get('password')
-    
-    if usuario == "admin" and contrasena == "123":
-        session['admin_logeado'] = True
-        return redirect(url_for('admin.dashboard')) 
+@admin_bp.route('/admin/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('admin.login'))
 
 @admin_bp.route('/admin/dashboard')
 def dashboard():
