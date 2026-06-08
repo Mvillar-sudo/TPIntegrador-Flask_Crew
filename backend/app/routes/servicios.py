@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from ..services.servicios_service import (
+from services.servicios import (
     obtener_servicios,
     obtener_servicio_id,
     crear_servicio_db,
@@ -8,13 +8,12 @@ from ..services.servicios_service import (
     eliminar_servicio_db
 )
 
-from ..validators.servicios_validator import validar_servicio
+from validators.servicios import validar_servicio
 
 
 servicios_bp = Blueprint('servicios',__name__,url_prefix='/api/servicios')
 
 # get todos
-@servicios_bp.route('/', methods=['GET'])
 def get_servicios():
     try:
         servicios = obtener_servicios()
@@ -25,7 +24,7 @@ def get_servicios():
 
 
 # get por id
-@servicios_bp.route('/<int:id_servicio>', methods=['GET'])
+@servicio_bp.route('/<int:id_servicio>', methods=['GET'])
 def get_servicio(id_servicio):
     try:
         servicio = obtener_servicio_id(id_servicio)
@@ -42,8 +41,10 @@ def get_servicio(id_servicio):
 
 
 # POST
-@servicios_bp.route('/', methods=['POST'])
+@servicio_bp.route('/', methods=['POST'])
 def crear_servicio():
+    if "usuario" not in session:
+        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         data = request.get_json()
 
@@ -65,8 +66,10 @@ def crear_servicio():
 
 
 # patch
-@servicios_bp.route('/<int:id_servicio>', methods=['PATCH'])
+@servicio_bp.route('/<int:id_servicio>', methods=['PATCH'])
 def actualizar_servicio(id_servicio):
+    if "usuario" not in session:
+        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         data = request.get_json()
 
@@ -101,8 +104,10 @@ def actualizar_servicio(id_servicio):
 
 
 # delete
-@servicios_bp.route('/<int:id_servicio>', methods=['DELETE'])
+@servicio_bp.route('/<int:id_servicio>', methods=['DELETE'])
 def eliminar_servicio(id_servicio):
+    if "usuario" not in session:
+        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         filas = eliminar_servicio_db(id_servicio)
 

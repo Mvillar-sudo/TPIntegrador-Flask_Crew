@@ -1,4 +1,5 @@
-from backend.app.routes.menu import menu_bp
-from backend.app.routes.reseñas import reseñas_bp
-from backend.app.routes.auth import auth_bp
-
+from .menu_validator import validar_id_plato, validar_crear_plato
+#from .reseñas_validator import
+from .auth_validator import validar_login
+#from .reservas_validator import
+from .servicios import validar_servicio

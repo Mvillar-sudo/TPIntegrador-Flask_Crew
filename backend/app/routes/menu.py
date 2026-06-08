@@ -1,7 +1,11 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, jsonify
+from services import obtener_menu_plato_service
 
-menu_bp = Blueprint('menu', __name__, url_prefix='/api/menu')
+menu_bp = Blueprint("menu", __name__)
 
-@menu_bp.route('/', methods=['GET'])
-def get_menu():
-    return jsonify({"mensaje": "Endpoint de Menú funcionando"})
+#permite mostrar los platos en la pantalla de menu
+@menu_bp.route("/menu", methods=["GET"])
+def ver_menu():
+    platos = obtener_menu_plato_service()
+
+    return jsonify(platos), 200
