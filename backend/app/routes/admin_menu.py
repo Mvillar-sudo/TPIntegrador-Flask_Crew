@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify, session
 from validators import validar_id_plato, validar_crear_plato
-from auth import session
 from services import (
     crear_plato_service,
     obtener_menu_admin_service,
