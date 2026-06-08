@@ -1,4 +1,4 @@
-from ..db import query_db, execute_db
+from db import query_db, execute_db
 
 
 def obtener_servicios():
