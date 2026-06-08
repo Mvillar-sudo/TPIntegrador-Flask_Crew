@@ -2,4 +2,4 @@ from .menu_service import crear_plato_service, obtener_menu_admin_service, obten
 from .resenas_service import obtener_resenas,obtener_resena_id, crear_resena_db, eliminar_resena_db
 from .auth_service import post_register, post_login
 #from .reservas_service import
-from .servicios import obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db
+from .servicios_service import obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db
