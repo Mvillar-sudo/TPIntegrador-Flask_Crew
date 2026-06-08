@@ -4,7 +4,6 @@ from flask_mail import Mail
 from dotenv import load_dotenv
 from routes import menu_bp, resenas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
 import db
-import os
 
 from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
 from . import mail
@@ -25,10 +24,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 
     # inicializar extensiones
-    app.secret_key = os.getenv('SECRET_KEY')
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
-
-    # inicializar extensiones
     db.init_app(app)
     mail.init_app(app)
     mail.app = app

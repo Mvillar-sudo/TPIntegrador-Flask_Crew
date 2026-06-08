@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request
 
 from services import (
     obtener_servicios,
@@ -43,8 +43,6 @@ def get_servicio(id_servicio):
 # POST
 @servicios_bp.route('/', methods=['POST'])
 def crear_servicio():
-    if "usuario" not in session:
-        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         data = request.get_json()
 
@@ -68,8 +66,6 @@ def crear_servicio():
 # patch
 @servicios_bp.route('/<int:id_servicio>', methods=['PATCH'])
 def actualizar_servicio(id_servicio):
-    if "usuario" not in session:
-        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         data = request.get_json()
 
@@ -106,8 +102,6 @@ def actualizar_servicio(id_servicio):
 # delete
 @servicios_bp.route('/<int:id_servicio>', methods=['DELETE'])
 def eliminar_servicio(id_servicio):
-    if "usuario" not in session:
-        return jsonify({"mensaje": "No hay sesión activa"}), 401
     try:
         filas = eliminar_servicio_db(id_servicio)
 
