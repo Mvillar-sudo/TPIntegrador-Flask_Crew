@@ -30,22 +30,33 @@
                 {% for plato in platos %}
                 {% if plato.estado == 1 %}
                 <div class="col-lg-4 col-md-4 col-sm-6">
-                    <a href="{{ url_for('static', filename='img/' ~ plato.imagen) }}" class="fh5co-card-item image-popup">
+                    {% if plato.imagen %}
+                        {% set ruta_imagen = url_for('static', filename='img/' + plato.imagen) %}
+                        {% set clase_placeholder = "" %}
+                    {% else %}
+                        {% set ruta_imagen = url_for('static', filename='img/img_1.jpg') %}
+                        {% set clase_placeholder = "img-placeholder" %}
+                    {% endif %}
+
+                    <a href="{{ ruta_imagen }}" class="fh5co-card-item image-popup">
                         <figure>
                             <div class="overlay"><i class="ti-plus"></i></div>
-                            <img src="{{ url_for('static', filename='img/' ~ plato.imagen) }}" alt="{{ plato.nombre }}" class="img-responsive">
+                            <img src="{{ ruta_imagen }}" 
+                                 alt="{{ plato.nombre_plato }}" 
+                                 class="img-responsive img-plato-tabla {{ clase_placeholder }}">
                         </figure>
                         <div class="fh5co-text">
-                            <h2>{{ plato.nombre }}</h2>
-                            <p>{{ plato.descripcion }}</p>
-                            <p><span class="price cursive-font">${{ plato.precio }}</span></p>
+                            <h2>{{ plato.nombre_plato if plato.nombre_plato else "Plato sin nombre" }}</h2>
+                            <p>{{ plato.descripcion if plato.descripcion else "Sin descripción disponible." }}</p>
+                            <p><span class="price cursive-font">${{ "%.2f"|format(plato.precio) if plato.precio else "0.00" }}</span></p>
                         </div>
                     </a>
                 </div>
-                {% endif %}
-                {% endfor %}
-                </div>
-
+                {% endif %}  {% endfor %} </div>
         </div>
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}
