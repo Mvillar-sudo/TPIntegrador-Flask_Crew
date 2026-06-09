@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (loginForm) {
       loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
 
         if (errorContainer) {
           errorContainer.style.display = 'none';
@@ -25,31 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarError("Por favor, ingresa tu contraseña.");
             return;
         }
-
-        const datos = {
-            usuario: usernameInput,
-            password: passwordInput
-        };
-
-        const url = loginForm.getAttribute('data-action');
-
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
-        })
-        .then(res => {
-            if (res.ok) {
-                window.location.href = '/admin/dashboard';
-            } else {
-                return res.json().then(err => {
-                    throw new Error(err.mensaje || 'Usuario o contraseña incorrectos.');
-                });
-            }
-        })
-        .catch(err => {
-            mostrarError(err.message);
-        });
       });
     }
 
