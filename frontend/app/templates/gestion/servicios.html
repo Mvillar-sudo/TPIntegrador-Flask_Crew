@@ -25,7 +25,7 @@
         <td><strong class="text-dark">{{ servicio.nombre }}</strong></td>
         <td><small class="text-muted">{{ servicio.fecha_creacion.strftime('%d/%m/%Y %H:%M') if servicio.fecha_creacion else 'N/A' }}</small></td>
         <td>
-            {% if servicio.activo == 1 %}
+            {% if servicio.activo  == True %}
                 <span class="label label-success">Activo</span>
             {% else %}
                 <span class="label label-danger">Inactivo</span>
@@ -33,7 +33,7 @@
         </td>
         <td class="text-center">
             <div class="btn-group-acciones">
-                <a href="{{ url_for('admin.actualizar_servicio_proceso', id_servicio=servicio.id) }}" class="btn-editar" title="Editar">
+                <a href="{{ url_for('admin.editar_servicio_vista', id_servicio=servicio.id) }}" class="btn-editar" title="Editar">
                     Editar
                 </a>
                 

@@ -36,7 +36,7 @@ def crear_servicio_db(data):
 def actualizar_servicio_db(id_servicio, data):
 
     nombre = data.get('nombre')
-    activo = data.get('activo')
+    activo = 1 if data.get('activo') else 0
 
 
     return execute_db("""

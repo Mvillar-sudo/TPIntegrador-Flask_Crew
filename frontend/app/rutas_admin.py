@@ -27,6 +27,11 @@ def login_process():
         session['admin_logeado'] = True
         return redirect(url_for('admin.dashboard')) 
 
+@admin_bp.route('/admin/cerrar_sesion')
+def cerrar_sesion(): 
+    session['admin_logeado'] = False 
+    return redirect(url_for('cliente.landing'))
+
 @admin_bp.route('/admin/dashboard')
 def dashboard():
     if not session.get('admin_logeado'):
@@ -140,8 +145,22 @@ def crear_servicio_proceso():
 
     except RuntimeError as e:
         return jsonify({"error": str(e)}), 500 
+    
+@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET'])
+def editar_servicio_vista(id_servicio):
+    try:
+        servicio = obtener_servicio_id(id_servicio)
+        if not servicio:
+            flash('Servicio no encontrado', 'danger')
+            return redirect(url_for('admin.ver_servicios'))
+
+        return render_template("gestion/editar_servicio.html", servicio=servicio)
+
+    except Exception as e:
+        print(f"Error al renderizar vista de edición de servicio: {e}")
+        return "Error interno del servidor", 500
        
-@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET', 'POST']) # 👈 Soporta ambos métodos
+@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])
 def actualizar_servicio_proceso(id_servicio):
     try:
         servicio = obtener_servicio_id(id_servicio)
@@ -149,28 +168,30 @@ def actualizar_servicio_proceso(id_servicio):
             flash('Servicio no encontrado', 'danger')
             return redirect(url_for('admin.ver_servicios'))
 
-        estado_real = 1 if request.form.get("activo") else 0
-        if request.method == "POST":
-            data = {
-                "nombre": request.form.get("nombre"),
-                "activo": estado_real
-            }
+        valor_select = request.form.get("activo")
+        
+        estado_booleano = (valor_select == "True")
+        
+        data = {
+            "nombre": request.form.get("nombre", "").strip(),
+            "activo": estado_booleano  
+        }
 
-            
-            error = validar_servicio(data, es_actualizacion=True)
-            if error:
-                flash(f"Error de validación: {error}", "danger")
-                return render_template("gestion/editar_servicio.html", servicio=servicio), 400
-            
-            actualizar_servicio_db(id_servicio, data)
-            
-            flash('¡Servicio actualizado con éxito!', 'success')
-            return redirect(url_for('admin.ver_servicios'))
+        
+        error = validar_servicio(data, es_actualizacion=True)
+        if error:
+            flash(f"Error de validación: {error}", "danger")
+            servicio.nombre = data["nombre"]
+            servicio.activo = 1 if estado_booleano else 0
+            return render_template("gestion/editar_servicio.html", servicio=servicio), 400
 
-        return render_template("gestion/editar_servicio.html", servicio=servicio)
+        actualizar_servicio_db(id_servicio, data)
+        
+        flash('¡Servicio actualizado con éxito!', 'success')
+        return redirect(url_for('admin.ver_servicios'))
 
     except Exception as e:
-        print(f"Error crítico en controlador de servicios: {e}")
+        print(f"Error crítico en el procesamiento del servicio: {e}")
         return "Error interno del servidor", 500
     
 @admin_bp.route('/<int:id_servicio>', methods=['POST'])
