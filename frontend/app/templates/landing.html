@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Hamburgueseria Pagina Principal{% endblock %}
+{% block title %}Flask Burger Pagina Principal{% endblock %}
 
 {% block content %}
     <header id="gtco-header" class="gtco-cover gtco-cover-md landing-header-bg" role="banner" data-stellar-background-ratio="0.5">
@@ -10,15 +10,14 @@
                 <div class="col-md-12 col-md-offset-0 text-left">
                     <div class="row row-mt-15em">
                         <div class="col-md-7 mt-text animate-box" data-animate-effect="fadeInUp">
-                            <span class="intro-text-small">Hand-crafted by <a href="http://gettemplates.co" target="_blank">GetTemplates.co</a></span>
-                            <h1 class="cursive-font">All in good taste!</h1>    
+                            <h1 class="cursive-font">Hamburguesas de calidad</h1>    
                         </div>
                         <div class="col-md-4 col-md-push-1 animate-box" data-animate-effect="fadeInRight">
                             <div class="form-wrap">
                                 <div class="tab">
                                     <div class="tab-content">
                                         <div class="tab-content-inner active" data-content="signup">
-                                            <h3 id='reservar'class="cursive-font">Table Reservation</h3>
+                                            <h3 id='reservar'class="cursive-font">Reservar mesa</h3>
                                             <form action="{{ url_for('reservas.crear_reserva') }}" method="POST"> 
                                                 <div class="row form-group">
                                                     <div class="col-md-12">
@@ -79,8 +78,8 @@
         <div class="gtco-container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading animate-box">
-                    <h2 class="cursive-font">Our Services</h2>
-                    <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                    <h2 class="cursive-font">Nuestros Servicios de Calidad</h2>
+                    <p>Servicios que transforman a la experiencia Flask Burger en la mejor del barrio.</p>
                 </div>
             </div>
             <div class="row">
@@ -104,8 +103,8 @@
         <div class="gtco-container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading animate-box">
-                    <h2 class="cursive-font primary-color">Fun Facts</h2>
-                    <p>Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+                    <h2 class="cursive-font primary-color">Sobre Nosotros</h2>
+                    <p>Te esperamos en AV. Paseo Colon 840 abierto todos los dias de la semana.</p>
                 </div>
             </div>
 
@@ -113,25 +112,25 @@
                 <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
                     <div class="feature-center">
                         <span class="counter js-counter" data-from="0" data-to="5" data-speed="5000" data-refresh-interval="50">1</span>
-                        <span class="counter-label">Avg. Rating</span>
+                        <span class="counter-label">Localidades actuales</span>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
                     <div class="feature-center">
                         <span class="counter js-counter" data-from="0" data-to="43" data-speed="5000" data-refresh-interval="50">1</span>
-                        <span class="counter-label">Food Types</span>
+                        <span class="counter-label">Empleados totales</span>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
                     <div class="feature-center">
-                        <span class="counter js-counter" data-from="0" data-to="32" data-speed="5000" data-refresh-interval="50">1</span>
-                        <span class="counter-label">Chef Cook</span>
+                        <span class="counter js-counter" data-from="0" data-to="28" data-speed="5000" data-refresh-interval="50">1</span>
+                        <span class="counter-label">Chefs de Calidad</span>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 animate-box" data-animate-effect="fadeInUp">
                     <div class="feature-center">
                         <span class="counter js-counter" data-from="0" data-to="1985" data-speed="5000" data-refresh-interval="50">1</span>
-                        <span class="counter-label">Year Started</span>
+                        <span class="counter-label">Inauguración</span>
                     </div>
                 </div>
             </div>

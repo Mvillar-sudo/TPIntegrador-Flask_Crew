@@ -51,4 +51,11 @@ def eliminar_servicio_db(id_servicio):
     return execute_db(
         "DELETE FROM servicios WHERE id = %s",
         (id_servicio,)
-    )
+    ) 
+def obtener_total_servicios_activos():
+    resultado = query_db("""
+        SELECT COUNT(*) as total 
+        FROM servicios 
+        WHERE activo = 1
+    """, one=True)
+    return resultado['total'] if resultado else 0

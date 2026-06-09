@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from backend.app.routes.auth import auth_bp
 from backend.app.routes.admin_menu import admin_menu_bp
 from backend.app.routes.servicios import servicios_bp
-from backend.app.services.servicios_service import (obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db)
-from backend.app.services.admin_menu_service import (obtener_menu_admin_service, obtener_plato_service, cambiar_estado_plato_service, actualizar_parcial_plato_service, eliminar_plato_service, crear_plato_service)
+from backend.app.services.servicios_service import (obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db, obtener_total_servicios_activos)
+from backend.app.services.admin_menu_service import (obtener_menu_admin_service, obtener_plato_service, cambiar_estado_plato_service, actualizar_parcial_plato_service, eliminar_plato_service, crear_plato_service, obtener_total_platos_activos)
 from backend.app.db import query_db, execute_db
 from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
 from backend.app.validators.servicios_validator import (validar_servicio)
@@ -34,13 +34,25 @@ def cerrar_sesion():
 
 @admin_bp.route('/admin/dashboard')
 def dashboard():
-    if not session.get('admin_logeado'):
+    if not session.get('admin_logeado'): 
         return redirect(url_for('admin.login'))
+    try:
+        total_platos = obtener_total_platos_activos()
+        total_servicios = obtener_total_servicios_activos()
         
-    return render_template('gestion/dashboard.html')
+        return render_template(
+            "gestion/dashboard.html", 
+            total_platos=total_platos,
+            total_servicios=total_servicios
+        )
+    except Exception as e:
+        print(f"Error al cargar métricas del dashboard: {e}")
+        return "Error interno del servidor", 500
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 def ver_menu():
+    if not session.get('admin_logeado'): 
+        return redirect(url_for('admin.login'))
     try:
         platos = obtener_menu_admin_service()
 

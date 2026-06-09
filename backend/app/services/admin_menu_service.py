@@ -1,4 +1,4 @@
-from ..db import get_db
+from ..db import get_db, query_db
 
 def crear_plato_service(data):
 
@@ -126,4 +126,12 @@ def eliminar_plato_service(id_plato):
     cursor.close()
     conn.close()
 
-    return filas_afectadas > 0
+    return filas_afectadas > 0 
+
+def obtener_total_platos_activos():
+    resultado = query_db("""
+        SELECT COUNT(*) as total 
+        FROM menu 
+        WHERE estado = 1
+    """, one=True)
+    return resultado['total'] if resultado else 0
