@@ -2235,4 +2235,25 @@ main {
 .cambios {
   padding: 10px 10px;
 }
+/* Fix inputs del formulario de reserva */
+#gtco-header .form-wrap .tab-content .form-control {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#gtco-header .form-wrap .tab-content select option {
+    color: #000 !important;
+    background-color: #fff !important;
+}
+
+#gtco-header .form-wrap .tab-content .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* flatpickr input una vez seleccionado */
+#gtco-header .flatpickr-input {
+    color: #fff !important;
+}
+
+
 /*# sourceMappingURL=style.css.map */
