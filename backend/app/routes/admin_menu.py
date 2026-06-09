@@ -21,7 +21,7 @@ def crear_plato():
     if error:
         return jsonify({"mensaje": error}), 400
 
-    resultado = crear_plato_service(data)
+    crear_plato_service(data)
 
     return jsonify({"mensaje": "Plato creado"}), 201
 

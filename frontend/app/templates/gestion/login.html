@@ -20,7 +20,21 @@
 
                     <div id="errorContainer" class="login-error-message"></div>
 
-                    <form id="loginForm" action="{{ url_for('admin.login_process') }}" method="POST">
+                    {% if error %}
+                        <div style="background-color: #f8d7da !important;
+                            color: #721c24 !important;
+                            border: 1px solid #f5c6cb !important;
+                            padding: 15px !important;
+                            margin-bottom: 25px !important;
+                            text-align: center !important;
+                            border-radius: 4px !important;
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;">
+                            <strong>¡Atención!</strong> {{ error }}
+                        </div>
+                    {% endif %}
+                    <form id="loginForm" action="{{ url_for('admin.login') }}" method="POST">
                         
                         <div class="form-group-custom">
                             <label for="username">Usuario Administrador</label>
@@ -42,4 +56,7 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
 {% endblock %}

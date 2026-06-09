@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from servicios import (
+from services import (
     obtener_servicios,
     obtener_servicio_id,
     crear_servicio_db,
@@ -8,7 +8,8 @@ from servicios import (
     eliminar_servicio_db
 )
 
-from validators.servicios import validar_servicio
+from validators import validar_servicio
+
 
 servicios_bp = Blueprint('servicios',__name__,url_prefix='/api/servicios')
 # get todos
