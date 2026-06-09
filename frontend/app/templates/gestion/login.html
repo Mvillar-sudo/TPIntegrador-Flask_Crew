@@ -20,7 +20,7 @@
 
                     <div id="errorContainer" class="login-error-message"></div>
 
-                    <form id="loginForm" data-action="{{ url_for('admin.login.html') }}">
+                    <form id="loginForm" action="{{ url_for('admin.login_process') }}" method="POST">
                         
                         <div class="form-group-custom">
                             <label for="username">Usuario Administrador</label>
@@ -42,8 +42,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block extra_scripts %}
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 {% endblock %}

@@ -15,19 +15,21 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 
 -- 2. Tabla: productos (Menú)
-CREATE TABLE IF NOT EXISTS productos (
-    id_productos INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
+CREATE TABLE IF NOT EXISTS menu (
+    id_plato INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_plato VARCHAR(100) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     descripcion TEXT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    imagen VARCHAR(255) NULL,
 );
 
 -- 3. Tabla: reservas
 CREATE TABLE IF NOT EXISTS reservas (
     id_reserva INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    telefono VARCHAR(20) NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     cantidad_personas INT NOT NULL,
@@ -40,8 +42,7 @@ CREATE TABLE IF NOT EXISTS reservas (
 -- 4. Tabla: servicios
 CREATE TABLE IF NOT EXISTS servicios (
     id_servicio INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(100) NULL,
+    nombre VARCHAR(100) NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -56,4 +57,3 @@ CREATE TABLE IF NOT EXISTS resenas (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE SET NULL
 );
-

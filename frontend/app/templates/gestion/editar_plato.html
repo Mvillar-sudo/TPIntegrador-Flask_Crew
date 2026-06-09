@@ -1,0 +1,62 @@
+{% extends 'gestion/base_admin.html' %}
+{% block title %}Panel - Editar Plato{% endblock %}
+{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container admin-form-container">
+        <a href="{{ url_for('admin.ver_menu') }}" class="btn btn-default btn-sm">← Volver al Menú</a>
+        
+        <div class="admin-table-container admin-card-body">
+            <h2 class="admin-form-title">Editar Plato #{{ plato.id_plato }}</h2>
+            
+            <form action="{{ url_for('admin.editar_plato', id_plato=plato.id_plato) }}" method="POST" enctype="multipart/form-data">
+                
+                <div class="admin-form-group">
+                    <label for="nombre_plato" class="admin-form-label">Nombre del Plato:</label>
+                    <input type="text" id="nombre_plato" name="nombre_plato" value="{{ plato.nombre_plato }}" required class="form-control admin-form-input">
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="descripcion" class="admin-form-label">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" required class="form-control admin-form-textarea">{{ plato.descripcion }}</textarea>
+                </div> 
+
+                <div class="admin-form-group">
+                    <label for="imagen" class="admin-form-label">Imagen del Plato:</label>
+                    
+                    {% if plato.imagen %}
+                        <div class="mini-vista-previa mb-2">
+                            <p class="text-muted small mb-1">Imagen actual:</p>
+                            <img src="{{ url_for('static', filename='img/' + plato.imagen) }}" alt="Foto actual" class="img-thumbnail" style="max-width: 120px; border-radius: 6px;">
+                        </div>
+                    {% endif %}
+                    
+                    <div class="custom-file-upload">
+                        <input type="file" id="imagen" name="imagen" accept="image/*" class="form-control admin-form-input">
+                        <small class="text-muted d-block mt-1">Selecciona un archivo solo si deseas cambiar la foto actual.</small>
+                    </div>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="precio" class="admin-form-label">Precio ($):</label>
+                    <input type="number" id="precio" name="precio" value="{{ plato.precio }}" step="0.01" required class="form-control admin-form-input">
+                </div>
+
+                <div class="admin-form-group-large">
+                    <label for="estado" class="admin-form-label">Estado en el Menú:</label>
+                    <select id="estado" name="estado" class="form-control admin-form-input">
+                        <option value="1" {% if plato.estado == 1 %}selected{% endif %}>Activo</option>
+                        <option value="0" {% if plato.estado == 0 %}selected{% endif %}>Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="admin-form-actions">
+                    <button type="submit" class="btn btn-primary btn-submit-save">Guardar Cambios</button>
+                    <a href="{{ url_for('admin.ver_menu') }}" class="btn btn-default btn-cancel-link">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -20,15 +20,15 @@ def login():
 
     if not user:
         return {"mensaje": "Credenciales inválidas"}, 401
-    
+
     if not check_password_hash(user["contraseña"], password):
         return {"mensaje": "Credenciales inválidas"}, 401
 
     if user["rol"] == "administrador":
         return {"mensaje": "Login correcto", "rol": "administrador"}, 200
     else:
-        return {"mensaje": "Login correcto", "rol": "usuario"}, 200  
-    
+        return {"mensaje": "Login correcto", "rol": "usuario"}, 200
+
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
@@ -47,4 +47,4 @@ def register():
 
     execute_db(query, args)
 
-    return {"mensaje": "Usuario creado correctamente"}, 201    
+    return {"mensaje": "Usuario creado correctamente"}, 201
