@@ -17,11 +17,19 @@
                     
                     <hr class="mb-4">
 
-                    <form action="{{ url_for('admin.crear_plato_proceso') }}" method="POST">
+                    <form action="{{ url_for('admin.crear_plato_proceso') }}" method="POST" enctype="multipart/form-data">
                         
                         <div class="form-group mb-3">
                             <label for="nombre_plato" class="form-label fw-semibold text-secondary">Nombre del Plato *</label>
                             <input type="text" class="form-control form-control-lg" id="nombre_plato" name="nombre_plato" required placeholder="Ej. Pizza Margherita">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="imagen" class="form-label fw-semibold text-secondary">Imagen del Plato</label>
+                            <div class="custom-file-upload">
+                                <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*">
+                                <small class="text-muted d-block mt-1">Formatos sugeridos: JPG, PNG o WebP.</small>
+                            </div>
                         </div>
 
                         <div class="form-group mb-3">

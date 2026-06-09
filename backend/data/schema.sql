@@ -19,6 +19,7 @@ CREATE TABLE menu (
 	id_plato INT AUTO_INCREMENT PRIMARY KEY,
     nombre_plato VARCHAR(100) NOT NULL,
     descripcion TEXT NULL,
+    imagen VARCHAR(255) NULL,
     precio DECIMAL(10,2) NOT NULL,
     estado BOOLEAN NOT NULL DEFAULT TRUE
 );

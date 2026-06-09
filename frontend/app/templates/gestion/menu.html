@@ -3,6 +3,10 @@
 {% set titulo_pagina = "Gestión del Menú" %}
 {% set subtitulo_pagina = "Administra los platos, precios y disponibilidad en tiempo real." %}
 
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
 {% block boton_crear %}
     <a href="{{ url_for('admin.crear_plato_vista') }}" class="btn btn-primary btn-lg shadow-sm">
         Agregar Nuevo Plato
@@ -14,6 +18,7 @@
     <th style="width: 25%">Nombre del Plato</th>
     <th style="width: 15%">Precio</th>
     <th style="width: 30%">Descripción</th>
+    <th style="width: 15%">Imagen</th>
     <th style="width: 10%">Disponibilidad</th>
     <th style="width: 10%" class="text-center">Acciones</th>
 {% endblock %}
@@ -25,6 +30,15 @@
         <td><strong class="text-dark">{{ plato.nombre_plato }}</strong></td>
         <td><span class="text-success fw-bold">${{ "%.2f"|format(plato.precio) }}</span></td>
         <td><small class="text-muted">{{ plato.descripcion if plato.descripcion else 'Sin descripción.' }}</small></td>
+        <td>
+            <div class="contenedor-foto-tabla">
+                {% if plato.imagen %}
+                    <img src="{{ url_for('static', filename='img/' + plato.imagen) }}" alt="{{ plato.nombre_plato }}" class="img-plato-tabla">
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/img_1.jpg') }}" alt="Sin imagen" class="img-plato-tabla img-placeholder">
+                {% endif %}
+            </div>
+        </td>
         <td>
             {% if plato.estado == 1 %}
                 <span class="label label-success">Activo</span>
@@ -44,4 +58,7 @@
     {% else %}
     <tr><td colspan="6" class="text-center text-muted py-4">No hay platos registrados en la carta.</td></tr>
     {% endfor %}
+{% endblock %} 
+{% block extra_scripts %} 
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

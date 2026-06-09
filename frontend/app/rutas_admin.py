@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, flash
+from flask import Blueprint, current_app, render_template, request, jsonify, redirect, url_for, session, flash
 from backend.app.routes.auth import auth_bp
 from backend.app.routes.admin_menu import admin_menu_bp
 from backend.app.routes.servicios import servicios_bp
@@ -7,6 +7,8 @@ from backend.app.services.admin_menu_service import (obtener_menu_admin_service,
 from backend.app.db import query_db, execute_db
 from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
 from backend.app.validators.servicios_validator import (validar_servicio)
+import os 
+from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -63,6 +65,10 @@ def ver_menu():
     
 @admin_bp.route("/admin/menu/editar/<int:id_plato>", methods=["GET", "POST"])
 def editar_plato(id_plato):
+    plato = obtener_plato_service(id_plato)
+    if not plato:
+        return "Plato no encontrado", 404
+
     if request.method == "POST":
         data_actualizada = {
             "nombre_plato": request.form.get("nombre_plato"),
@@ -70,17 +76,29 @@ def editar_plato(id_plato):
             "precio": float(request.form.get("precio", 0)),
             "estado": int(request.form.get("estado", 1))
         }
+
+        file = request.files.get("imagen")
         
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
+            
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+                
+            filepath = os.path.join(upload_folder, filename)
+            file.save(filepath)
+            
+            data_actualizada["imagen"] = filename
+        else:
+            data_actualizada["imagen"] = plato.get("imagen")
+
         exito = actualizar_parcial_plato_service(id_plato, data_actualizada)
         
         if exito:
             return redirect(url_for('admin.ver_menu'))
         else:
-            return "El plato no existe o fue eliminado por otro usuario", 404
-
-    plato = obtener_plato_service(id_plato)
-    if not plato:
-        return "Plato no encontrado", 404
+            return "El plato no existe o fue eliminado", 404
         
     return render_template('gestion/editar_plato.html', plato=plato)
 
@@ -101,14 +119,38 @@ def crear_plato_vista():
 
 @admin_bp.route("/admin/menu/crear_proceso", methods=["POST"])
 def crear_plato_proceso():
-    data = {
-        "nombre_plato": request.form.get("nombre_plato"),
-        "descripcion": request.form.get("descripcion"),
-        "precio": float(request.form.get("precio", 0))
-    }
-    crear_plato_service(data)
-    flash('¡Nuevo plato añadido exitosamente!', 'success')
-    return redirect(url_for('admin.ver_menu'))
+    try:
+        data = {
+            "nombre_plato": request.form.get("nombre_plato", "").strip(),
+            "descripcion": request.form.get("descripcion", "").strip(),
+            "imagen": None,
+            "precio": float(request.form.get("precio", 0))
+        }
+
+        file = request.files.get("imagen")
+
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            
+            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
+            
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+            
+            filepath = os.path.join(upload_folder, filename)
+            file.save(filepath)
+            
+            data["imagen"] = filename
+
+        crear_plato_service(data)
+        
+        flash('¡Nuevo plato añadido exitosamente!', 'success')
+        return redirect(url_for('admin.ver_menu'))
+    
+    except Exception as e:
+        print(f"Error al crear el plato: {e}")
+        flash('Ocurrió un error al procesar el plato.', 'danger')
+        return redirect(url_for('admin.ver_menu'))
 
 @admin_bp.route('/admin/dashboard/reservas')
 def reservas():
