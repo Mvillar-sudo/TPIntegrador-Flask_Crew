@@ -5,8 +5,6 @@ from .routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, da
 from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
 from . import db
 from . import mail
-from routes import menu_bp, reseñas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
-import db
 
 def create_app():
     app = Flask(__name__)
@@ -28,7 +26,6 @@ def create_app():
     # registro de blueprints
     app.register_blueprint(menu_bp)
     app.register_blueprint(reseñas_bp)
-    app.register_blueprint(auth_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
