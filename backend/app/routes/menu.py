@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services import obtener_menu_plato_service
+from ..services import obtener_menu_plato_service
 
 menu_bp = Blueprint("menu", __name__)
 

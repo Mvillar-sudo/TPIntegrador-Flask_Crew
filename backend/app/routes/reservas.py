@@ -3,8 +3,8 @@ import secrets
 from flask import Blueprint, jsonify, request
 from ..db import get_db
 from ..config import MAX_RESERVAS_POR_FRANJA
-from validators.qr import generar_qr
-from validators.email import enviar_email_reserva
+from ..validators.qr import generar_qr
+from ..validators.email import enviar_email_reserva
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 

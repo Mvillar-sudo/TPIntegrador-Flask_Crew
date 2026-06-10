@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from backend.app.routes.reservas import reservas_bp
-from backend.app.routes.reseñas import reseñas_bp
+from backend.app.routes.resena import resenas_bp
 from backend.app.services.admin_menu_service import obtener_menu_admin_service
 from backend.app.services.servicios_service import (obtener_servicios)
 from backend.app.services.resenas_service import obtener_resenas
@@ -8,7 +8,7 @@ from backend.app.services.resenas_service import obtener_resenas
 cliente_bp = Blueprint('cliente', __name__)
 
 cliente_bp.register_blueprint(reservas_bp)
-cliente_bp.register_blueprint(reseñas_bp)
+cliente_bp.register_blueprint(resenas_bp)
 
 @cliente_bp.route('/', methods=['GET', 'POST'])
 def landing():
