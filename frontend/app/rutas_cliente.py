@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from backend.app.routes.reservas import reservas_bp
-from backend.app.routes.reseñas import reseñas_bp
-from backend.app.services.admin_menu_service import obtener_menu_admin_service
-from backend.app.services.servicios_service import (obtener_servicios)
-from backend.app.services.resenas_service import obtener_resenas
-
+import requests
+# from backend.app.routes.reservas import reservas_bp
+# from backend.app.routes.reseñas import reseñas_bp
+# from backend.app.services.admin_menu_service import obtener_menu_admin_service
+# from backend.app.services.servicios_service import (obtener_servicios)
+# from backend.app.services.resenas_service import obtener_resenas
+#
 cliente_bp = Blueprint('cliente', __name__)
 
 cliente_bp.register_blueprint(reservas_bp)
@@ -57,10 +58,17 @@ def pagina_resenas():
 @cliente_bp.route('/menu', methods=['GET'])
 def ver_menu_publico():
     try:
-        todos_los_platos = obtener_menu_admin_service()
-        
-        platos_activos = [p for p in todos_los_platos if p.get('activo') == True or p.get('activo') == 1]
-    except Exception:
-        platos_activos = []
+        response = requests.get("http://127.0.0.1:5000/menu")
+
+        platos = []
+        if response.status_code == 200:
+            platos = response.json()
+        else:
+            print(f"Advertencia: El Backend devolvió código {response.status_code}")
+
+        return render_template('menu.html', platos=platos)
+    except Exception as e:
+        print(f"Error crítico en /admin/menu: {e}")
+        return f"Error interno del servidor: {e}", 500
 
     return render_template('menu.html', platos=platos_activos)
