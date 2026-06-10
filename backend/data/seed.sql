@@ -18,10 +18,10 @@ INSERT INTO servicios (nombre, activo) VALUES
 ON DUPLICATE KEY UPDATE nombre=nombre;
 
 -- 3. Insertar platillos iniciales del menú (productos)
-INSERT INTO productos (nombre, precio, descripcion, activo) VALUES
-('Pizza Napolitana', 12500.00, 'Pizza con mozzarella, rodajas de tomate, ajo y albahaca fresca.', TRUE),
-('Milanesa con Papas Fritas', 11000.00, 'Clásica milanesa de carne acompañada de papas fritas crujientes.', TRUE),
-('Hamburguesa Completa', 9500.00, 'Hamburguesa casera con queso, lechuga, tomate, huevo y jamón, con papas.', TRUE),
-('Ensalada César', 8500.00, 'Lettuce romana, croutons, queso parmesano y aderezo César.', TRUE),
-('Tiramisú', 4500.00, 'Postre clásico italiano con café y mascarpone.', TRUE)
+INSERT INTO men8u (nombre, precio, descripcion, activo, imagen) VALUES
+('Pizza Napolitana', 12500.00, 'Pizza con mozzarella, rodajas de tomate, ajo y albahaca fresca.', TRUE, 'https://www.recetasnestlecam.com/sites/default/files/styles/recipe_detail_desktop_new/public/srh_recipes/017845e65b2068a168e87a38f0722a75.jpg?itok=2bgODUGg'),
+('Milanesa con Papas Fritas', 11000.00, 'Clásica milanesa de carne acompañada de papas fritas crujientes.', TRUE, 'https://www.recetasnestlecam.com/sites/default/files/styles/recipe_detail_desktop_new/public/srh_recipes/017845e65b2068a168e87a38f0722a75.jpg?itok=2bgODUGg'),
+('Hamburguesa Completa', 9500.00, 'Hamburguesa casera con queso, lechuga, tomate, huevo y jamón, con papas.', TRUE, 'https://www.recetasnestlecam.com/sites/default/files/styles/recipe_detail_desktop_new/public/srh_recipes/017845e65b2068a168e87a38f0722a75.jpg?itok=2bgODUGg'),
+('Ensalada César', 8500.00, 'Lettuce romana, croutons, queso parmesano y aderezo César.', TRUE, 'https://www.recetasnestlecam.com/sites/default/files/styles/recipe_detail_desktop_new/public/srh_recipes/017845e65b2068a168e87a38f0722a75.jpg?itok=2bgODUGg'),
+('Tiramisú', 4500.00, 'Postre clásico italiano con café y mascarpone.', TRUE, 'https://www.recetasnestlecam.com/sites/default/files/styles/recipe_detail_desktop_new/public/srh_recipes/017845e65b2068a168e87a38f0722a75.jpg?itok=2bgODUGg')
 ON DUPLICATE KEY UPDATE nombre=nombre;
