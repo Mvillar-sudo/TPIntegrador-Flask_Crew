@@ -28,7 +28,7 @@
     <tr>
         <td><code>#{{ plato.id_plato }}</code></td>
         <td><strong class="text-dark">{{ plato.nombre_plato }}</strong></td>
-        <td><span class="text-success fw-bold">${{ "%.2f"|format(plato.precio) }}</span></td>
+        <td><span class="text-success fw-bold">${{ "%.2f"|format(plato.precio|float) }}</span></td>
         <td><small class="text-muted">{{ plato.descripcion if plato.descripcion else 'Sin descripción.' }}</small></td>
         <td>
             <div class="contenedor-foto-tabla">
@@ -48,8 +48,8 @@
         </td>
         <td class="text-center">
             <div class="btn-group-acciones">
-                <a href="{{ url_for('admin.editar_plato', id_plato=plato.id_plato) }}" class="btn-editar">Editar</a>
-                <form action="{{ url_for('admin.borrar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar">
+                <a href="{{ url_for('admin.editar_plato_vista', id_plato=plato.id_plato) }}" class="btn-editar">Editar</a>
+                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar">
                     <button type="submit" class="btn-eliminar">Eliminar</button>
                 </form>
             </div>

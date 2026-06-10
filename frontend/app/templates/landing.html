@@ -18,7 +18,7 @@
                                     <div class="tab-content">
                                         <div class="tab-content-inner active" data-content="signup">
                                             <h3 id='reservar'class="cursive-font">Reservar mesa</h3>
-                                            <form action="{{ url_for('reservas.crear_reserva') }}" method="POST"> 
+                                            <form action="{{ url_for('cliente.procesar_reserva_cliente') }}" method="POST"> 
                                                 <div class="row form-group">
                                                     <div class="col-md-12">
                                                         <label for="activities">Personas</label>
@@ -84,7 +84,7 @@
             </div>
             <div class="row">
                 {% for servicio in servicios %}
-                {% if servicio.activo ==1 %}
+                {% if servicio.activo %}
                 <div class="col-md-4 col-sm-6">
                     <div class="feature-center animate-box" data-animate-effect="fadeIn">
                         <span class="icon">

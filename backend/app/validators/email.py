@@ -1,7 +1,7 @@
 from flask_mail import Message
 from flask import current_app
-from ..config import MAIL_USERNAME
-from .. import mail
+from config import MAIL_USERNAME
+from extensions import mail
 import os
 
 def enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva):

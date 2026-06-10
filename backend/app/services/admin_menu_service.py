@@ -1,4 +1,4 @@
-from ..db import get_db
+from db import get_db
 
 def crear_plato_service(data):
 
