@@ -75,46 +75,17 @@ def procesar_reserva_cliente():
             mensaje = response.json().get("mensaje", "No hay disponibilidad.")
             flash(mensaje, "danger")
     except Exception:
-        platos_activos = []
+        flash("Error con el servidor de reservas.", "danger")
+    return redirect(url_for('cliente.landing'))
 
-    return render_template('menu.html', platos=platos_activos)
 
-
-@cliente_bp.route('/reservas/nueva', methods=['POST'])
-def crear_reserva():
-    data = {
-        "nombre": request.form.get("name"),
-        "email": request.form.get("Email"),
-        "fecha": request.form.get("fecha"),
-        "hora": request.form.get("hora"),
-        "cantidad_personas": request.form.get("persons"),
-        "telefono": ""  # el form no tiene campo telefono
-    }
-
+@cliente_bp.route('/cancelar-reserva/<string:token>', methods=['GET'])
+def cancelar_via_email(token):
     try:
-        r = requests.post(f"{BACKEND_URL}/api/reservas/", json=data)
-        if r.status_code == 201:
-            return redirect(url_for('cliente.landing'))
+        response = requests.get(f"{BACKEND_URL}/reservas/cancelar/{token}")
+        if response.status_code == 200:
+            return "<h1>Reserva cancelada correctamente.</h1>"
         else:
-            error = r.json().get("mensaje", "Error al crear la reserva")
-            return render_template('landing.html', error=error)
-    except Exception as e:
-        print(f"Error al crear reserva: {e}")
-        return render_template('landing.html', error="Error de conexión con el servidor")
-    
-
-@cliente_bp.route('/reservas/cancelar/<string:token>', methods=['GET'])
-def cancelar_reserva(token):
-    try:
-        r = requests.get(f"{BACKEND_URL}/api/reservas/cancelar/{token}")
-        mensaje = r.json().get("mensaje", "")
-        if r.status_code == 200:
-            return render_template('cancelacion.html', exito=True, mensaje=mensaje)
-        else:
-            return render_template('cancelacion.html', exito=False, mensaje=mensaje)
-    except Exception as e:
-        print(f"Error al cancelar reserva: {e}")
-        return render_template('cancelacion.html', exito=False, mensaje="Error de conexión con el servidor")
-    
-    
-    
+            return f"<h1>Error: {response.json().get('mensaje')}</h1>", 400
+    except Exception:
+        return "<h1>Error de conexión.</h1>", 500

@@ -1,13 +1,19 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from .routes import menu_bp, resenas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
-from . import db
 
-from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
-from . import mail
+import db
+from extensions import mail
 
+from routes.menu import menu_bp
+from routes.resena import resenas_bp
+from routes.auth import auth_bp
+from routes.reservas import reservas_bp
+from routes.servicios import servicios_bp
+from routes.admin_menu import admin_menu_bp
+from routes.dashboard import dashboard_bp
 
+from config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
 
 def create_app():
     app = Flask(__name__)
