@@ -7,6 +7,8 @@ from backend.app.services.admin_menu_service import (obtener_menu_admin_service,
 from backend.app.db import query_db, execute_db
 from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
 from backend.app.validators.servicios_validator import (validar_servicio)
+import requests
+BACKEND_URL = "http://localhost:5000"
 import os
 from werkzeug.utils import secure_filename
 import requests
@@ -169,27 +171,6 @@ def crear_plato_proceso():
         flash('Ocurrió un error al procesar el plato.', 'danger')
         return redirect(url_for('admin.ver_menu'))
 
-@admin_bp.route('/admin/dashboard/reservas')
-def reservas():
-    if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
-        
-    reservas_lista = [
-        {
-            "id": 101, 
-            "email": "juan@email.com", 
-            "fecha": "2026-05-28", 
-            "hora": "21:00", 
-            "cantidad_personas": 4, 
-            "estado": "Confirmada",
-            "token_cancelacion": "xyz789token",
-            "qr_code": "qr_reserva_101.png",
-            "fecha_creacion": "2026-05-25"
-        }
-    ]
-    return render_template('gestion/reservas.html', reservas=reservas_lista)
-
-
 @admin_bp.route('/admin/dashboard/servicios')
 def ver_servicios():
     if not session.get('admin_logeado'): 
@@ -279,3 +260,52 @@ def eliminar_servicio(id_servicio):
 
     except RuntimeError as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@admin_bp.route('/admin/dashboard/reservas')
+def reservas():
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
+        
+    try:
+        r = requests.get(f"{BACKEND_URL}/api/reservas/")
+        reservas_lista = r.json()
+    except Exception as e:
+        print(f"Error al obtener reservas: {e}")
+        reservas_lista = []
+    
+    return render_template('gestion/reservas.html', reservas=reservas_lista)
+
+
+@admin_bp.route('/admin/dashboard/reservas/<int:id_reserva>/cancelar', methods=['POST'])
+def cancelar_reserva(id_reserva):
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
+    try:
+        r = requests.patch(f"{BACKEND_URL}/api/reservas/{id_reserva}/cancelar")
+        flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
+    except Exception as e:
+        flash("Error de conexión con el servidor", "danger")
+    
+    return redirect(url_for('admin.reservas'))
+
+@admin_bp.route('/admin/dashboard/validar-qr', methods=['GET'])
+def scanear_qr():
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
+    
+    id_reserva = request.args.get('id_reserva')
+    qr_code = request.args.get('qr_code')
+
+    try:
+        r = requests.post(f"{BACKEND_URL}/api/reservas/validar-qr", json={
+            "id_reserva": id_reserva,
+            "qr_code": qr_code
+        })
+        mensaje = r.json().get("mensaje", "")
+        exito = r.status_code == 200
+    except Exception as e:
+        mensaje = "Error de conexión con el servidor"
+        exito = False
+
+    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje)

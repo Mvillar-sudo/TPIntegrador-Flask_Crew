@@ -7,18 +7,26 @@ import os
 def enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva):
 
     # 1. armar el link de cancelación
-    link_cancelacion = f"http://localhost:5000/api/reservas/cancelar/{token_cancelacion}"
+    link_cancelacion = f"http://localhost:3000/reservas/cancelar/{token_cancelacion}"
 
-    # 2. armar el cuerpo del email
+    # 2. armar el cuerpo del email (texto plano)
     cuerpo = f"""
-    Hola {nombre}, tu reserva fue confirmada.
-    
+    Hola {nombre}, gracias por reservar en Flask Burger.
+
+    Tu reserva ha sido confirmada con los siguientes datos:
     Fecha: {fecha}
     Hora: {hora}
     Personas: {cantidad_personas}
-    
-    Para cancelar tu reserva hacé click acá:
+
+    Si querés cancelar o modificar tu reserva, hacé clic en el siguiente enlace:
     {link_cancelacion}
+
+    Recordá que, para modificar tu reserva, primero tenés que cancelarla y luego crear una nueva con los datos correctos.
+    Mostrá el QR adjunto al llegar al local para que podamos validar tu reserva.
+
+    ¡Te esperamos!
+    Saludos,
+    El equipo de Flask Burger
     """
 
     # 3. crear el mensaje
