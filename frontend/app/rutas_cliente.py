@@ -1,13 +1,8 @@
 import requests
-from flask import Blueprint, render_template, request, redirect, url_for
-from backend.app.routes.resena import resenas_bp
-from backend.app.services.admin_menu_service import obtener_menu_admin_service
-from backend.app.services.servicios_service import (obtener_servicios)
-from backend.app.services.resenas_service import obtener_resenas
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 BACKEND_URL = "http://localhost:5000"
 
 cliente_bp = Blueprint('cliente', __name__)
-
 
 
 @cliente_bp.route('/', methods=['GET'])
