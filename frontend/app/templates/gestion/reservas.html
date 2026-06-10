@@ -1,11 +1,13 @@
 {% extends 'gestion/base_admin.html' %}
 {% block title %}Panel - Control de Reservas{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
 
 {% block content %}
 <div class="admin-page-wrapper">
     <div class="gtco-container">
-        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn-volver">← Volver al Dashboard</a>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -16,20 +18,18 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        
-        <div class="admin-table-container">
-            <h2 style="font-weight: 300; margin-bottom: 20px;">Control de Reservas</h2>
-            <table class="table-admin">
+
+        <div class="reservas-table-wrap">
+            <h2>Control de Reservas</h2>
+            <table class="table-reservas">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Email Cliente</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
                         <th>Fecha / Hora</th>
                         <th>Personas</th>
                         <th>Estado</th>
-                        <th>Token Cancelación</th>
-                        <th>Código QR</th>
-                        <th>Fecha Registro</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -37,7 +37,7 @@
                     {% for reserva in reservas %}
                     <tr>
                         <td>
-                            <a href="#" class="btn-detalle" 
+                            <a href="#" class="btn-detalle"
                                data-id="{{ reserva.id_reserva }}"
                                data-nombre="{{ reserva.nombre }}"
                                data-email="{{ reserva.email }}"
@@ -46,29 +46,30 @@
                                data-hora="{{ reserva.hora }}"
                                data-personas="{{ reserva.cantidad_personas }}"
                                data-estado="{{ reserva.estado }}"
+                               data-token="{{ reserva.token_cancelacion }}"
+                               data-qr="{{ reserva.qr_code }}"
+                               data-creacion="{{ reserva.fecha_creacion }}"
                                data-toggle="modal" data-target="#modalDetalle">
                                 #{{ reserva.id_reserva }}
                             </a>
                         </td>
-                        <td><strong>{{ reserva.email }}</strong></td>
+                        <td>{{ reserva.nombre }}</td>
+                        <td>{{ reserva.email }}</td>
                         <td>{{ reserva.fecha }} a las {{ reserva.hora }} hs</td>
                         <td>{{ reserva.cantidad_personas }}</td>
                         <td>
-                            <span class="badge-status {% if reserva.estado == 'pendiente' %}badge-active{% else %}badge-inactive{% endif %}">
+                            <span class="badge-estado badge-{{ reserva.estado }}">
                                 {{ reserva.estado }}
                             </span>
                         </td>
-                        <td><code>{{ reserva.token_cancelacion }}</code></td>
-                        <td><small><i class="ti-image"></i> {{ reserva.qr_code }}</small></td>
-                        <td>{{ reserva.fecha_creacion }}</td>
                         <td>
-                            {% if reserva.estado != 'cancelada' %}
+                            {% if reserva.estado != 'cancelada' and reserva.estado != 'validada' %}
                             <form action="{{ url_for('admin.cancelar_reserva', id_reserva=reserva.id_reserva) }}" method="POST"
                                   onsubmit="return confirm('¿Cancelar esta reserva?')">
                                 <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
                             </form>
                             {% else %}
-                                <span class="badge-status badge-inactive">Cancelada</span>
+                                <span style="color: #aaa; font-size: 13px;">—</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -96,6 +97,9 @@
                     <tr><th>Hora</th><td id="modal-hora"></td></tr>
                     <tr><th>Personas</th><td id="modal-personas"></td></tr>
                     <tr><th>Estado</th><td id="modal-estado"></td></tr>
+                    <tr><th>Token Cancelación</th><td id="modal-token" style="word-break: break-all; font-size: 12px;"></td></tr>
+                    <tr><th>Código QR</th><td id="modal-qr" style="font-size: 12px;"></td></tr>
+                    <tr><th>Fecha Registro</th><td id="modal-creacion"></td></tr>
                 </table>
             </div>
             <div class="modal-footer">
@@ -116,6 +120,9 @@
         $('#modal-hora').text($(this).data('hora'));
         $('#modal-personas').text($(this).data('personas'));
         $('#modal-estado').text($(this).data('estado'));
+        $('#modal-token').text($(this).data('token'));
+        $('#modal-qr').text($(this).data('qr'));
+        $('#modal-creacion').text($(this).data('creacion'));
     });
 </script>
 {% endblock %}
