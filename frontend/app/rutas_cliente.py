@@ -1,6 +1,21 @@
 from flask import Blueprint, render_template, request, redirect, url_for
+import requests
 
 cliente_bp = Blueprint('cliente', __name__)
+
+BACKEND_RESENAS_URL = 'http://localhost:5000/api/resenas/'
+
+def obtener_resenas_backend():
+    respuesta = requests.get(BACKEND_RESENAS_URL, timeout=10)
+    respuesta.raise_for_status()
+    return respuesta.json()
+
+def render_resenas(exito, error):
+    try:
+        resenas_list = obtener_resenas_backend()
+    except Exception:
+        resenas_list = []
+    return render_template('resenas.html', resenas=resenas_list, exito=exito, error=error)
 
 @cliente_bp.route('/', methods=['GET', 'POST'])
 def landing():
@@ -38,25 +53,29 @@ def menu():
     ]
     return render_template('menu.html', platos=platos_hamburgueseria)
 
+@cliente_bp.route('/resenas', methods=['GET', 'POST'])
+def resenas():
+    if request.method == 'POST':
+        nombre_cliente = request.form.get('nombre_cliente', '').strip()
+        calificacion   = request.form.get('calificacion', '').strip()
+        comentario     = request.form.get('comentario', '').strip()
+        reserva_id     = request.form.get('reserva_id', '').strip()
 
-@cliente_bp.route('/dejar-resena', methods=['GET'])
-def pagina_resenas():
-    try:
-        todas_las_resenas = obtener_resenas()
-        
-        ultimas_resenas = todas_las_resenas[:6] 
-    except Exception:
-        ultimas_resenas = []
+        payload = {
+            "nombre_cliente": nombre_cliente,
+            "calificacion": int(calificacion) if calificacion else None,
+            "comentario": comentario,
+            "reserva_id": int(reserva_id) if reserva_id else None,
+        }
 
-    return render_template('resenas.html', resenas=ultimas_resenas)
+        try:
+            respuesta = requests.post(BACKEND_RESENAS_URL, json=payload, timeout=10)
+            if respuesta.status_code != 201:
+                error = respuesta.json().get('error', 'No se pudo crear la reseña')
+                return render_resenas(exito=False, error=error)
+        except Exception:
+            return render_resenas(exito=False, error='No se pudo conectar con el servidor')
 
-@cliente_bp.route('/menu', methods=['GET'])
-def ver_menu_publico():
-    try:
-        todos_los_platos = obtener_menu_admin_service()
-        
-        platos_activos = [p for p in todos_los_platos if p.get('activo') == True or p.get('activo') == 1]
-    except Exception:
-        platos_activos = []
+        return render_resenas(exito=True, error=None)
 
-    return render_template('menu.html', platos=platos_activos)
+    return render_resenas(exito=False, error=None)
