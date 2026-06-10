@@ -6,7 +6,8 @@ from services import (
     obtener_plato_service,
     actualizar_parcial_plato_service,
     cambiar_estado_plato_service,
-    eliminar_plato_service)
+    eliminar_plato_service,
+    obtener_total_platos_activos_service)
 
 admin_menu_bp = Blueprint("admin_menu", __name__)
 
@@ -34,40 +35,45 @@ def ver_menu_admin():
     return jsonify(platos), 200
 
 #para que el admin pueda ver los detalles de un plato en especifico
-@admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["GET"])
-def ver_plato(id_plato):
-
+@admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["GET", "PATCH", "DELETE"])
+def gestionar_plato(id_plato):
     error = validar_id_plato(id_plato)
     if error:
         return jsonify({"mensaje": error}), 400
 
-    plato = obtener_plato_service(id_plato)
+    if request.method == "GET":
 
+        plato = obtener_plato_service(id_plato)
    
-    if not plato:
-        return jsonify({"mensaje": "Plato no encontrado"}), 404
+        if not plato:
+            return jsonify({"mensaje": "Plato no encontrado"}), 404
 
-    return jsonify(plato), 200
+        return jsonify(plato), 200
 
-#le permite al admin modificar uno o más datos de un plato
-@admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["PATCH"])
-def actualizar_plato(id_plato):
+    if request.method == "PATCH":
+        data = request.json
+        if not data:
+            return jsonify({"mensaje": "No se enviaron datos"}), 400
 
-    data = request.json
+        error = validar_id_plato(id_plato)
+        if error:
+            return jsonify({"mensaje": error}), 400
 
-    if not data:
-        return jsonify({"mensaje": "No se enviaron datos"}), 400
+        actualizado = actualizar_parcial_plato_service(id_plato, data)
 
-    error = validar_id_plato(id_plato)
-    if error:
-        return jsonify({"mensaje": error}), 400
+        if not actualizado:
+            return jsonify({"mensaje": "Plato no encontrado"}), 404
 
-    actualizado = actualizar_parcial_plato_service(id_plato, data)
+        return jsonify({"mensaje": "Plato actualizado"}), 200
 
-    if not actualizado:
-        return jsonify({"mensaje": "Plato no encontrado"}), 404
+    if request.method == "DELETE":
+        eliminado = eliminar_plato_service(id_plato)
 
-    return jsonify({"mensaje": "Plato actualizado"}), 200
+        if not eliminado:
+            return jsonify({"mensaje": "Plato no encontrado"}), 404
+
+        return jsonify({"mensaje": "Plato eliminado correctamente"}), 200
+
 
 #para que el admin pueda desactivar o activar la visibilización de un plato
 @admin_menu_bp.route("/admin/menu/<int:id_plato>/estado", methods=["PATCH"])
@@ -89,20 +95,7 @@ def cambiar_estado(id_plato):
 
     return jsonify({"mensaje": "Estado actualizado"}), 200
 
-
-#para que el admin pueda eliminar un plato de la base de datos
-@admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["DELETE"])
-def eliminar_plato(id_plato):
-    
-    error = validar_id_plato(id_plato)
-
-    if error:
-        return jsonify({"mensaje": error}), 400
-
-    eliminado = eliminar_plato_service(id_plato)
-
-    if not eliminado:
-        return jsonify({"mensaje": "Plato no encontrado"}), 404
-  
-
-    return jsonify({"mensaje": "Plato eliminado correctamente"}), 200
+@admin_menu_bp.route("/admin/menu/cantidad-platos-activos", methods=["GET"])
+def obtener_cantidad_platos_activos():
+    resultado = obtener_total_platos_activos_service()
+    return jsonify({"cantidad": resultado}), 200

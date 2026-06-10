@@ -1,21 +1,11 @@
-from flask import Blueprint, current_app, render_template, request, jsonify, redirect, url_for, session, flash
-from backend.app.routes.auth import auth_bp
-from backend.app.routes.admin_menu import admin_menu_bp
-from backend.app.routes.servicios import servicios_bp
-from backend.app.services.servicios_service import (obtener_servicios, obtener_servicio_id, crear_servicio_db, actualizar_servicio_db, eliminar_servicio_db)
-from backend.app.services.admin_menu_service import (obtener_menu_admin_service, obtener_plato_service, cambiar_estado_plato_service, actualizar_parcial_plato_service, eliminar_plato_service, crear_plato_service)
-from backend.app.db import query_db, execute_db
-from backend.app.validators.admin_menu_validator import (validar_crear_plato, validar_id_plato)
-from backend.app.validators.servicios_validator import (validar_servicio)
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, session, flash
 import os
 from werkzeug.utils import secure_filename
 import requests
+from utils import guardar_sesion
 
 admin_bp = Blueprint('admin', __name__)
 
-admin_bp.register_blueprint(auth_bp)
-admin_bp.register_blueprint(admin_menu_bp)
-admin_bp.register_blueprint(servicios_bp)
 
 @admin_bp.route('/admin/login', methods=["GET", "POST"])
 def login():
@@ -53,16 +43,16 @@ def logout():
 
 @admin_bp.route('/admin/dashboard')
 def dashboard():
-    if not session.get('admin_logeado'):
-        return redirect(url_for('admin.login'))
     try:
-        total_platos = obtener_total_platos_activos()
-        total_servicios = obtener_total_servicios_activos()
+        resp_platos = requests.get("http://127.0.0.1:5000/admin/menu/cantidad-platos-activos")
+        resp_servicios = requests.get("http://127.0.0.1:5000/api/resenas/admin/cantidad-resenas")
 
+        cant_platos = resp_platos.json().get('cantidad', 0) if resp_platos.status_code == 200 else 0
+        cant_servicios = resp_servicios.json().get('cantidad', 0) if resp_servicios.status_code == 200 else 0
         return render_template(
             "gestion/dashboard.html",
-            total_platos=total_platos,
-            total_servicios=total_servicios
+            total_platos=cant_platos,
+            total_servicios=cant_servicios
         )
     except Exception as e:
         print(f"Error al cargar métricas del dashboard: {e}")
@@ -70,10 +60,14 @@ def dashboard():
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 def ver_menu():
-    if not session.get('admin_logeado'):
-        return redirect(url_for('admin.login'))
     try:
-        platos = obtener_menu_admin_service()
+        response = requests.get("http://127.0.0.1:5000/admin/menu")
+
+        platos = []
+        if response.status_code == 200:
+            platos = response.json()
+        else:
+            print(f"Advertencia: El Backend devolvió código {response.status_code}")
 
         return render_template('gestion/menu.html', platos=platos)
     except Exception as e:
@@ -82,17 +76,18 @@ def ver_menu():
     
 @admin_bp.route("/admin/menu/editar/<int:id_plato>", methods=["GET", "POST"])
 def editar_plato(id_plato):
-    plato = obtener_plato_service(id_plato)
-    if not plato:
-        return "Plato no encontrado", 404
+    response_get = requests.get(f"http://127.0.0.1:5000/admin/menu/{id_plato}")
+    if response_get.status_code != 200:
+        return "El plato no existe o el Backend no responde", 404
 
+    plato_data = response_get.json()[0]
     if request.method == "POST":
         data_actualizada = {
             "nombre_plato": request.form.get("nombre_plato"),
             "descripcion": request.form.get("descripcion"),
             "precio": float(request.form.get("precio", 0)),
-            "estado": int(request.form.get("estado", 1))
-        }
+            "activo": int(request.form.get("activo", 1))  # Usamos 'estado' por consistencia
+            }
 
         file = request.files.get("imagen")
 
@@ -108,174 +103,172 @@ def editar_plato(id_plato):
 
             data_actualizada["imagen"] = filename
         else:
-            data_actualizada["imagen"] = plato.get("imagen")
+            data_actualizada["imagen"] = plato_data.get("imagen")
 
-        exito = actualizar_parcial_plato_service(id_plato, data_actualizada)
-        
-        if exito:
+        response_put = requests.patch(f"http://127.0.0.1:5000/admin/menu/{id_plato}", json=data_actualizada)
+
+        if response_put.status_code == 200:
             return redirect(url_for('admin.ver_menu'))
         else:
-            return "El plato no existe o fue eliminado", 404
-        
-    return render_template('gestion/editar_plato.html', plato=plato)
+            return f"Error al actualizar el plato en el Backend: {response_put.text}", response_put.status_code
+
+    return render_template('gestion/editar_plato.html', plato=plato_data)
 
 @admin_bp.route('/admin/menu/eliminar/<int:id_plato>', methods=['POST'])
 def borrar_plato(id_plato):
-
-    eliminado = eliminar_plato_service(id_plato)
-
-    if not eliminado:
-        return "Plato no eliminado", 404
-
-    return redirect(url_for("admin.ver_menu"))
+    response_post = requests.delete(f"http://127.0.0.1:5000/admin/menu/{id_plato}")
+    if response_post.status_code == 200:
+        return redirect(url_for("admin.ver_menu"))
+    else:
+        return f"No se pudo eliminar el plato: {response_post.text}", response_post.status_code
 
 
-@admin_bp.route("/admin/menu/crear", methods=["GET"])
-def crear_plato_vista():
+@admin_bp.route("/admin/menu/crear", methods=["GET", "POST"])
+def crear_plato():
+    if request.method == "POST":
+        try:
+            data = {
+                "nombre_plato": request.form.get("nombre_plato", "").strip(),
+                "descripcion": request.form.get("descripcion", "").strip(),
+                "imagen": None,
+                "precio": float(request.form.get("precio", 0))
+            }
+
+            file = request.files.get("imagen")
+
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+
+                upload_folder = os.path.join(current_app.root_path, 'static', 'img')
+
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+
+                filepath = os.path.join(upload_folder, filename)
+                file.save(filepath)
+
+                data["imagen"] = filename
+
+            response = requests.post("http://127.0.0.1:5000/admin/menu", json=data)
+            if response.status_code == 201:
+                flash('¡Nuevo plato añadido exitosamente!', 'success')
+                return redirect(url_for('admin.ver_menu'))
+            else:
+                flash(f'Error del Backend al crear: {response.text}', 'danger')
+
+        except Exception as e:
+            print(f"Error al crear el plato: {e}")
+            flash('Ocurrió un error al procesar el plato.', 'danger')
+            return redirect(url_for('admin.ver_menu'))
     return render_template('gestion/crear_plato.html')
-
-@admin_bp.route("/admin/menu/crear_proceso", methods=["POST"])
-def crear_plato_proceso():
-    try:
-        data = {
-            "nombre_plato": request.form.get("nombre_plato", "").strip(),
-            "descripcion": request.form.get("descripcion", "").strip(),
-            "imagen": None,
-            "precio": float(request.form.get("precio", 0))
-        }
-
-        file = request.files.get("imagen")
-
-        if file and file.filename != '':
-            filename = secure_filename(file.filename)
-
-            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
-
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
-
-            filepath = os.path.join(upload_folder, filename)
-            file.save(filepath)
-
-            data["imagen"] = filename
-
-        crear_plato_service(data)
-
-        flash('¡Nuevo plato añadido exitosamente!', 'success')
-        return redirect(url_for('admin.ver_menu'))
-
-    except Exception as e:
-        print(f"Error al crear el plato: {e}")
-        flash('Ocurrió un error al procesar el plato.', 'danger')
-        return redirect(url_for('admin.ver_menu'))
-
-@admin_bp.route('/admin/dashboard/reservas')
-def reservas():
-    if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
-        
-    reservas_lista = [
-        {
-            "id": 101, 
-            "email": "juan@email.com", 
-            "fecha": "2026-05-28", 
-            "hora": "21:00", 
-            "cantidad_personas": 4, 
-            "estado": "Confirmada",
-            "token_cancelacion": "xyz789token",
-            "qr_code": "qr_reserva_101.png",
-            "fecha_creacion": "2026-05-25"
-        }
-    ]
-    return render_template('gestion/reservas.html', reservas=reservas_lista)
-
-
-@admin_bp.route('/admin/dashboard/servicios')
-def ver_servicios():
-    if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
-    try:
-        servicios = obtener_servicios()
-        return render_template('gestion/servicios.html', servicios=servicios)
-    except RuntimeError as e:
-        return "No se encontro el abm", 500 
-    
-@admin_bp.route("/admin/dashboard/servicios/crear", methods=["GET"])
-def crear_servicio_vista():
-    return render_template('gestion/crear_servicio.html')
-
-
-@admin_bp.route('/admin/dashboard/servicios/crear_proceso', methods=['POST'])
-def crear_servicio_proceso():
-    try:
-        data = {"nombre": request.form.get("nombre")}
-
-        crear_servicio_db(data)
-
-        return redirect(url_for('admin.ver_servicios'))
-
-    except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500 
-
-@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET'])
-def editar_servicio_vista(id_servicio):
-    try:
-        servicio = obtener_servicio_id(id_servicio)
-        if not servicio:
-            flash('Servicio no encontrado', 'danger')
-            return redirect(url_for('admin.ver_servicios'))
-
-        return render_template("gestion/editar_servicio.html", servicio=servicio)
-
-    except Exception as e:
-        print(f"Error al renderizar vista de edición de servicio: {e}")
-        return "Error interno del servidor", 500
-
-@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])
-def actualizar_servicio_proceso(id_servicio):
-    try:
-        servicio = obtener_servicio_id(id_servicio)
-        if not servicio:
-            flash('Servicio no encontrado', 'danger')
-            return redirect(url_for('admin.ver_servicios'))
-
-        valor_select = request.form.get("activo")
-
-        estado_booleano = (valor_select == "True")
-
-        data = {
-            "nombre": request.form.get("nombre", "").strip(),
-            "activo": estado_booleano
-        }
-
-
-        error = validar_servicio(data, es_actualizacion=True)
-        if error:
-            flash(f"Error de validación: {error}", "danger")
-            servicio.nombre = data["nombre"]
-            servicio.activo = 1 if estado_booleano else 0
-            return render_template("gestion/editar_servicio.html", servicio=servicio), 400
-
-        actualizar_servicio_db(id_servicio, data)
-
-        flash('¡Servicio actualizado con éxito!', 'success')
-        return redirect(url_for('admin.ver_servicios'))
-
-    except Exception as e:
-        print(f"Error crítico en el procesamiento del servicio: {e}")
-        return "Error interno del servidor", 500
-    
-@admin_bp.route('/<int:id_servicio>', methods=['POST'])
-def eliminar_servicio(id_servicio):
-    try:
-        filas = eliminar_servicio_db(id_servicio)
-
-        if filas == 0:
-            return jsonify({
-                "error": "Servicio no encontrado"
-            }), 404
-
-        return redirect(url_for('admin.ver_servicios'))
-
-    except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500
+#
+# @admin_bp.route('/admin/dashboard/reservas')
+# def reservas():
+#     if not session.get('admin_logeado'):
+#         return redirect(url_for('admin.login'))
+#
+#     reservas_lista = [
+#         {
+#             "id": 101,
+#             "email": "juan@email.com",
+#             "fecha": "2026-05-28",
+#             "hora": "21:00",
+#             "cantidad_personas": 4,
+#             "estado": "Confirmada",
+#             "token_cancelacion": "xyz789token",
+#             "qr_code": "qr_reserva_101.png",
+#             "fecha_creacion": "2026-05-25"
+#         }
+#     ]
+#     return render_template('gestion/reservas.html', reservas=reservas_lista)
+#
+#
+# @admin_bp.route('/admin/dashboard/servicios')
+# def ver_servicios():
+#     if not session.get('admin_logeado'):
+#         return redirect(url_for('admin.login'))
+#     try:
+#         servicios = obtener_servicios()
+#         return render_template('gestion/servicios.html', servicios=servicios)
+#     except RuntimeError as e:
+#         return "No se encontro el abm", 500
+#
+# @admin_bp.route("/admin/dashboard/servicios/crear", methods=["GET"])
+# def crear_servicio_vista():
+#     return render_template('gestion/crear_servicio.html')
+#
+#
+# @admin_bp.route('/admin/dashboard/servicios/crear_proceso', methods=['POST'])
+# def crear_servicio_proceso():
+#     try:
+#         data = {"nombre": request.form.get("nombre")}
+#
+#         crear_servicio_db(data)
+#
+#         return redirect(url_for('admin.ver_servicios'))
+#
+#     except RuntimeError as e:
+#         return jsonify({"error": str(e)}), 500
+#
+# @admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET'])
+# def editar_servicio_vista(id_servicio):
+#     try:
+#         servicio = obtener_servicio_id(id_servicio)
+#         if not servicio:
+#             flash('Servicio no encontrado', 'danger')
+#             return redirect(url_for('admin.ver_servicios'))
+#
+#         return render_template("gestion/editar_servicio.html", servicio=servicio)
+#
+#     except Exception as e:
+#         print(f"Error al renderizar vista de edición de servicio: {e}")
+#         return "Error interno del servidor", 500
+#
+# @admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])
+# def actualizar_servicio_proceso(id_servicio):
+#     try:
+#         servicio = obtener_servicio_id(id_servicio)
+#         if not servicio:
+#             flash('Servicio no encontrado', 'danger')
+#             return redirect(url_for('admin.ver_servicios'))
+#
+#         valor_select = request.form.get("activo")
+#
+#         estado_booleano = (valor_select == "True")
+#
+#         data = {
+#             "nombre": request.form.get("nombre", "").strip(),
+#             "activo": estado_booleano
+#         }
+#
+#
+#         error = validar_servicio(data, es_actualizacion=True)
+#         if error:
+#             flash(f"Error de validación: {error}", "danger")
+#             servicio.nombre = data["nombre"]
+#             servicio.activo = 1 if estado_booleano else 0
+#             return render_template("gestion/editar_servicio.html", servicio=servicio), 400
+#
+#         actualizar_servicio_db(id_servicio, data)
+#
+#         flash('¡Servicio actualizado con éxito!', 'success')
+#         return redirect(url_for('admin.ver_servicios'))
+#
+#     except Exception as e:
+#         print(f"Error crítico en el procesamiento del servicio: {e}")
+#         return "Error interno del servidor", 500
+#
+# @admin_bp.route('/<int:id_servicio>', methods=['POST'])
+# def eliminar_servicio(id_servicio):
+#     try:
+#         filas = eliminar_servicio_db(id_servicio)
+#
+#         if filas == 0:
+#             return jsonify({
+#                 "error": "Servicio no encontrado"
+#             }), 404
+#
+#         return redirect(url_for('admin.ver_servicios'))
+#
+#     except RuntimeError as e:
+#         return jsonify({"error": str(e)}), 500
