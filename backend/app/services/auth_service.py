@@ -1,4 +1,4 @@
-from db import execute_db, query_db
+from ..db import execute_db, query_db
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime

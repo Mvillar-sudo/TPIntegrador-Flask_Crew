@@ -9,7 +9,7 @@
 {% block content %}
 <div class="admin-page-wrapper mt-4">
     <div class="gtco-container cerrar-dashboard">
-        <a href="#" class="btn-cerrar-dashboard">Cerrar Sesión</a>
+        <a href="{{ url_for('admin.cerrar_sesion') }}" class="btn-cerrar-dashboard">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -39,7 +39,7 @@
                     <div class="card-icon"></div>
                     <h3>Reservas</h3>
                     <p>Monitorea las mesas reservadas, aprueba solicitudes y revisa los horarios pico del comedor.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Ver Calendario</a>
+                    <a href="{{ url_for('admin.reservas') }}" class="btn btn-primary btn-sm">Ver Calendario</a>
                 </div>
             </div>
 
@@ -48,7 +48,7 @@
                     <div class="card-icon"></div>
                     <h3>Servicios Extras</h3>
                     <p>Administra opciones adicionales como eventos privados, catering o zonas de delivery especial.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Configurar</a>
+                    <a href="{{ url_for('admin.ver_servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
                 </div>
             </div>
 
@@ -57,7 +57,7 @@
                     <div class="card-icon"></div>
                     <h3>Scanear QR</h3>
                     <p>Verificar QR de reserva.</p>
-                    <a href="#" class="btn btn-primary btn-sm">Scanear</a>
+                    <a href="{{ url_for('admin.scanear_qr') }}" class="btn btn-primary btn-sm">Scanear</a>
                 </div>
             </div>
 
