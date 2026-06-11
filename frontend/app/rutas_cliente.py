@@ -1,69 +1,84 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 import requests
-from flask import Blueprint, render_template, request, redirect, url_for
-from backend.app.routes.resena import resenas_bp
-from backend.app.services.admin_menu_service import obtener_menu_admin_service
-from backend.app.services.servicios_service import (obtener_servicios)
-from backend.app.services.resenas_service import obtener_resenas
+
+cliente_bp = Blueprint('cliente', __name__)
+
+#def obtener_resenas_backend():
+
+#respuesta = requests.get(BACKEND_RESENAS_URL, timeout=10)
+ #  respuesta.raise_for_status()
+  #  return respuesta.json()
+
+#def render_resenas(exito, error):
+ #   try:
+  #      resenas_list = obtener_resenas_backend()
+   # except Exception:
+    #    resenas_list = []
+    #return render_template('resenas.html', resenas=resenas_list, exito=exito, error=error)
+
 BACKEND_URL = "http://localhost:5000"
 
 cliente_bp = Blueprint('cliente', __name__)
 
 
-
-@cliente_bp.route('/', methods=['GET', 'POST'])
+@cliente_bp.route('/', methods=['GET'])
 def landing():
-    if request.method == 'POST':
-        if 'email' in request.form and 'persons' not in request.form:
-            # Formulario de suscripción
-            email = request.form.get('email')
-            print(f"[Newsletter] Nuevo suscriptor: {email}")
-        else:
-            # Formulario de reserva rápida del Header
-            personas = request.form.get('persons')
-            fecha = request.form.get('date')
-            hora = request.form.get('time')
-            print(f"[Reserva Rápida] {personas} personas para el {fecha} a las {hora}")
-            
-        return redirect(url_for('cliente.landing'))
-        
     try:
-        servicios = obtener_servicios()
-        return render_template('landing.html', servicios=servicios)
-    except RuntimeError as e:
-        return "No se encontro el abm", 500 
-
-@cliente_bp.route('/menu')
-def menu():
-    try:
-        platos = obtener_menu_admin_service()
-
-        return render_template('menu.html', platos=platos)
-    except Exception as e:
-        print(f"Error crítico en /admin/menu: {e}")
-        return f"Error interno del servidor: {e}", 500
-    
-
-@cliente_bp.route('/dejar-resena', methods=['GET'])
-def pagina_resenas():
-    try:
-        todas_las_resenas = obtener_resenas()
-        
-        ultimas_resenas = todas_las_resenas[:6] 
+        response = requests.get(f"{BACKEND_URL}/servicios/")
+        servicios = response.json() if response.status_code == 200 else []
     except Exception:
-        ultimas_resenas = []
+        servicios = []
+    return render_template('landing.html', servicios=servicios)
 
-    return render_template('resenas.html', resenas=ultimas_resenas)
 
 @cliente_bp.route('/menu', methods=['GET'])
-def ver_menu_publico():
+def menu():
     try:
-        todos_los_platos = obtener_menu_admin_service()
-        
-        platos_activos = [p for p in todos_los_platos if p.get('activo') == True or p.get('activo') == 1]
+        response = requests.get(f"{BACKEND_URL}/menu")
+        platos_activos = response.json() if response.status_code == 200 else []
     except Exception:
         platos_activos = []
-
     return render_template('menu.html', platos=platos_activos)
+
+@cliente_bp.route('/resenas', methods=['GET', 'POST'])
+def resenas():
+    if request.method == 'POST':
+        nombre_cliente = request.form.get('nombre_cliente', '').strip()
+        calificacion   = request.form.get('calificacion', '').strip()
+        comentario     = request.form.get('comentario', '').strip()
+        reserva_id     = request.form.get('reserva_id', '').strip()
+
+        payload = {
+            "nombre_cliente": nombre_cliente,
+            "calificacion": int(calificacion) if calificacion else None,
+            "comentario": comentario,
+            "reserva_id": int(reserva_id) if reserva_id else None,
+        }
+
+        try:
+            respuesta = requests.post(BACKEND_RESENAS_URL, json=payload, timeout=10)
+            if respuesta.status_code != 201:
+                error = respuesta.json().get('error', 'No se pudo crear la reseña')
+                return render_resenas(exito=False, error=error)
+        except Exception:
+            return render_resenas(exito=False, error='No se pudo conectar con el servidor')
+
+        return render_resenas(exito=True, error=None)
+
+    return render_resenas(exito=False, error=None)
+
+@cliente_bp.route('/dejar-resena', methods=['GET'])
+def dejar_resena():
+    try:
+        response = requests.get(f"{BACKEND_URL}/resenas/")
+        if response.status_code == 200:
+            todas_las_resenas = response.json()
+            ultimas_resenas = todas_las_resenas[:6] 
+        else:
+            ultimas_resenas = []
+    except Exception:
+        ultimas_resenas = []
+    return render_template('resenas.html', resenas=ultimas_resenas)
 
 
 @cliente_bp.route('/reservas/nueva', methods=['POST'])
@@ -101,6 +116,3 @@ def cancelar_reserva(token):
     except Exception as e:
         print(f"Error al cancelar reserva: {e}")
         return render_template('cancelacion.html', exito=False, mensaje="Error de conexión con el servidor")
-    
-    
-    

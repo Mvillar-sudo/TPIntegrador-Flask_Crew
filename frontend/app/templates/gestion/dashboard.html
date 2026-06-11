@@ -9,7 +9,7 @@
 {% block content %}
 <div class="admin-page-wrapper mt-4">
     <div class="gtco-container cerrar-dashboard">
-        <a href="{{ url_for('admin.cerrar_sesion') }}" class="btn-cerrar-dashboard">Cerrar Sesión</a>
+        <a href="{{ url_for('admin.logout') }}" class="btn-cerrar-dashboard">Cerrar Sesión</a>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
                 <span class="metric-label">Platos activos</span>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-6 text-center">
-                <span class="metric-number">17</span>
+                <span class="metric-number">{{ total_reservas }}</span>
                 <span class="metric-label">Reservas Pendientes</span>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12 text-center">

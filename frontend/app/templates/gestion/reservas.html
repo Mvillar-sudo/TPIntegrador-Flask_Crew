@@ -1,14 +1,10 @@
-{% extends 'gestion/base_admin.html' %}
+{% extends 'gestion/base_dashboard.html' %}
 {% block title %}Panel - Control de Reservas{% endblock %}
 {% block extra_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="admin-page-wrapper">
-    <div class="gtco-container">
-        <a href="{{ url_for('admin.dashboard') }}" class="btn-volver">← Volver al Dashboard</a>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
