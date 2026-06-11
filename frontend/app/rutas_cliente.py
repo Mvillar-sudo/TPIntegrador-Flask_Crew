@@ -24,11 +24,14 @@ cliente_bp = Blueprint('cliente', __name__)
 @cliente_bp.route('/', methods=['GET'])
 def landing():
     try:
-        response = requests.get(f"{BACKEND_URL}/servicios/")
+        response = requests.get(f"{BACKEND_URL}/api/servicios/", timeout=3)
         servicios = response.json() if response.status_code == 200 else []
-    except Exception:
+    except Exception as e:
+        print(f"⚠️ Error al conectar con la API de servicios: {e}")
         servicios = []
+        
     return render_template('landing.html', servicios=servicios)
+
 
 
 @cliente_bp.route('/menu', methods=['GET'])

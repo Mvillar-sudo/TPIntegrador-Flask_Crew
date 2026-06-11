@@ -3,7 +3,7 @@ from flask import g
 from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT
 
 def get_db():
-    if 'db' not in g:
+    if 'db' not in g or not g.db.is_connected():
         g.db = mysql.connector.connect(
             host=DB_HOST,
             user=DB_USER,
