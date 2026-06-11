@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from validators import validar_id_plato, validar_crear_plato
 from services import (
     crear_plato_service,
@@ -9,11 +9,6 @@ from services import (
     eliminar_plato_service)
 
 admin_menu_bp = Blueprint("admin_menu", __name__)
-
-@admin_menu_bp.before_request
-def verificar_sesion():
-    if "usuario" not in session:
-        return jsonify({"mensaje": "No autorizado. Inicia sesión primero."}), 401
 
 #para que el admin pueda crear un plato
 @admin_menu_bp.route("/admin/menu", methods=["POST"])
@@ -26,7 +21,7 @@ def crear_plato():
     if error:
         return jsonify({"mensaje": error}), 400
 
-    resultado = crear_plato_service(data)
+    crear_plato_service(data)
 
     return jsonify({"mensaje": "Plato creado"}), 201
 
@@ -41,16 +36,21 @@ def ver_menu_admin():
 #para que el admin pueda ver los detalles de un plato en especifico
 @admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["GET"])
 def ver_plato(id_plato):
-
     error = validar_id_plato(id_plato)
     if error:
         return jsonify({"mensaje": error}), 400
 
     plato = obtener_plato_service(id_plato)
-
    
     if not plato:
         return jsonify({"mensaje": "Plato no encontrado"}), 404
+
+    # 🚀 SI EL SERVICIO DEVUELVE UNA LISTA CON EL PLATO ADENTRO, SACAMOS EL PRIMERO
+    if isinstance(plato, list):
+        if len(plato) > 0:
+            plato = plato[0] # Nos quedamos con el diccionario directo
+        else:
+            return jsonify({"mensaje": "Plato no encontrado"}), 404
 
     return jsonify(plato), 200
 

@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
-from services.resena import (
+from services import (
     obtener_resenas,
     obtener_resena_id,
     crear_resena_db,
-   eliminar_resena_db
+    eliminar_resena_db
 )
-from validators.resena import validar_resena
+from validators import validar_resena
 
 resenas_bp = Blueprint('resenas', __name__, url_prefix='/api/resenas')
 

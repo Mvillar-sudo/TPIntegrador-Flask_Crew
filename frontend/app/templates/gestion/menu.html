@@ -1,53 +1,64 @@
-{% extends 'gestion/base_admin.html' %}
-{% block title %}Panel - Gestión de Menú{% endblock %}
-{% block extra_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">{% endblock %}
+{% extends 'gestion/base_dashboard.html' %}
 
-{% block content %}
-<div class="admin-page-wrapper">
-    <div class="gtco-container">
-        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
-        
-        <div class="admin-table-container">
-            <h2 style="font-weight: 300; margin-bottom: 20px;">Platos del Menú</h2>
-            <table class="table-admin">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Precio</th>
-                        <th>Estado</th>
-                        <th>Fecha Creación</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for plato in platos %}
-                    <tr>
-                        <td>{{ plato.id }}</td>
-                        <td><strong>{{ plato.nombre }}</strong></td>
-                        <td><small>{{ plato.descripcion }}</small></td>
-                        <td>${{ plato.precio }}</td>
-                        <td>
-                            {% if plato.activo %}
-                                <span class="badge-status badge-active">Activo</span>
-                            {% else %}
-                                <span class="badge-status badge-danger">Inactivo</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ plato.fecha_creacion }}</td>
-                        <td>
-                            <button class="btn btn-default btn-actions">Editar</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+{% set titulo_pagina = "Gestión del Menú" %}
+{% set subtitulo_pagina = "Administra los platos, precios y disponibilidad en tiempo real." %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block boton_crear %}
+    <a href="{{ url_for('admin.crear_plato_vista') }}" class="btn btn-primary btn-lg shadow-sm">
+        Agregar Nuevo Plato
+    </a>
+{% endblock %}
+
+{% block cabecera_tabla %}
+    <th style="width: 10%">ID</th>
+    <th style="width: 25%">Nombre del Plato</th>
+    <th style="width: 15%">Precio</th>
+    <th style="width: 30%">Descripción</th>
+    <th style="width: 15%">Imagen</th>
+    <th style="width: 10%">Disponibilidad</th>
+    <th style="width: 10%" class="text-center">Acciones</th>
+{% endblock %}
+
+{% block cuerpo_tabla %}
+    {% for plato in platos %}
+    <tr>
+        <td><code>#{{ plato.id_plato }}</code></td>
+        <td><strong class="text-dark">{{ plato.nombre_plato }}</strong></td>
+        <td><span class="text-success fw-bold">${{ "%.2f"|format(plato.precio|float) }}</span></td>
+        <td><small class="text-muted">{{ plato.descripcion if plato.descripcion else 'Sin descripción.' }}</small></td>
+        <td>
+            <div class="contenedor-foto-tabla">
+                {% if plato.imagen %}
+                    <img src="{{ url_for('static', filename='img/' + plato.imagen) }}" alt="{{ plato.nombre_plato }}" class="img-plato-tabla">
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/img_1.jpg') }}" alt="Sin imagen" class="img-plato-tabla img-placeholder">
+                {% endif %}
+            </div>
+        </td>
+        <td>
+            {% if plato.estado == 1 %}
+                <span class="label label-success">Activo</span>
+            {% else %}
+                <span class="label label-danger">Inactivo</span>
+            {% endif %}
+        </td>
+        <td class="text-center">
+            <div class="btn-group-acciones">
+                <a href="{{ url_for('admin.editar_plato_vista', id_plato=plato.id_plato) }}" class="btn-editar">Editar</a>
+                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar">
+                    <button type="submit" class="btn-eliminar">Eliminar</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="text-center text-muted py-4">No hay platos registrados en la carta.</td></tr>
+    {% endfor %}
 {% endblock %} 
-
-{% block extra_scripts %}
-    <script src="{{ url_for('static', filename='js/abm-menu.js') }}"></script>
+{% block extra_scripts %} 
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

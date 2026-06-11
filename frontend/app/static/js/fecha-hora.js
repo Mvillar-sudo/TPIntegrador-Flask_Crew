@@ -26,17 +26,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 ],
                 onChange: function(selectedDates, dateStr) {
                     if (!dateStr) return;
-
-                    fetch(`/api/reservas/horas-ocupadas?fecha=${dateStr}`)
-                        .then(response => response.json())
-                        .then(horasLlenas => {
-                            horasDeshabilitadas = horasLlenas; 
-                            
-                            horaPicker.clear();
-                            horaPicker.set("disabled", false); 
-                            horaPicker.redraw();
-                        })
-                        .catch(err => console.error("Error buscando disponibilidad:", err));
                 }
             });
 
@@ -51,21 +40,4 @@ document.addEventListener("DOMContentLoaded", function() {
                     hora: document.getElementById('reserva-hora').value,
                     cantidad_personas: parseInt(document.getElementById('activities').value)
                 };
-
-                fetch('/api/reservas/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datosReserva)
-                })
-                .then(res => {
-                    if (res.status === 201) {
-                        alert("¡Reserva creada con éxito! Revisa tu correo.");
-                        form.reset();
-                        horaPicker.set("disabled", true);
-                    } else {
-                        return res.json().then(data => { alert(`Error: ${data.mensaje}`); });
-                    }
-                })
-                .catch(err => alert("Ocurrió un error al procesar la reserva."));
-            });
-        });
+            })});

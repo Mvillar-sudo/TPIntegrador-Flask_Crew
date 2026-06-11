@@ -12,6 +12,9 @@ def validar_servicio(data, es_actualizacion=False):
 
         nombre = data['nombre']
 
+        if nombre is None or not isinstance(nombre, str):
+            return "El nombre debe ser un texto válido"
+
         if len(nombre.strip()) < 2:
             return "El nombre debe tener al menos 2 caracteres"
 
