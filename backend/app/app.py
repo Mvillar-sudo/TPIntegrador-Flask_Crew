@@ -1,11 +1,10 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from .routes import (menu_bp,
+from routes import (menu_bp,
                      admin_menu_bp,
                      resenas_bp,
                      auth_bp,
-                     reservas_bp,
                      servicios_bp,
                      dashboard_bp)
 import db
@@ -18,19 +17,19 @@ def create_app():
     CORS(app, origins=["http://localhost:3000"])
     load_dotenv()
 
-    # configuración del mail
-    app.config['MAIL_SERVER'] = MAIL_SERVER
-    app.config['MAIL_PORT'] = MAIL_PORT
-    app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
-    app.config['MAIL_USE_SSL'] = False
-    app.config['MAIL_USERNAME'] = MAIL_USERNAME
-    app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+    # # configuración del mail
+    # app.config['MAIL_SERVER'] = MAIL_SERVER
+    # app.config['MAIL_PORT'] = MAIL_PORT
+    # app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
+    # app.config['MAIL_USE_SSL'] = False
+    # app.config['MAIL_USERNAME'] = MAIL_USERNAME
+    # app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
     db.init_app(app)
-    mail.init_app(app)
-    mail.app = app
+    # mail.init_app(app)
+    # mail.app = app
 
     app.register_blueprint(menu_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
@@ -38,7 +37,7 @@ def create_app():
     app.register_blueprint(dashboard_bp, url_prefix='/api')
 
     app.register_blueprint(resenas_bp)
-    app.register_blueprint(reservas_bp)
+    # app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
 
     @app.route('/')

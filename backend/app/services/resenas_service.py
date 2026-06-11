@@ -26,3 +26,13 @@ def crear_resena_db(data):
 
 def eliminar_resena_db(id_resena):
     return execute_db("DELETE FROM resenas WHERE id = %s", (id_resena,))
+
+def obtener_cantidad_resenas():
+    resultado = query_db("""
+            SELECT COUNT(*) as total 
+            FROM menu 
+            WHERE activo = 1
+           """)
+    if resultado and len(resultado) > 0:
+        return resultado[0]['total']
+    return 0
