@@ -40,27 +40,27 @@ def menu():
         platos_activos = []
     return render_template('menu.html', platos=platos_activos)
 
-@cliente_bp.route('/resenas', methods=['GET', 'POST'])
-def resenas():
-    if request.method == 'POST':
-        nombre_cliente = request.form.get('nombre_cliente', '').strip()
-        calificacion   = request.form.get('calificacion', '').strip()
-        comentario     = request.form.get('comentario', '').strip()
-        reserva_id     = request.form.get('reserva_id', '').strip()
+#@cliente_bp.route('/resenas', methods=['GET', 'POST'])
+#def resenas():
+    #if request.method == 'POST':
+        #nombre_cliente = request.form.get('nombre_cliente', '').strip()
+        #calificacion   = request.form.get('calificacion', '').strip()
+        #comentario     = request.form.get('comentario', '').strip()
+        #reserva_id     = request.form.get('reserva_id', '').strip()
 
-        payload = {
-            "nombre_cliente": nombre_cliente,
-            "calificacion": int(calificacion) if calificacion else None,
-            "comentario": comentario,
-            "reserva_id": int(reserva_id) if reserva_id else None,
-        }
+        #payload = {
+            #"nombre_cliente": nombre_cliente,
+           # "calificacion": int(calificacion) if calificacion else None,
+          #  "comentario": comentario,
+         #   "reserva_id": int(reserva_id) if reserva_id else None,
+        #}
 
-        try:
-            respuesta = requests.post(f"{BACKEND_URL}/resenas/", json=payload, timeout=10)
-            if respuesta.status_code != 201:
-                error = respuesta.json().get('error', 'No se pudo crear la reseña')
+        #try:
+           # respuesta = requests.post(f"{BACKEND_URL}/resenas/", json=payload, timeout=10)
+          #  if respuesta.status_code != 201:
+         #       error = respuesta.json().get('error', 'No se pudo crear la reseña')
                 #return render_resenas(exito=False, error=error)
-        except Exception:
+        #except Exception:
            # return render_resenas(exito=False, error='No se pudo conectar con el servidor')
 
         #return render_resenas(exito=True, error=None)

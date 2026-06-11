@@ -35,7 +35,7 @@ def create_app():
     app.register_blueprint(menu_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_menu_bp, url_prefix='/api')
-    app.register_blueprint(dashboard_bp, url_prefix='/api')
+    app.register_blueprint(dashboard_bp)
     
     app.register_blueprint(resenas_bp)
     app.register_blueprint(reservas_bp)
