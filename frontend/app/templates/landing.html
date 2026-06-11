@@ -14,11 +14,16 @@
                         </div>
                         <div class="col-md-4 col-md-push-1 animate-box" data-animate-effect="fadeInRight">
                             <div class="form-wrap">
+                                {% if error %}
+                                <div class="alert alert-danger" style="margin-bottom: 15px;">
+                                {{ error }}
+                                </div>
+                                {% endif %}
                                 <div class="tab">
                                     <div class="tab-content">
                                         <div class="tab-content-inner active" data-content="signup">
                                             <h3 id='reservar'class="cursive-font">Tabla de reservaciones</h3>
-                                             <form action="{{ url_for('cliente.enviar_reserva') }}" method="POST">
+                                             <form action="{{ url_for('cliente.crear_reserva') }}" method="POST">
                                                 <div class="row form-group">
                                                     <div class="col-md-12">
                                                         <label for="activities">Personas</label>

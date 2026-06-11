@@ -258,31 +258,28 @@ def actualizar_servicio_proceso(id_servicio):
         flash("Error al conectar con la API", "danger")
     return redirect(url_for('admin.ver_servicios'))
 
-@admin_bp.route('/admin/dashboard/reservas')
-@requiere_login()
-def reservas():  
-    try:
-        # 1. Le pegamos al backend (asegurando la barra al final)
-        r = requests.get(f"{BACKEND_URL}/reservas/")
-        
-        if r.status_code == 200:
-            reservas_lista = r.json()
-        else:
-            reservas_lista = []
-            
 
+@admin_bp.route('/admin/dashboard/reservas')
+def reservas():
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
+        
+    try:
+        r = requests.get(f"{BACKEND_URL}/api/reservas/")
+        reservas_lista = r.json()
     except Exception as e:
-        print(f"❌ ERROR CRÍTICO EN FRONTEND AL TRAER RESERVAS: {e}")
+        print(f"Error al obtener reservas: {e}")
         reservas_lista = []
     
-    # Pasamos la lista limpia tal cual viene de la API al HTML
     return render_template('gestion/reservas.html', reservas=reservas_lista)
 
+
 @admin_bp.route('/admin/dashboard/reservas/<int:id_reserva>/cancelar', methods=['POST'])
-@requiere_login()
 def cancelar_reserva(id_reserva):
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
     try:
-        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
+        r = requests.patch(f"{BACKEND_URL}/api/reservas/{id_reserva}/cancelar")
         flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
     except Exception as e:
         flash("Error de conexión con el servidor", "danger")
@@ -290,8 +287,10 @@ def cancelar_reserva(id_reserva):
     return redirect(url_for('admin.reservas'))
 
 @admin_bp.route('/admin/dashboard/validar-qr', methods=['GET'])
-@requiere_login()
 def scanear_qr():
+    if not session.get('admin_logeado'):
+        return redirect(url_for('admin.login'))
+    
     id_reserva = request.args.get('id_reserva')
     qr_code = request.args.get('qr_code')
 

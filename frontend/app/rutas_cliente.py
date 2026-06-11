@@ -66,6 +66,7 @@ def menu():
         #return render_resenas(exito=True, error=None)
 
     #return render_resenas(exito=False, error=None)
+
 @cliente_bp.route('/dejar-resena', methods=['GET'])
 def dejar_resena():
     try:
@@ -81,24 +82,18 @@ def dejar_resena():
 
 
 @cliente_bp.route('/reservas/nueva', methods=['POST'])
-def enviar_reserva():
-    # Convertimos la cantidad de personas a entero de forma segura
-    try:
-        personas = int(request.form.get("persons", 1))
-    except (ValueError, TypeError):
-        personas = 1 # Fallback por si mandan el "5+" o algo raro
-
+def crear_reserva():
     data = {
         "nombre": request.form.get("name"),
         "email": request.form.get("Email"),
         "fecha": request.form.get("fecha"),
         "hora": request.form.get("hora"),
-        "cantidad_personas": personas, # 🚀 Ahora viaja como un número entero real (int)
-        "telefono": ""  
+        "cantidad_personas": request.form.get("persons"),
+        "telefono": ""  # el form no tiene campo telefono
     }
 
     try:
-        r = requests.post(f"{BACKEND_URL}/api/reservas/crear", json=data)
+        r = requests.post(f"{BACKEND_URL}/api/reservas/", json=data)
         if r.status_code == 201:
             return redirect(url_for('cliente.landing'))
         else:
@@ -107,3 +102,17 @@ def enviar_reserva():
     except Exception as e:
         print(f"Error al crear reserva: {e}")
         return render_template('landing.html', error="Error de conexión con el servidor")
+    
+
+@cliente_bp.route('/reservas/cancelar/<string:token>', methods=['GET'])
+def cancelar_reserva(token):
+    try:
+        r = requests.get(f"{BACKEND_URL}/api/reservas/cancelar/{token}")
+        mensaje = r.json().get("mensaje", "")
+        if r.status_code == 200:
+            return render_template('cancelacion.html', exito=True, mensaje=mensaje)
+        else:
+            return render_template('cancelacion.html', exito=False, mensaje=mensaje)
+    except Exception as e:
+        print(f"Error al cancelar reserva: {e}")
+        return render_template('cancelacion.html', exito=False, mensaje="Error de conexión con el servidor")
