@@ -7,7 +7,7 @@ from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensaj
 
 admin_bp = Blueprint('admin', __name__)
 
-BACKEND_URL = "http://127.0.0.1:5000/api"
+BACKEND_URL = "http://localhost:5000/api"
 
 @admin_bp.route('/admin/login', methods=['GET'])
 def login():
@@ -44,26 +44,50 @@ def logout():
     return redirect(url_for('admin.login'))
 
 
+import requests
+from flask import Blueprint, render_template
+
+# ... (resto de tu configuración de admin_bp y BACKEND_URL)
+
 @admin_bp.route('/admin/dashboard')
 @requiere_login()
 def dashboard():
-    try:
-        response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
-        data = response.json() if response.status_code == 200 else {}
-        total_platos = data.get("total_platos", 0)
-        total_servicios = data.get("total_servicios", 0)
-    except Exception:
-        total_platos, total_servicios = 0, 0
+    # 1. Definimos valores por defecto (así evitamos el crash si el backend está caído)
+    total_platos = 0
+    total_reservas = 0
+    total_servicios = 0
 
-    return render_template('gestion/dashboard.html', total_platos=total_platos, total_servicios=total_servicios)
+    try:
+        # 2. 🚀 CORRECCIÓN 404: Se añade '/api' a la ruta si tu BACKEND_URL no lo incluye
+        response = requests.get(f"{BACKEND_URL}/api/dashboard/metricas")
+        
+        if response.status_code == 200:
+            json_response = response.json()
+            
+            # 3. 🚀 CORRECCIÓN DE ESTRUCTURA: Extraemos el nodo 'data' del JSON del backend
+            metricas = json_response.get("data", {})
+            
+            # 4. Asignamos usando los nombres exactos de las llaves del backend
+            total_platos = metricas.get("total_platos_activos", 0)
+            total_reservas = metricas.get("total_reservas_pendientes", 0)
+            total_servicios = metricas.get("total_servicios_activos", 0)
+            
+    except requests.exceptions.RequestException as e:
+        # Captura errores de red (Timeout, Conexión rehusada, etc.) sin romper el frontend
+        print(f"⚠️ Error al conectar con el backend de métricas: {e}")
+
+    # 5. Renderizamos la plantilla (si falló el try, pasará los ceros de forma segura)
+    return render_template(
+        'gestion/dashboard.html', 
+        total_platos=total_platos, 
+        total_reservas=total_reservas, 
+        total_servicios=total_servicios
+    )
 
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 @requiere_login()
 def ver_menu():
-    # Aseguramos usar la IP numérica directa para evitar problemas de IPv6
-    BACKEND_URL = "http://127.0.0.1:5000/api"
-    
     try:
         # Probamos pegarle a la ruta de la API del backend
         response = requests.get(f"{BACKEND_URL}/menu")
@@ -125,10 +149,8 @@ def crear_plato_proceso():
 @admin_bp.route("/admin/menu/editar/<int:id_plato>", methods=["GET"])
 @requiere_login()
 def editar_plato_vista(id_plato):
-    """Muestra el formulario real con los datos corregidos."""
-    CORRECT_BACKEND_URL = "http://127.0.0.1:5000/api"
     
-    response = requests.get(f"{CORRECT_BACKEND_URL}/admin/menu/{id_plato}")
+    response = requests.get(f"{BACKEND_URL}/admin/menu/{id_plato}")
     
     if response.status_code == 200:
         plato = response.json()
@@ -167,7 +189,7 @@ def editar_plato_proceso(id_plato):
             payload["imagen"] = filename
 
         # Conexión por PATCH a tu API del Backend
-        url_backend = f"http://127.0.0.1:5000/api/admin/menu/{id_plato}"
+        url_backend = f"{BACKEND_URL}/admin/menu/{id_plato}"
         
         print(f"--- DATOS QUE ENVIAMOS AL BACKEND: {payload} ---")
         response = requests.patch(url_backend, json=payload)
@@ -196,7 +218,7 @@ def eliminar_plato(id_plato):
     """Le avisa al Backend que tiene que eliminar el plato."""
     try:
         # 🚀 LE MANDAMOS UN DELETE AL BACKEND
-        response = requests.delete(f"http://127.0.0.1:5000/api/admin/menu/{id_plato}")
+        response = requests.delete(f"{BACKEND_URL}/admin/menu/{id_plato}")
         
         if response.status_code == 200:
             flash('Plato eliminado correctamente.', 'success')
@@ -238,10 +260,50 @@ def actualizar_servicio_proceso(id_servicio):
 
 @admin_bp.route('/admin/dashboard/reservas')
 @requiere_login()
-def reservas():
+def reservas():  
     try:
-        response = requests.get(f"{BACKEND_URL}/reservas/")
-        reservas_lista = response.json() if response.status_code == 200 else []
-    except Exception:
+        # 1. Le pegamos al backend (asegurando la barra al final)
+        r = requests.get(f"{BACKEND_URL}/reservas/")
+        
+        if r.status_code == 200:
+            reservas_lista = r.json()
+        else:
+            reservas_lista = []
+            
+
+    except Exception as e:
+        print(f"❌ ERROR CRÍTICO EN FRONTEND AL TRAER RESERVAS: {e}")
         reservas_lista = []
+    
+    # Pasamos la lista limpia tal cual viene de la API al HTML
     return render_template('gestion/reservas.html', reservas=reservas_lista)
+
+@admin_bp.route('/admin/dashboard/reservas/<int:id_reserva>/cancelar', methods=['POST'])
+@requiere_login()
+def cancelar_reserva(id_reserva):
+    try:
+        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
+        flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
+    except Exception as e:
+        flash("Error de conexión con el servidor", "danger")
+    
+    return redirect(url_for('admin.reservas'))
+
+@admin_bp.route('/admin/dashboard/validar-qr', methods=['GET'])
+@requiere_login()
+def scanear_qr():
+    id_reserva = request.args.get('id_reserva')
+    qr_code = request.args.get('qr_code')
+
+    try:
+        r = requests.post(f"{BACKEND_URL}/api/reservas/validar-qr", json={
+            "id_reserva": id_reserva,
+            "qr_code": qr_code
+        })
+        mensaje = r.json().get("mensaje", "")
+        exito = r.status_code == 200
+    except Exception as e:
+        mensaje = "Error de conexión con el servidor"
+        exito = False
+
+    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje)

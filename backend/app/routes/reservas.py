@@ -1,5 +1,5 @@
 import secrets
-
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from db import get_db, query_db, execute_db
 from config import MAX_RESERVAS_POR_FRANJA
@@ -13,7 +13,7 @@ def detalle_de_una_reserva(id_reserva):
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado FROM reservas WHERE id_reserva = %s" , (id_reserva,))
+        cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado, token, qr_code, fecha_creacion FROM reservas WHERE id_reserva = %s" , (id_reserva,))
         resultado = cursor.fetchone()
         print(resultado)  
         print(type(resultado)) 
@@ -26,7 +26,10 @@ def detalle_de_una_reserva(id_reserva):
                 "fecha": str(resultado[4]),
                 "hora": str(resultado[5]),
                 "cantidad_personas": resultado[6],
-                "estado": resultado[7]
+                 "estado": resultado[7],
+                "token": resultado[8],
+                "qr_code": resultado[9],
+                "fecha_creacion": str(resultado[10]) if resultado[10] else ""
             })
         else:
             return jsonify({"mensaje": "Reserva no encontrada"}), 404
@@ -51,7 +54,10 @@ def listar_todas_las_reservas():
     "fecha": str(fila[4]),
     "hora": str(fila[5]),
     "cantidad_personas": fila[6],
-    "estado": fila[7]
+    "estado": fila[7],
+    "token": fila[8],
+    "qr_code": fila[9],
+    "fecha_creacion": str(fila[10]) if fila[10] else ""
 } for fila in resultado])
     except Exception as e:
         return jsonify({"mensaje": "Error al listar las reservas", "error": str(e)}), 500
@@ -59,15 +65,30 @@ def listar_todas_las_reservas():
         cursor.close()
 
 
-@reservas_bp.route('/', methods=['POST'])
+@reservas_bp.route('/crear', methods=['POST'])
 def crear_reserva():
     data = request.json
     email = data.get("email")
     nombre = data.get("nombre")
     telefono = data.get("telefono")
-    fecha = data["fecha"]
-    hora = data["hora"]
+    fecha_recibida = data["fecha"] # Viene como '12/06/2026'
+    hora_original = data["hora"]
     cantidad_personas = data["cantidad_personas"]
+
+    # 🚀 PARSEO Y LIMPIEZA DE FECHA PARA MYSQL
+    try:
+        # Intentamos parsear el formato que está fallando (DD/MM/YYYY)
+        fecha_objeto = datetime.strptime(fecha_recibida, "%d/%m/%Y")
+        fecha = fecha_objeto.strftime("%Y-%m-%d") # Lo transforma a '2026-06-12'
+    except ValueError:
+        # Por si en algún momento vuelve a venir en formato ISO (YYYY-MM-DD)
+        fecha = fecha_recibida
+
+    # 🚀 BLINDAJE DE HORA (El que ya teníamos)
+    if hora_original and len(hora_original) == 5:
+        hora = f"{hora_original}:00"
+    else:
+        hora = hora_original
 
     conn = get_db()
     cursor = conn.cursor()
@@ -83,31 +104,33 @@ def crear_reserva():
         if total_reservas >= MAX_RESERVAS_POR_FRANJA:
             return jsonify({"mensaje": "No hay disponibilidad para esa fecha y hora"}), 400
 
-        token_cancelacion = secrets.token_urlsafe(32)
+        token = secrets.token_urlsafe(32)
 
-        
         cursor.execute("SELECT COUNT(*) FROM reservas WHERE email = %s AND fecha = %s AND hora = %s AND estado != 'cancelada'", (email, fecha, hora))
         resultado = cursor.fetchone()
         if resultado[0] > 0:
             return jsonify({"mensaje": "Ya tenés una reserva para ese día y horario"}), 400
 
-        
+        # Insertar reserva básica
         cursor.execute(
             """INSERT INTO reservas 
-            (nombre, email, telefono, fecha, hora, cantidad_personas, token_cancelacion) 
+            (nombre, email, telefono, fecha, hora, cantidad_personas, token) 
             VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (nombre, email, telefono, fecha, hora, cantidad_personas, token_cancelacion)
+            (nombre, email, telefono, fecha, hora, cantidad_personas, token)
         )
 
         id_reserva = cursor.lastrowid
 
-        ruta_qr = generar_qr(id_reserva, nombre, fecha, hora, cantidad_personas, token_cancelacion)
-        cursor.execute(
-            "UPDATE reservas SET qr_code = %s WHERE id_reserva = %s",
-            (ruta_qr, id_reserva)
-        )
-
-        enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva)
+        # 🚨 Envolvemos QR y Email para que si fallan, sepamos qué pasó
+        try:
+            ruta_qr = generar_qr(id_reserva, nombre, fecha, hora, cantidad_personas, token)
+            cursor.execute(
+                "UPDATE reservas SET qr_code = %s WHERE id_reserva = %s",
+                (ruta_qr, id_reserva)
+            )
+            enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token, id_reserva)
+        except Exception as e_externo:
+            print(f"⚠️ Ojo: Falló el QR o el Email, pero intentaremos guardar igual: {e_externo}")
 
         conn.commit()
         return jsonify({"mensaje": "Reserva creada correctamente"}), 201
@@ -125,7 +148,7 @@ def cancelar_por_token(token):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT id_reserva, estado FROM reservas WHERE token_cancelacion = %s",
+            "SELECT id_reserva, estado FROM reservas WHERE token = %s",
             (token,)
         )
         resultado = cursor.fetchone()

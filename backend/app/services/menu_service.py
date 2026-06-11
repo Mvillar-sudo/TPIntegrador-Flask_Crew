@@ -102,4 +102,15 @@ def eliminar_plato_service(id_plato):
 
     if filas_afectadas == 0:
         return None
-    return True
+    return True 
+
+def obtener_total_platos_activos():
+    resultado = query_db("""
+        SELECT COUNT(*) as total 
+        FROM menu 
+        WHERE estado = 1
+    """, one=True)
+    if resultado and len(resultado) > 0:
+        return resultado[0][0]
+    
+    return 0
