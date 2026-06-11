@@ -56,16 +56,16 @@ def resenas():
         }
 
         try:
-            respuesta = requests.post(BACKEND_RESENAS_URL, json=payload, timeout=10)
+            respuesta = requests.post(f"{BACKEND_URL}/resenas/", json=payload, timeout=10)
             if respuesta.status_code != 201:
                 error = respuesta.json().get('error', 'No se pudo crear la reseña')
-                return render_resenas(exito=False, error=error)
+                #return render_resenas(exito=False, error=error)
         except Exception:
-            return render_resenas(exito=False, error='No se pudo conectar con el servidor')
+           # return render_resenas(exito=False, error='No se pudo conectar con el servidor')
 
-        return render_resenas(exito=True, error=None)
+        #return render_resenas(exito=True, error=None)
 
-    return render_resenas(exito=False, error=None)
+    #return render_resenas(exito=False, error=None)
 @cliente_bp.route('/dejar-resena', methods=['GET'])
 def dejar_resena():
     try:
