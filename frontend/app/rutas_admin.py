@@ -1,6 +1,7 @@
 import requests
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+import datetime
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
 
 from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
@@ -47,7 +48,6 @@ def logout():
 import requests
 from flask import Blueprint, render_template
 
-# ... (resto de tu configuración de admin_bp y BACKEND_URL)
 
 @admin_bp.route('/admin/dashboard')
 @requiere_login()
@@ -70,17 +70,58 @@ def dashboard():
         total_platos=total_platos, 
         total_reservas=total_reservas, 
         total_servicios=total_servicios
-    )
+    ) 
+
+@admin_bp.route('/admin/api/metricas-en-vivo')
+@requiere_login() 
+def metricas_en_vivo():
+    try:
+        response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
+        if response.status_code == 200:
+            metricas = response.json().get("data", {})
+            
+            p = metricas.get("total_platos_activos", 0)
+            r = metricas.get("total_reservas_pendientes", 0)
+            s = metricas.get("total_servicios_activos", 0)
+            
+            hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
+
+            historial = session.get('grafico_historial', {"platos": [], "reservas": [], "servicios": [], "tiempos": []})
+            
+            historial["platos"].append(p)
+            historial["reservas"].append(r)
+            historial["servicios"].append(s)
+            historial["tiempos"].append(hora_actual)
+
+            # Mantener solo los últimos 12 registros
+            if len(historial["platos"]) > 12:
+                historial["platos"].pop(0)
+                historial["reservas"].pop(0)
+                historial["servicios"].pop(0)
+                historial["tiempos"].pop(0)
+
+            session['grafico_historial'] = historial 
+            session.modified = True 
+            
+            return jsonify({
+                "actual": {"platos": p, "reservas": r, "servicios": s},
+                "historial": historial
+            })
+            
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Error de red en vivo: {e}")
+    
+    return jsonify({"error": "No se pudieron obtener datos"}), 500
 
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 @requiere_login()
 def ver_menu():
     try:
-        # Probamos pegarle a la ruta de la API del backend
+        
         response = requests.get(f"{BACKEND_URL}/menu")
         
-        # SI DA 404, probamos con la ruta alternativa por si acaso tu backend usa /admin/menu
+        
         if response.status_code == 404:
             response = requests.get(f"{BACKEND_URL}/admin/menu")
 
@@ -142,7 +183,6 @@ def editar_plato_vista(id_plato):
     
     if response.status_code == 200:
         plato = response.json()
-        # 🚀 Volvemos a activar la plantilla real:
         return render_template('gestion/editar_plato.html', plato=plato)
     
     flash("No se pudo obtener el plato.", "danger")
@@ -156,7 +196,6 @@ def editar_plato_proceso(id_plato):
         filename = None
         file = request.files.get("imagen")
         
-        # Guardamos la imagen localmente si se subió una nueva
         if file and file.filename != '':
             filename = secure_filename(file.filename)
             upload_folder = os.path.join(current_app.root_path, 'static', 'img')
@@ -164,19 +203,18 @@ def editar_plato_proceso(id_plato):
                 os.makedirs(upload_folder)
             file.save(os.path.join(upload_folder, filename))
 
-        # 🚀 ASEGURAMOS LOS TIPOS DE DATOS EXACTOS QUE TU BACKEND ESPERA
         payload = {
             "nombre_plato": str(request.form.get("nombre_plato", "")).strip(),
             "descripcion": str(request.form.get("descripcion", "")).strip(),
             "precio": float(request.form.get("precio", 0.0)),
-            "estado": int(request.form.get("estado", 1)) # <-- Obligatorio que sea Entero (0 o 1)
+            "estado": int(request.form.get("estado", 1)) 
         }
 
-        # Si el usuario subió una foto nueva, la agregamos al paquete
+       
         if filename:
             payload["imagen"] = filename
 
-        # Conexión por PATCH a tu API del Backend
+       
         url_backend = f"{BACKEND_URL}/admin/menu/{id_plato}"
         
         print(f"--- DATOS QUE ENVIAMOS AL BACKEND: {payload} ---")
@@ -205,7 +243,7 @@ def editar_plato_proceso(id_plato):
 def eliminar_plato(id_plato):
     """Le avisa al Backend que tiene que eliminar el plato."""
     try:
-        # 🚀 LE MANDAMOS UN DELETE AL BACKEND
+       
         response = requests.delete(f"{BACKEND_URL}/admin/menu/{id_plato}")
         
         if response.status_code == 200:
@@ -232,19 +270,16 @@ def ver_servicios():
 @admin_bp.route('/admin/servicios/nuevo', methods=['GET', 'POST'])
 def crear_servicio_vista():
     if request.method == 'POST':
-        # 1. Recolectamos los datos que envió el usuario desde el formulario HTML
         data_formulario = {
             "nombre": request.form.get("nombre")
         }
         
         try:
-            # 2. Se los enviamos mediante POST a tu API de servicios.py (Backend)
-            # BACKEND_URL ya incluye '/api', y tu blueprint suma '/servicios/'
             response = requests.post(f"{BACKEND_URL}/servicios/", json=data_formulario, timeout=3)
             
             if response.status_code == 201:
                 flash("¡Servicio creado con éxito!", "success")
-                return redirect(url_for('admin.ver_servicios')) # O la ruta de tu tabla de servicios
+                return redirect(url_for('admin.ver_servicios'))  
             else:
                 error_api = response.json().get("error", "Error desconocido")
                 flash(f"No se pudo crear: {error_api}", "danger")
@@ -253,14 +288,12 @@ def crear_servicio_vista():
             flash("Error de conexión con el servidor de datos.", "danger")
             print(f"❌ Error de red: {e}")
 
-    # Si es GET, simplemente mostramos la plantilla con el formulario vacío
     return render_template('gestion/crear_servicio.html')
 
 
 @admin_bp.route('/admin/servicios/eliminar/<int:id_servicio>', methods=['POST'])
 def eliminar_servicio_vista(id_servicio):
     try:
-        # Tu frontend le pega a la API de servicios.py que me mostraste
         response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
         if response.status_code == 200:
             flash("Servicio eliminado correctamente.", "success")
@@ -272,18 +305,15 @@ def eliminar_servicio_vista(id_servicio):
     return redirect(url_for('admin.ver_servicios'))
 
 @admin_bp.route('/admin/servicios/editar/<int:id_servicio>', methods=['GET', 'POST'])
-@requiere_login() # Si usas tu decorador de login/sesión
+@requiere_login() 
 def editar_servicio_vista(id_servicio):
     if request.method == 'POST':
-        # Recolectamos los datos modificados del formulario
-        # Evaluamos 'activo' basado en si el checkbox fue marcado
         data_formulario = {
             "nombre": request.form.get("nombre"),
             "activo": True if request.form.get("activo") else False
         }
         
         try:
-            # Le pegamos al endpoint PATCH de tu API Backend
             response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=data_formulario, timeout=3)
             
             if response.status_code == 200:
@@ -295,13 +325,10 @@ def editar_servicio_vista(id_servicio):
         except requests.exceptions.RequestException:
             flash("Error de conexión con el servidor de datos.", "danger")
 
-    # --- COMPORTAMIENTO GET (Cargar datos actuales del servicio) ---
     try:
-        # Traemos los datos actuales desde la API para precargar el formulario
         response = requests.get(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
         if response.status_code == 200:
             servicio = response.json()
-            # Renderizamos una nueva plantilla para editar
             return render_template('gestion/editar_servicio.html', servicio=servicio)
         else:
             flash("No se pudo encontrar el servicio solicitado.", "danger")
@@ -371,4 +398,21 @@ def scanear_qr():
         mensaje = "Error de conexión con el servidor"
         exito = False
 
-    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje)
+    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje) 
+
+#backup de def reservas 
+@admin_bp.route('/admin/dashboard/reservas_backup')
+@requiere_login()
+def reservas_backup():
+    reservas_lista = []
+    try:
+        
+        response = requests.get(f"{BACKEND_URL}/dashboard/reservas")
+        if response.status_code == 200:
+            data_backend = response.json()
+            reservas_lista = data_backend.get("data", []) 
+            
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Error al traer reservas: {e}")
+
+    return render_template('gestion/reservas.html', reservas=reservas_lista)

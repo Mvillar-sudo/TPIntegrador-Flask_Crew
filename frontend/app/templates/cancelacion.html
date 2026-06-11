@@ -1,26 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Cancelación de Reserva{% endblock %}
 
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
 {% block content %}
 <div id="gtco-features">
     <div class="gtco-container">
         <div class="row">
             <div class="col-md-6 col-md-offset-3 text-center gtco-heading animate-box">
                 {% if exito %}
-                    <span class="icon" style="color: #28a745; font-size: 60px;">
+                    <span class="icon icon-exito">
                         <i class="ti-check-box"></i>
                     </span>
-                    <h2 class="cursive-font" style="margin-top: 20px;">Reserva Cancelada</h2>
+                    <h2 class="cursive-font titulo-cancelacion">Reserva Cancelada</h2>
                     <p>{{ mensaje }}</p>
                 {% else %}
-                    <span class="icon" style="color: #dc3545; font-size: 60px;">
+                    <span class="icon icon-error">
                         <i class="ti-close"></i>
                     </span>
-                    <h2 class="cursive-font" style="margin-top: 20px;">No se pudo cancelar</h2>
+                    <h2 class="cursive-font titulo-cancelacion">No se pudo cancelar</h2>
                     <p>{{ mensaje }}</p>
                 {% endif %}
 
-                <a href="{{ url_for('cliente.landing') }}" class="btn btn-primary" style="margin-top: 20px;">
+                <a href="{{ url_for('cliente.landing') }}" class="btn btn-primary btn-retorno">
                     Volver al inicio
                 </a>
             </div>

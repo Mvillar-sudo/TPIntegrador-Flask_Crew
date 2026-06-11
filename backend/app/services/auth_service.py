@@ -27,7 +27,7 @@ def post_login(data):
     user_db = resultado[0]
 
     if check_password_hash(user_db["password"], password):
-        # 🌟 ADAPTACIÓN JWT: Generamos el token si la contraseña es correcta
+        # ADAPTACIÓN JWT: Generamos el token si la contraseña es correcta
         token = generar_jwt(user_db["email"])
 
         # Devolvemos la estructura DTO (objeto limpio) + el Token para el Front

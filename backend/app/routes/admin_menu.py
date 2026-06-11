@@ -45,10 +45,10 @@ def ver_plato(id_plato):
     if not plato:
         return jsonify({"mensaje": "Plato no encontrado"}), 404
 
-    # 🚀 SI EL SERVICIO DEVUELVE UNA LISTA CON EL PLATO ADENTRO, SACAMOS EL PRIMERO
+    # si el servicio devuelve una lista con el plato adentro, saca el primero
     if isinstance(plato, list):
         if len(plato) > 0:
-            plato = plato[0] # Nos quedamos con el diccionario directo
+            plato = plato[0]
         else:
             return jsonify({"mensaje": "Plato no encontrado"}), 404
 

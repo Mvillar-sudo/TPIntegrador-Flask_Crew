@@ -37,8 +37,6 @@ def obtener_plato_service(id_plato):
 def actualizar_parcial_plato_service(id_plato, data):
     """Actualiza un plato en la base de datos limpiando cualquier dato corrupto."""
     
-    # 🚀 EXTRACCIÓN LIMPIA Y SEGURA (Evitamos que se cuelen tuplas accidentales)
-    # Si por algún motivo venía como tupla o lista, extraemos solo el primer valor [0]
     nombre_plato = data.get("nombre_plato")
     if isinstance(nombre_plato, (tuple, list)): nombre_plato = nombre_plato[0]
         
@@ -54,7 +52,6 @@ def actualizar_parcial_plato_service(id_plato, data):
     imagen = data.get("imagen")
     if isinstance(imagen, (tuple, list)): imagen = imagen[0]
 
-    # Armamos la query dinámica o estática según uses COALESCE
     query = """
         UPDATE menu 
         SET nombre_plato = COALESCE(%s, nombre_plato),
@@ -65,7 +62,6 @@ def actualizar_parcial_plato_service(id_plato, data):
         WHERE id_plato = %s
     """
     
-    # 🚀 Forzamos la conversión estricta de tipos de datos en la tupla final
     args = (
         str(nombre_plato) if nombre_plato is not None else None,
         str(descripcion) if descripcion is not None else None,
@@ -75,7 +71,7 @@ def actualizar_parcial_plato_service(id_plato, data):
         int(id_plato)
     )
 
-    # Ejecutamos en la base de datos
+    
     campos_actualizados = execute_db(query, args)
     
     if campos_actualizados == 0:

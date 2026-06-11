@@ -4,6 +4,7 @@
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 {% endblock %}
 
 {% block content %}
@@ -18,49 +19,40 @@
         
         <div class="row row-pb-sm">
             <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
-                <h2 class="cursive-font primary-color">Panel Administrative</h2>
+                <h2 class="cursive-font primary-color">Panel Administrativo</h2>
                 <p>Bienvenido de nuevo. Selecciona una sección para gestionar el negocio en tiempo real.</p>
             </div>
         </div>
 
         <div class="row">
-            
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
-                    <div class="card-icon"></div>
                     <h3>Gestión de Menú</h3>
                     <p>Modifica platos, actualiza precios, descripciones y disponibilidad de las hamburguesas.</p>
                     <a href="{{ url_for('admin.ver_menu') }}" class="btn btn-primary btn-sm">Ver Reporte</a>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-centerHighlight">
-                    <div class="card-icon"></div>
                     <h3>Reservas</h3>
                     <p>Monitorea las mesas reservadas, aprueba solicitudes y revisa los horarios pico del comedor.</p>
                     <a href="{{ url_for('admin.reservas') }}" class="btn btn-primary btn-sm">Ver Calendario</a>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
-                    <div class="card-icon"></div>
                     <h3>Servicios Extras</h3>
                     <p>Administra opciones adicionales como eventos privados, catering o zonas de delivery especial.</p>
                     <a href="{{ url_for('admin.ver_servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
-                    <div class="card-icon"></div>
                     <h3>Scanear QR</h3>
                     <p>Verificar QR de reserva.</p>
                     <a href="{{ url_for('admin.scanear_qr') }}" class="btn btn-primary btn-sm">Scanear</a>
                 </div>
             </div>
-
         </div>
 
         <div class="row metrics-row">
@@ -78,10 +70,24 @@
             </div>
         </div>
 
-    </div>
+        <div class="row" style="margin-top: 40px;">
+            <div class="col-md-12">
+                <div style="background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0px 2px 10px rgba(0,0,0,0.05);">
+                    <h3 class="text-center" style="margin-bottom: 20px; color: #333;">Evolución del Negocio</h3>
+                    <div id="chart-lineas-dashboard"></div>
+                </div>
+            </div>
+        </div>
+        </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    
+    <script> 
+        const URL_METRICAS_VIVO = "{{ url_for('admin.metricas_en_vivo') }}";
+        const HISTORIAL_INICIAL = {{ session.get('grafico_historial', {}) | tojson | safe }};
+    </script>
+     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}

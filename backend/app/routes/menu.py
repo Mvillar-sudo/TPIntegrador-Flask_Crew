@@ -4,10 +4,10 @@ from services.admin_menu_service import obtener_menu_admin_service
 
 menu_bp = Blueprint("menu", __name__)
 
-@menu_bp.route("/api/menu", methods=["GET"]) # Asegurate de que coincida con tu ruta
+@menu_bp.route("/api/menu", methods=["GET"]) 
 def ver_menu():
     try:
-        platos = obtener_menu_admin_service() # Trae id_plato, nombre, precio, descripcion, imagen, estado
+        platos = obtener_menu_admin_service() 
         return jsonify(platos), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
