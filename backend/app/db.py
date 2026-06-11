@@ -3,7 +3,7 @@ from flask import g
 from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT
 
 def get_db():
-    if 'db' not in g:
+    if 'db' not in g or not g.db.is_connected():
         g.db = mysql.connector.connect(
             host=DB_HOST,
             user=DB_USER,
@@ -26,8 +26,14 @@ def init_db():
     with open('data/schemas.sql', encoding='utf-8') as f:
         sql = f.read()
 
-    for result in cursor.execute(sql, multi=True):
-        pass
+    # multi=True devuelve un iterador de cursores
+    results = cursor.execute(sql, multi=True)
+    
+    if results:
+        for result in results:
+            # Forzamos a consumir el resultado de cada sentencia ejecutada
+            result.fetchall() 
+            result.close() # Cerramos cada cursor interno
 
     db.commit()
     cursor.close()

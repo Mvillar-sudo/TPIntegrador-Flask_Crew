@@ -52,38 +52,25 @@ from flask import Blueprint, render_template
 @admin_bp.route('/admin/dashboard')
 @requiere_login()
 def dashboard():
-    # 1. Definimos valores por defecto (así evitamos el crash si el backend está caído)
     total_platos = 0
     total_reservas = 0
     total_servicios = 0
-
     try:
-        # 2. 🚀 CORRECCIÓN 404: Se añade '/api' a la ruta si tu BACKEND_URL no lo incluye
-        response = requests.get(f"{BACKEND_URL}/api/dashboard/metricas")
-        
+        response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
         if response.status_code == 200:
-            json_response = response.json()
-            
-            # 3. 🚀 CORRECCIÓN DE ESTRUCTURA: Extraemos el nodo 'data' del JSON del backend
-            metricas = json_response.get("data", {})
-            
-            # 4. Asignamos usando los nombres exactos de las llaves del backend
+            metricas = response.json().get("data", {})
             total_platos = metricas.get("total_platos_activos", 0)
             total_reservas = metricas.get("total_reservas_pendientes", 0)
             total_servicios = metricas.get("total_servicios_activos", 0)
-            
     except requests.exceptions.RequestException as e:
-        # Captura errores de red (Timeout, Conexión rehusada, etc.) sin romper el frontend
-        print(f"⚠️ Error al conectar con el backend de métricas: {e}")
+        print(f"⚠️ Error de red con métricas: {e}")
 
-    # 5. Renderizamos la plantilla (si falló el try, pasará los ceros de forma segura)
     return render_template(
         'gestion/dashboard.html', 
         total_platos=total_platos, 
         total_reservas=total_reservas, 
         total_servicios=total_servicios
     )
-
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 @requiere_login()
@@ -239,6 +226,88 @@ def ver_servicios():
     except Exception:
         servicios = []
     return render_template('gestion/servicios.html', servicios=servicios)
+
+@admin_bp.route('/admin/servicios/nuevo', methods=['GET', 'POST'])
+def crear_servicio_vista():
+    if request.method == 'POST':
+        # 1. Recolectamos los datos que envió el usuario desde el formulario HTML
+        data_formulario = {
+            "nombre": request.form.get("nombre")
+        }
+        
+        try:
+            # 2. Se los enviamos mediante POST a tu API de servicios.py (Backend)
+            # BACKEND_URL ya incluye '/api', y tu blueprint suma '/servicios/'
+            response = requests.post(f"{BACKEND_URL}/servicios/", json=data_formulario, timeout=3)
+            
+            if response.status_code == 201:
+                flash("¡Servicio creado con éxito!", "success")
+                return redirect(url_for('admin.ver_servicios')) # O la ruta de tu tabla de servicios
+            else:
+                error_api = response.json().get("error", "Error desconocido")
+                flash(f"No se pudo crear: {error_api}", "danger")
+                
+        except requests.exceptions.RequestException as e:
+            flash("Error de conexión con el servidor de datos.", "danger")
+            print(f"❌ Error de red: {e}")
+
+    # Si es GET, simplemente mostramos la plantilla con el formulario vacío
+    return render_template('gestion/crear_servicio.html')
+
+
+@admin_bp.route('/admin/servicios/eliminar/<int:id_servicio>', methods=['POST'])
+def eliminar_servicio_vista(id_servicio):
+    try:
+        # Tu frontend le pega a la API de servicios.py que me mostraste
+        response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        if response.status_code == 200:
+            flash("Servicio eliminado correctamente.", "success")
+        else:
+            flash("No se pudo eliminar el servicio.", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el backend.", "danger")
+        
+    return redirect(url_for('admin.ver_servicios'))
+
+@admin_bp.route('/admin/servicios/editar/<int:id_servicio>', methods=['GET', 'POST'])
+@requiere_login() # Si usas tu decorador de login/sesión
+def editar_servicio_vista(id_servicio):
+    if request.method == 'POST':
+        # Recolectamos los datos modificados del formulario
+        # Evaluamos 'activo' basado en si el checkbox fue marcado
+        data_formulario = {
+            "nombre": request.form.get("nombre"),
+            "activo": True if request.form.get("activo") else False
+        }
+        
+        try:
+            # Le pegamos al endpoint PATCH de tu API Backend
+            response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=data_formulario, timeout=3)
+            
+            if response.status_code == 200:
+                flash("Servicio actualizado correctamente.", "success")
+                return redirect(url_for('admin.ver_servicios'))
+            else:
+                error_api = response.json().get("error", "Error al actualizar")
+                flash(f"Error: {error_api}", "danger")
+        except requests.exceptions.RequestException:
+            flash("Error de conexión con el servidor de datos.", "danger")
+
+    # --- COMPORTAMIENTO GET (Cargar datos actuales del servicio) ---
+    try:
+        # Traemos los datos actuales desde la API para precargar el formulario
+        response = requests.get(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        if response.status_code == 200:
+            servicio = response.json()
+            # Renderizamos una nueva plantilla para editar
+            return render_template('gestion/editar_servicio.html', servicio=servicio)
+        else:
+            flash("No se pudo encontrar el servicio solicitado.", "danger")
+            return redirect(url_for('admin.ver_servicios'))
+            
+    except requests.exceptions.RequestException:
+        flash("Error al conectar con el servidor.", "danger")
+        return redirect(url_for('admin.ver_servicios'))
 
 
 @admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])

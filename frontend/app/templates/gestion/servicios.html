@@ -16,16 +16,26 @@
     <th>Nombre del Servicio</th>
     <th>Alta en Sistema</th>
     <th>Estado</th>
-{% endblock %}
+    <th class="text-center">Acciones</th> {% endblock %}
 
 {% block cuerpo_tabla %}
     {% for servicio in servicios %}
     <tr>
-        <td><code>#{{ servicio.id }}</code></td>
+        <td><code>#{{ servicio.id_servicio }}</code></td>
         <td><strong class="text-dark">{{ servicio.nombre }}</strong></td>
-        <td><small class="text-muted">{{ servicio.fecha_creacion.strftime('%d/%m/%Y %H:%M') if servicio.fecha_creacion else 'N/A' }}</small></td>
+        
         <td>
-            {% if servicio.activo  == True %}
+            <small class="text-muted">
+                {% if servicio.fecha_creacion %}
+                    {{ servicio.fecha_creacion[8:10] }}/{{ servicio.fecha_creacion[5:7] }}/{{ servicio.fecha_creacion[0:4] }} {{ servicio.fecha_creacion[11:16] }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </small>
+        </td>
+        
+        <td>
+            {% if servicio.activo %}
                 <span class="label label-success">Activo</span>
             {% else %}
                 <span class="label label-danger">Inactivo</span>
@@ -33,11 +43,11 @@
         </td>
         <td class="text-center">
             <div class="btn-group-acciones">
-                <a href="{{ url_for('admin.editar_servicio_vista', id_servicio=servicio.id) }}" class="btn-editar" title="Editar">
+                <a href="{{ url_for('admin.editar_servicio_vista', id_servicio=servicio.id_servicio) }}" class="btn-editar" title="Editar">
                     Editar
                 </a>
                 
-                <form action="{{ url_for('admin.eliminar_servicio', id_servicio=servicio.id) }}" method="POST" class="form-eliminar">
+                <form action="{{ url_for('admin.eliminar_servicio_vista', id_servicio=servicio.id_servicio) }}" method="POST" class="form-eliminar" data-nombre="este servicio">
                     <button type="submit" class="btn-eliminar">Eliminar</button>
                 </form>
             </div>

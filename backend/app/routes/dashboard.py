@@ -20,7 +20,6 @@ def get_metricas():
                 "total_servicios_activos": total_servicios
             }
         }), 200
-
     except Exception as e:
         return jsonify({
             "status": "error",

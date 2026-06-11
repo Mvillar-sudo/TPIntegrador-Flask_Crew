@@ -49,7 +49,8 @@
         <td class="text-center">
             <div class="btn-group-acciones">
                 <a href="{{ url_for('admin.editar_plato_vista', id_plato=plato.id_plato) }}" class="btn-editar">Editar</a>
-                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar">
+                
+                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar" data-nombre="este plato">
                     <button type="submit" class="btn-eliminar">Eliminar</button>
                 </form>
             </div>
@@ -61,4 +62,5 @@
 {% endblock %} 
 {% block extra_scripts %} 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/eliminar.js') }}"></script>
 {% endblock %}

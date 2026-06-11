@@ -105,12 +105,8 @@ def eliminar_plato_service(id_plato):
     return True 
 
 def obtener_total_platos_activos():
-    resultado = query_db("""
-        SELECT COUNT(*) as total 
-        FROM menu 
-        WHERE estado = 1
-    """, one=True)
-    if resultado and len(resultado) > 0:
-        return resultado[0][0]
-    
+    resultado = query_db("SELECT COUNT(*) as total FROM menu WHERE activo = 1", one=True)
+    if resultado:
+        if isinstance(resultado, dict): return resultado.get('total', 0)
+        return resultado[0]
     return 0
