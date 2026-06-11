@@ -1,11 +1,13 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+import datetime
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
 import requests
 from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
 
 admin_bp = Blueprint('admin', __name__)
-BACKEND_URL = "http://127.0.0.1:5000/api"
+
+BACKEND_URL = "http://localhost:5000/api"
 
 @admin_bp.route('/admin/login', methods=["GET", "POST"])
 def login():
@@ -75,7 +77,7 @@ def ver_menu():
     except Exception as e:
         print(f"Error crítico en /admin/menu: {e}")
         return f"Error interno del servidor: {e}", 500
-    
+
 @admin_bp.route("/admin/menu/editar/<int:id_plato>", methods=["GET", "POST"])
 def editar_plato(id_plato):
     response_get = requests.get(f"http://127.0.0.1:5000/admin/menu/{id_plato}")
@@ -199,6 +201,77 @@ def crear_servicio_vista():
     return render_template('gestion/crear_servicio.html')
 
 
+@admin_bp.route('/admin/servicios/nuevo', methods=['GET', 'POST'])
+def crear_servicio_vista():
+    if request.method == 'POST':
+        data_formulario = {
+            "nombre": request.form.get("nombre")
+        }
+
+        try:
+            response = requests.post(f"{BACKEND_URL}/servicios/", json=data_formulario, timeout=3)
+
+            if response.status_code == 201:
+                flash("¡Servicio creado con éxito!", "success")
+                return redirect(url_for('admin.ver_servicios'))
+            else:
+                error_api = response.json().get("error", "Error desconocido")
+                flash(f"No se pudo crear: {error_api}", "danger")
+
+        except requests.exceptions.RequestException as e:
+            flash("Error de conexión con el servidor de datos.", "danger")
+            print(f"❌ Error de red: {e}")
+
+    return render_template('gestion/crear_servicio.html')
+
+
+@admin_bp.route('/admin/servicios/eliminar/<int:id_servicio>', methods=['POST'])
+def eliminar_servicio_vista(id_servicio):
+    try:
+        response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        if response.status_code == 200:
+            flash("Servicio eliminado correctamente.", "success")
+        else:
+            flash("No se pudo eliminar el servicio.", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el backend.", "danger")
+
+    return redirect(url_for('admin.ver_servicios'))
+
+@admin_bp.route('/admin/servicios/editar/<int:id_servicio>', methods=['GET', 'POST'])
+@requiere_login()
+def editar_servicio_vista(id_servicio):
+    if request.method == 'POST':
+        data_formulario = {
+            "nombre": request.form.get("nombre"),
+            "activo": True if request.form.get("activo") else False
+        }
+
+        try:
+            response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=data_formulario, timeout=3)
+
+            if response.status_code == 200:
+                flash("Servicio actualizado correctamente.", "success")
+                return redirect(url_for('admin.ver_servicios'))
+            else:
+                error_api = response.json().get("error", "Error al actualizar")
+                flash(f"Error: {error_api}", "danger")
+        except requests.exceptions.RequestException:
+            flash("Error de conexión con el servidor de datos.", "danger")
+
+    try:
+        response = requests.get(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        if response.status_code == 200:
+            servicio = response.json()
+            return render_template('gestion/editar_servicio.html', servicio=servicio)
+        else:
+            flash("No se pudo encontrar el servicio solicitado.", "danger")
+            return redirect(url_for('admin.ver_servicios'))
+
+    except requests.exceptions.RequestException:
+        flash("Error al conectar con el servidor.", "danger")
+        return redirect(url_for('admin.ver_servicios'))
+
 @admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])
 @requiere_login()
 def actualizar_servicio_proceso(id_servicio):
@@ -216,14 +289,63 @@ def actualizar_servicio_proceso(id_servicio):
         flash("Error al conectar con la API", "danger")
     return redirect(url_for('admin.ver_servicios'))
 
-
-
 @admin_bp.route('/admin/dashboard/reservas')
 @requiere_login()
 def reservas():
     try:
-        response = requests.get(f"{BACKEND_URL}/reservas/")
-        reservas_lista = response.json() if response.status_code == 200 else []
-    except Exception:
+        r = requests.get(f"{BACKEND_URL}/api/reservas/")
+        reservas_lista = r.json()
+    except Exception as e:
+        print(f"Error al obtener reservas: {e}")
         reservas_lista = []
+
+    return render_template('gestion/reservas.html', reservas=reservas_lista)
+
+
+@admin_bp.route('/admin/dashboard/reservas/<int:id_reserva>/cancelar', methods=['POST'])
+@requiere_login()
+def cancelar_reserva(id_reserva):
+    try:
+        r = requests.patch(f"{BACKEND_URL}/api/reservas/{id_reserva}/cancelar")
+        flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
+    except Exception as e:
+        flash("Error de conexión con el servidor", "danger")
+
+    return redirect(url_for('admin.reservas'))
+
+@admin_bp.route('/admin/dashboard/validar-qr', methods=['GET'])
+@requiere_login()
+def scanear_qr():
+
+    id_reserva = request.args.get('id_reserva')
+    qr_code = request.args.get('qr_code')
+
+    try:
+        r = requests.post(f"{BACKEND_URL}/api/reservas/validar-qr", json={
+            "id_reserva": id_reserva,
+            "qr_code": qr_code
+        })
+        mensaje = r.json().get("mensaje", "")
+        exito = r.status_code == 200
+    except Exception as e:
+        mensaje = "Error de conexión con el servidor"
+        exito = False
+
+    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje)
+
+#backup de def reservas
+@admin_bp.route('/admin/dashboard/reservas_backup')
+@requiere_login()
+def reservas_backup():
+    reservas_lista = []
+    try:
+
+        response = requests.get(f"{BACKEND_URL}/dashboard/reservas")
+        if response.status_code == 200:
+            data_backend = response.json()
+            reservas_lista = data_backend.get("data", [])
+
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Error al traer reservas: {e}")
+
     return render_template('gestion/reservas.html', reservas=reservas_lista)

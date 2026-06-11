@@ -23,18 +23,13 @@
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
-                                <div style="background-color: #f8d7da !important;
-                                    color: #721c24 !important;
-                                    border: 1px solid #f5c6cb !important;
-                                    padding: 15px !important;
-                                    margin-bottom: 25px !important;
-                                    text-align: center !important;
-                                    border-radius: 4px !important;">
+                                <div class="alert-login-flash">
                                     <strong>¡Atención!</strong> {{ message }}
                                 </div>
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
+
                     <form id="loginForm" action="{{ url_for('admin.login_process') }}" method="POST">
                         
                         <div class="form-group-custom">
@@ -57,7 +52,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block extra_scripts %}
 {% endblock %}

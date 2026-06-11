@@ -23,7 +23,6 @@
         </div>
     </header>
 
-    <!-- Formulario de reseñas -->
     <div class="gtco-section">
         <div class="gtco-container">
             <div class="row">
@@ -101,7 +100,7 @@
                             <input type="submit" value="Enviar Reseña" class="btn btn-primary btn-lg">
                         </div>
 
-                    </form>		
+                    </form>     
                 </div>
             </div>
         </div>
@@ -109,7 +108,7 @@
 
     <hr class="seccion-divisor">
 
-    <div id="gtco-features" class="gtco-section" style="padding-top: 0;">
+    <div id="gtco-features" class="gtco-section section-opiniones">
         <div class="gtco-container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
@@ -126,7 +125,7 @@
                                 <span class="icon">
                                     <i class="ti-user"></i>
                                 </span>
-                                <h3 style="margin-bottom: 5px; font-weight: bold;">
+                                <h3 class="resena-autor">
                                     {{ resena.nombre_cliente }}
                                 </h3>
                                 
@@ -155,4 +154,8 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/resenas.js') }}"></script>
 {% endblock %}

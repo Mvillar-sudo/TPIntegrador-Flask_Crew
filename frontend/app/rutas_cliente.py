@@ -20,13 +20,16 @@ BACKEND_URL = "http://localhost:5000"
 
 cliente_bp = Blueprint('cliente', __name__)
 
+
 @cliente_bp.route('/', methods=['GET'])
 def landing():
     try:
-        response = requests.get(f"{BACKEND_URL}/servicios/")
+        response = requests.get(f"{BACKEND_URL}/api/servicios/", timeout=3)
         servicios = response.json() if response.status_code == 200 else []
-    except Exception:
+    except Exception as e:
+        print(f"⚠️ Error al conectar con la API de servicios: {e}")
         servicios = []
+
     return render_template('landing.html', servicios=servicios)
 
 
@@ -39,39 +42,40 @@ def menu():
         platos_activos = []
     return render_template('menu.html', platos=platos_activos)
 
-@cliente_bp.route('/resenas', methods=['GET', 'POST'])
-def resenas():
-    if request.method == 'POST':
-        nombre_cliente = request.form.get('nombre_cliente', '').strip()
-        calificacion   = request.form.get('calificacion', '').strip()
-        comentario     = request.form.get('comentario', '').strip()
-        reserva_id     = request.form.get('reserva_id', '').strip()
+#@cliente_bp.route('/resenas', methods=['GET', 'POST'])
+#def resenas():
+    #if request.method == 'POST':
+        #nombre_cliente = request.form.get('nombre_cliente', '').strip()
+        #calificacion   = request.form.get('calificacion', '').strip()
+        #comentario     = request.form.get('comentario', '').strip()
+        #reserva_id     = request.form.get('reserva_id', '').strip()
 
-        payload = {
-            "nombre_cliente": nombre_cliente,
-            "calificacion": int(calificacion) if calificacion else None,
-            "comentario": comentario,
-            "reserva_id": int(reserva_id) if reserva_id else None,
-        }
+        #payload = {
+            #"nombre_cliente": nombre_cliente,
+           # "calificacion": int(calificacion) if calificacion else None,
+          #  "comentario": comentario,
+         #   "reserva_id": int(reserva_id) if reserva_id else None,
+        #}
 
-        try:
-            respuesta = requests.post(BACKEND_RESENAS_URL, json=payload, timeout=10)
-            if respuesta.status_code != 201:
-                error = respuesta.json().get('error', 'No se pudo crear la reseña')
-                return render_resenas(exito=False, error=error)
-        except Exception:
-            return render_resenas(exito=False, error='No se pudo conectar con el servidor')
+        #try:
+           # respuesta = requests.post(f"{BACKEND_URL}/resenas/", json=payload, timeout=10)
+          #  if respuesta.status_code != 201:
+         #       error = respuesta.json().get('error', 'No se pudo crear la reseña')
+                #return render_resenas(exito=False, error=error)
+        #except Exception:
+           # return render_resenas(exito=False, error='No se pudo conectar con el servidor')
 
-        return render_resenas(exito=True, error=None)
+        #return render_resenas(exito=True, error=None)
 
-    return render_resenas(exito=False, error=None)
+    #return render_resenas(exito=False, error=None)
+
 @cliente_bp.route('/dejar-resena', methods=['GET'])
 def dejar_resena():
     try:
         response = requests.get(f"{BACKEND_URL}/resenas/")
         if response.status_code == 200:
             todas_las_resenas = response.json()
-            ultimas_resenas = todas_las_resenas[:6]
+            ultimas_resenas = todas_las_resenas[:6] 
         else:
             ultimas_resenas = []
     except Exception:
@@ -79,52 +83,37 @@ def dejar_resena():
     return render_template('resenas.html', resenas=ultimas_resenas)
 
 
-@cliente_bp.route('/dejar-resena/proceso', methods=['POST'])
-def procesar_nueva_resena():
-    payload = {
-        "nombre_cliente": request.form.get("nombre", "").strip(),
-        "comentario": request.form.get("comentario", "").strip(),
-        "calificacion": int(request.form.get("puntuacion", 5))
+@cliente_bp.route('/reservas/nueva', methods=['POST'])
+def crear_reserva():
+    data = {
+        "nombre": request.form.get("name"),
+        "email": request.form.get("Email"),
+        "fecha": request.form.get("fecha"),
+        "hora": request.form.get("hora"),
+        "cantidad_personas": request.form.get("persons"),
+        "telefono": ""  # el form no tiene campo telefono
     }
     try:
-        response = requests.post(f"{BACKEND_URL}/resenas/", json=payload)
-        if response.status_code == 201:
-            flash("¡Gracias por tu opinión!", "success")
+        r = requests.post(f"{BACKEND_URL}/api/reservas/", json=data)
+        if r.status_code == 201:
+            return redirect(url_for('cliente.landing'))
         else:
-            flash("No se pudo guardar la reseña.", "danger")
-    except Exception:
-        flash("Error de conexión con el servidor.", "danger")
-    return redirect(url_for('cliente.dejar_resena'))
+            error = r.json().get("mensaje", "Error al crear la reserva")
+            return render_template('landing.html', error=error)
+    except Exception as e:
+        print(f"Error al crear reserva: {e}")
+        return render_template('landing.html', error="Error de conexión con el servidor")
 
-@cliente_bp.route('/reservar_proceso', methods=['POST'])
-def procesar_reserva_cliente():
-    payload = {
-        "nombre": request.form.get("nombre"),
-        "email": request.form.get("email"),
-        "telefono": request.form.get("telefono"),
-        "fecha": request.form.get("date"),
-        "hora": request.form.get("time"),
-        "cantidad_personas": int(request.form.get("persons", 1))
-    }
+
+@cliente_bp.route('/reservas/cancelar/<string:token>', methods=['GET'])
+def cancelar_reserva(token):
     try:
-        response = requests.post(f"{BACKEND_URL}/reservas/", json=payload)
-        if response.status_code == 201:
-            flash("¡Reserva creada con éxito!", "success")
+        r = requests.get(f"{BACKEND_URL}/api/reservas/cancelar/{token}")
+        mensaje = r.json().get("mensaje", "")
+        if r.status_code == 200:
+            return render_template('cancelacion.html', exito=True, mensaje=mensaje)
         else:
-            mensaje = response.json().get("mensaje", "No hay disponibilidad.")
-            flash(mensaje, "danger")
-    except Exception:
-        flash("Error con el servidor de reservas.", "danger")
-    return redirect(url_for('cliente.landing'))
-
-
-@cliente_bp.route('/cancelar-reserva/<string:token>', methods=['GET'])
-def cancelar_via_email(token):
-    try:
-        response = requests.get(f"{BACKEND_URL}/reservas/cancelar/{token}")
-        if response.status_code == 200:
-            return "<h1>Reserva cancelada correctamente.</h1>"
-        else:
-            return f"<h1>Error: {response.json().get('mensaje')}</h1>", 400
-    except Exception:
-        return "<h1>Error de conexión.</h1>", 500
+            return render_template('cancelacion.html', exito=False, mensaje=mensaje)
+    except Exception as e:
+        print(f"Error al cancelar reserva: {e}")
+        return render_template('cancelacion.html', exito=False, mensaje="Error de conexión con el servidor")

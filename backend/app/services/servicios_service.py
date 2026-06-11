@@ -3,7 +3,7 @@ from db import query_db, execute_db
 
 def obtener_servicios():
     return query_db("""
-        SELECT id,
+        SELECT id_servicio,
                nombre,
                activo,
                fecha_creacion
@@ -14,12 +14,12 @@ def obtener_servicios():
 
 def obtener_servicio_id(id_servicio):
     return query_db("""
-        SELECT id,
+        SELECT id_servicio,
                nombre,
                activo,
                fecha_creacion
         FROM servicios
-        WHERE id = %s
+        WHERE id_servicio = %s
     """, (id_servicio,), one=True)
 
 
@@ -43,19 +43,23 @@ def actualizar_servicio_db(id_servicio, data):
         UPDATE servicios
         SET nombre = COALESCE(%s, nombre),
             activo = %s
-        WHERE id = %s
+        WHERE id_servicio = %s
     """, (nombre, activo, id_servicio))
 
 
 def eliminar_servicio_db(id_servicio):
     return execute_db(
-        "DELETE FROM servicios WHERE id = %s",
+        "DELETE FROM servicios WHERE id_servicio = %s",
         (id_servicio,)
     ) 
 def obtener_total_servicios_activos():
-    resultado = query_db("""
-        SELECT COUNT(*) as total 
-        FROM servicios 
-        WHERE activo = 1
-    """, one=True)
-    return resultado['total'] if resultado else 0
+    try:
+        resultado = query_db("SELECT COUNT(*) as total FROM servicios WHERE activo = 1", one=True)
+        
+        if resultado and isinstance(resultado, dict): 
+            return resultado.get('total', 0)
+            
+        return 0
+    except Exception as e:
+        print(f"⚠️ Error al contar servicios activos: {e}")
+        return 0

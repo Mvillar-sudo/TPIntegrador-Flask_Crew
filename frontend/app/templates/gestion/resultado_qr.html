@@ -1,0 +1,36 @@
+{% extends 'gestion/base_admin.html' %}
+{% block title %}Panel - Resultado QR{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        <div class="admin-table-container text-center qr-result-panel">
+            
+            {% if exito %}
+                <span class="qr-status-icon qr-icon-success">
+                    <i class="ti-check-box"></i>
+                </span>
+                <h2 class="qr-result-title qr-title-success">Acceso Permitido</h2>
+            {% else %}
+                <span class="qr-status-icon qr-icon-danger">
+                    <i class="ti-close"></i>
+                </span>
+                <h2 class="qr-result-title qr-title-danger">Acceso Denegado</h2>
+            {% endif %}
+
+            <p class="qr-result-text">{{ mensaje }}</p>
+
+            <a href="{{ url_for('admin.scanear_qr') }}" class="btn btn-primary qr-btn-action">
+                Escanear otro QR
+            </a>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default qr-btn-action">
+                Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

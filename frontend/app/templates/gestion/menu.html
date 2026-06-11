@@ -1,11 +1,13 @@
 {% extends 'gestion/base_dashboard.html' %}
 
-{% set titulo_pagina = "Gestión del Menú" %}
-{% set subtitulo_pagina = "Administra los platos, precios y disponibilidad en tiempo real." %}
+{% block title %}Gestión del Menú - Admin Panel{% endblock %}
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
+
+{% set titulo_pagina = "Gestión del Menú" %}
+{% set subtitulo_pagina = "Administra los platos, precios y disponibilidad en tiempo real." %}
 
 {% block boton_crear %}
     <a href="{{ url_for('admin.crear_plato') }}" class="btn btn-primary btn-lg shadow-sm">
@@ -14,13 +16,13 @@
 {% endblock %}
 
 {% block cabecera_tabla %}
-    <th style="width: 10%">ID</th>
-    <th style="width: 25%">Nombre del Plato</th>
-    <th style="width: 15%">Precio</th>
-    <th style="width: 30%">Descripción</th>
-    <th style="width: 15%">Imagen</th>
-    <th style="width: 10%">Disponibilidad</th>
-    <th style="width: 10%" class="text-center">Acciones</th>
+    <th class="col-id">ID</th>
+    <th class="col-nombre">Nombre del Plato</th>
+    <th class="col-precio">Precio</th>
+    <th class="col-desc">Descripción</th>
+    <th class="col-img">Imagen</th>
+    <th class="col-estado">Disponibilidad</th>
+    <th class="col-acciones text-center">Acciones</th>
 {% endblock %}
 
 {% block cuerpo_tabla %}
@@ -49,16 +51,17 @@
         <td class="text-center">
             <div class="btn-group-acciones">
                 <a href="{{ url_for('admin.editar_plato_vista', id_plato=plato.id_plato) }}" class="btn-editar">Editar</a>
-                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar">
+                <form action="{{ url_for('admin.eliminar_plato', id_plato=plato.id_plato) }}" method="POST" class="form-eliminar" data-nombre="este plato">
                     <button type="submit" class="btn-eliminar">Eliminar</button>
                 </form>
             </div>
         </td>
     </tr>
     {% else %}
-    <tr><td colspan="6" class="text-center text-muted py-4">No hay platos registrados en la carta.</td></tr>
+    <tr><td colspan="7" class="text-center text-muted no-data-row">No hay platos registrados en la carta.</td></tr>
     {% endfor %}
 {% endblock %} 
-{% block extra_scripts %} 
 
+{% block extra_scripts %}
+    <script src="{{ url_for('static', filename='js/eliminar.js') }}"></script>
 {% endblock %}

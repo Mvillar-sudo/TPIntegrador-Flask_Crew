@@ -1,7 +1,6 @@
 import secrets
-
 from flask import Blueprint, jsonify, request
-from db import get_db, query_db, execute_db
+from db import get_db
 from config import MAX_RESERVAS_POR_FRANJA
 from validators.qr import generar_qr
 from validators.email import enviar_email_reserva
@@ -13,7 +12,7 @@ def detalle_de_una_reserva(id_reserva):
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado FROM reservas WHERE id_reserva = %s" , (id_reserva,))
+        cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado, token_cancelacion, qr_code, fecha_creacion FROM reservas WHERE id_reserva = %s" , (id_reserva,))
         resultado = cursor.fetchone()
         print(resultado)  
         print(type(resultado)) 
@@ -26,7 +25,10 @@ def detalle_de_una_reserva(id_reserva):
                 "fecha": str(resultado[4]),
                 "hora": str(resultado[5]),
                 "cantidad_personas": resultado[6],
-                "estado": resultado[7]
+                "estado": resultado[7],
+                "token_cancelacion": resultado[8],
+                "qr_code": resultado[9],
+                "fecha_creacion": str(resultado[10]) if resultado[10] else ""
             })
         else:
             return jsonify({"mensaje": "Reserva no encontrada"}), 404
@@ -34,7 +36,6 @@ def detalle_de_una_reserva(id_reserva):
         return jsonify({"mensaje": "Error al obtener la reserva", "error": str(e)}), 500
     finally:
         cursor.close()
-
 
 @reservas_bp.route('/', methods=['GET'])
 def listar_todas_las_reservas():
@@ -51,7 +52,10 @@ def listar_todas_las_reservas():
     "fecha": str(fila[4]),
     "hora": str(fila[5]),
     "cantidad_personas": fila[6],
-    "estado": fila[7]
+    "estado": fila[7],
+    "token_cancelacion": fila[8],
+    "qr_code": fila[9],
+    "fecha_creacion": str(fila[10]) if fila[10] else ""
 } for fila in resultado])
     except Exception as e:
         return jsonify({"mensaje": "Error al listar las reservas", "error": str(e)}), 500
