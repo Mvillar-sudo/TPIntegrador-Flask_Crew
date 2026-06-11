@@ -2325,40 +2325,5 @@ main {
 .custom-file-upload {
     margin-top: 5px;
 }
-/* Fix inputs del formulario de reserva */
-#gtco-header .form-wrap .tab-content .form-control {
-    color: #fff !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-#gtco-header .form-wrap .tab-content select option {
-    color: #000 !important;
-    background-color: #fff !important;
-}
-
-#gtco-header .form-wrap .tab-content .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6) !important;
-}
-
-/* flatpickr input una vez seleccionado */
-#gtco-header .flatpickr-input {
-    color: #fff !important;
-}
-
-.admin-page-wrapper { padding: 3em 0; background: #f9f9f9; min-height: 100vh; }
-.reservas-table-wrap { background: #fff; border-radius: 4px; border: 1px solid #e6e6e6; padding: 30px; margin-top: 20px; }
-.reservas-table-wrap h2 { font-weight: 300; margin-bottom: 25px; color: #1a1a1a; }
-.table-reservas { width: 100%; border-collapse: collapse; }
-.table-reservas thead tr { background: #f5f5f5; }
-.table-reservas th { padding: 12px 15px; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; border-bottom: 2px solid #e6e6e6; }
-.table-reservas td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; color: #444; vertical-align: middle; }
-.table-reservas tbody tr:hover { background: #fafafa; }
-.badge-estado { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.badge-pendiente { background: #fff3cd; color: #856404; }
-.badge-cancelada { background: #f8d7da; color: #721c24; }
-.badge-validada  { background: #d4edda; color: #155724; }
-.btn-volver { color: #888; font-size: 14px; text-decoration: none; }
-.btn-volver:hover { color: #FBB448; }
-
 
 /*# sourceMappingURL=style.css.map */

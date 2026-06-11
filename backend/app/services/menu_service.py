@@ -1,4 +1,4 @@
-from ..db import execute_db, query_db
+from db import execute_db, query_db
 
 def crear_plato_service(data):
 

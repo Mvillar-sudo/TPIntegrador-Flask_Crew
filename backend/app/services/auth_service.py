@@ -1,4 +1,4 @@
-from ..db import execute_db, query_db
+from db import execute_db, query_db
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import datetime
@@ -15,11 +15,11 @@ def generar_jwt(usuario_email):
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
 def post_login(data):
-    usuario = data["username"]
+    nombre = data["username"]
     password = data["password"]
 
     query = "SELECT email, password FROM usuarios WHERE email = %s AND activo = TRUE"
-    resultado = query_db(query, (usuario,))  # Aprovechamos y dejamos la tupla fija
+    resultado = query_db(query, (nombre,))  # Aprovechamos y dejamos la tupla fija
 
     if not resultado:
         return None

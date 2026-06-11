@@ -1,12 +1,15 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_mail import Mail
 from dotenv import load_dotenv
-from routes import menu_bp, admin_menu_bp, resenas_bp, auth_bp, reservas_bp, servicios_bp, dashboard_bp
+from .routes import (menu_bp,
+                     admin_menu_bp,
+                     resenas_bp,
+                     auth_bp,
+                     reservas_bp,
+                     servicios_bp,
+                     dashboard_bp)
 import db
-
-from .config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
-from . import mail
+from extensions import mail
 
 
 
@@ -23,26 +26,25 @@ def create_app():
     app.config['MAIL_USERNAME'] = MAIL_USERNAME
     app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 
-    # inicializar extensiones
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
     db.init_app(app)
     mail.init_app(app)
     mail.app = app
 
-    # registro de blueprints
-    app.register_blueprint(menu_bp)
-    app.register_blueprint(admin_menu_bp)
+    app.register_blueprint(menu_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(admin_menu_bp, url_prefix='/api')
+    app.register_blueprint(dashboard_bp, url_prefix='/api')
+
     app.register_blueprint(resenas_bp)
-    app.register_blueprint(auth_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
-    app.register_blueprint(dashboard_bp)
 
     @app.route('/')
     def index():
-        return 'Backend funcionando correctamente en el puerto 5000'
+        return jsonify({"estado": "online", "mensaje": "Backend de Burger funcionando correctamente en el puerto 5000"}), 200
 
-    # Manejo de errores
     @app.errorhandler(404)
     def page_not_found(e):
         return jsonify({"error": "Endpoint no encontrado"}), 404

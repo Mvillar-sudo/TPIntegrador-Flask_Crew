@@ -1,0 +1,57 @@
+.review-form .form-group {
+    margin-bottom: 20px;
+}
+
+.reviews-header-bg {
+    background: #2b2b2b;
+}
+
+.primary-color {
+    color: #e67e22;
+}
+
+.resena-card {
+    background: #fff;
+    padding: 25px 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+    min-height: 260px;
+}
+
+.stars-display {
+    color: #f39c12;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.resena-fecha {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.star-rating {
+    direction: rtl;
+    display: inline-flex;
+    gap: 6px;
+    font-size: 28px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.2s ease;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #f39c12;
+}
+
+.star-rating input:checked ~ label {
+    color: #f39c12;
+}

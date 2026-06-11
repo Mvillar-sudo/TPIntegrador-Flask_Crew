@@ -1,10 +1,11 @@
-from flask import Blueprint, current_app, render_template, request, redirect, url_for, session, flash
 import os
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
 import requests
-from utils import guardar_sesion
+from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
 
 admin_bp = Blueprint('admin', __name__)
+BACKEND_URL = "http://127.0.0.1:5000/api"
 
 @admin_bp.route('/admin/login', methods=["GET", "POST"])
 def login():
@@ -41,6 +42,7 @@ def logout():
     return redirect(url_for('admin.login'))
 
 @admin_bp.route('/admin/dashboard')
+@requiere_login()
 def dashboard():
     try:
         resp_platos = requests.get("http://127.0.0.1:5000/admin/menu/cantidad-platos-activos")
@@ -58,6 +60,7 @@ def dashboard():
         return "Error interno del servidor", 500
 
 @admin_bp.route("/admin/menu", methods=["GET"])
+@requiere_login()
 def ver_menu():
     try:
         response = requests.get("http://127.0.0.1:5000/admin/menu")
@@ -162,16 +165,16 @@ def crear_plato():
 
 @admin_bp.route('/admin/dashboard/reservas')
 def reservas():
-    if not session.get('admin_logeado'): 
+    if not session.get('admin_logeado'):
         return redirect(url_for('admin.login'))
-        
+
     reservas_lista = [
         {
-            "id": 101, 
-            "email": "juan@email.com", 
-            "fecha": "2026-05-28", 
-            "hora": "21:00", 
-            "cantidad_personas": 4, 
+            "id": 101,
+            "email": "juan@email.com",
+            "fecha": "2026-05-28",
+            "hora": "21:00",
+            "cantidad_personas": 4,
             "estado": "Confirmada",
             "token_cancelacion": "xyz789token",
             "qr_code": "qr_reserva_101.png",
@@ -182,91 +185,45 @@ def reservas():
 
 
 @admin_bp.route('/admin/dashboard/servicios')
+@requiere_login()
 def ver_servicios():
-    if not session.get('admin_logeado'): 
-        return redirect(url_for('admin.login'))
     try:
-        servicios = obtener_servicios()
-        return render_template('gestion/servicios.html', servicios=servicios)
-    except RuntimeError as e:
-        return "No se encontro el abm", 500 
-    
+        response = requests.get(f"{BACKEND_URL}/servicios/")
+        servicios = response.json() if response.status_code == 200 else []
+    except Exception:
+        servicios = []
+    return render_template('gestion/servicios.html', servicios=servicios)
+
 @admin_bp.route("/admin/dashboard/servicios/crear", methods=["GET"])
 def crear_servicio_vista():
     return render_template('gestion/crear_servicio.html')
 
 
-@admin_bp.route('/admin/dashboard/servicios/crear_proceso', methods=['POST'])
-def crear_servicio_proceso():
-    try:
-        data = {"nombre": request.form.get("nombre")}
-
-        crear_servicio_db(data)
-
-        return redirect(url_for('admin.ver_servicios'))
-
-    except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500 
-
-@admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>', methods=['GET'])
-def editar_servicio_vista(id_servicio):
-    try:
-        servicio = obtener_servicio_id(id_servicio)
-        if not servicio:
-            flash('Servicio no encontrado', 'danger')
-            return redirect(url_for('admin.ver_servicios'))
-
-        return render_template("gestion/editar_servicio.html", servicio=servicio)
-
-    except Exception as e:
-        print(f"Error al renderizar vista de edición de servicio: {e}")
-        return "Error interno del servidor", 500
-
 @admin_bp.route('/admin/dashboard/servicios/editar/<int:id_servicio>/procesar', methods=['POST'])
+@requiere_login()
 def actualizar_servicio_proceso(id_servicio):
+    payload = {
+        "nombre": request.form.get("nombre", "").strip(),
+        "activo": (request.form.get("activo") == "True")
+    }
     try:
-        servicio = obtener_servicio_id(id_servicio)
-        if not servicio:
-            flash('Servicio no encontrado', 'danger')
-            return redirect(url_for('admin.ver_servicios'))
-
-        valor_select = request.form.get("activo")
-
-        estado_booleano = (valor_select == "True")
-
-        data = {
-            "nombre": request.form.get("nombre", "").strip(),
-            "activo": estado_booleano
-        }
+        response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=payload)
+        if response.status_code == 200:
+            flash('¡Servicio modificado!', 'success')
+        else:
+            flash(response.json().get("error", "Error"), "danger")
+    except Exception:
+        flash("Error al conectar con la API", "danger")
+    return redirect(url_for('admin.ver_servicios'))
 
 
-        error = validar_servicio(data, es_actualizacion=True)
-        if error:
-            flash(f"Error de validación: {error}", "danger")
-            servicio.nombre = data["nombre"]
-            servicio.activo = 1 if estado_booleano else 0
-            return render_template("gestion/editar_servicio.html", servicio=servicio), 400
 
-        actualizar_servicio_db(id_servicio, data)
-
-        flash('¡Servicio actualizado con éxito!', 'success')
-        return redirect(url_for('admin.ver_servicios'))
-
-    except Exception as e:
-        print(f"Error crítico en el procesamiento del servicio: {e}")
-        return "Error interno del servidor", 500
-    
-@admin_bp.route('/<int:id_servicio>', methods=['POST'])
-def eliminar_servicio(id_servicio):
+@admin_bp.route('/admin/dashboard/reservas')
+@requiere_login()
+def reservas():
     try:
-        filas = eliminar_servicio_db(id_servicio)
-
-        if filas == 0:
-            return jsonify({
-                "error": "Servicio no encontrado"
-            }), 404
-
-        return redirect(url_for('admin.ver_servicios'))
-
-    except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500
+        response = requests.get(f"{BACKEND_URL}/reservas/")
+        reservas_lista = response.json() if response.status_code == 200 else []
+    except Exception:
+        reservas_lista = []
+    return render_template('gestion/reservas.html', reservas=reservas_lista)
