@@ -136,6 +136,33 @@ def ver_menu():
         else:
             platos = []
             
+        upload_folder = os.path.join(current_app.root_path, 'static', 'img')
+
+        if platos:
+            for plato in platos:
+                imagen_nombre = plato.get("imagen")
+                
+                if imagen_nombre:
+                    ruta_fisica = os.path.join(upload_folder, imagen_nombre)
+                    
+                    # ¡SI LA IMAGEN FUE BORRADA DEL DISCO!
+                    if not os.path.exists(ruta_fisica):
+                        print(f"⚠️ La imagen '{imagen_nombre}' no existe en el disco. Limpiando en BD...")
+                        
+    
+                        id_plato = plato.get("id_plato")
+                        payload_limpieza = {
+                            "nombre_plato": plato.get("nombre_plato"),
+                            "descripcion": plato.get("descripcion"),
+                            "precio": plato.get("precio"),
+                            "estado": plato.get("estado"),
+                            "imagen": None  
+                        }
+                        
+                        requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
+                        
+                        plato["imagen"] = None
+
     except Exception as e:
         print(f"--- ERROR AL CONECTAR AL MENU: {e} ---")
         platos = []
@@ -183,6 +210,28 @@ def editar_plato_vista(id_plato):
     
     if response.status_code == 200:
         plato = response.json()
+        imagen_nombre = plato.get("imagen")
+        
+        if imagen_nombre:
+            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
+            ruta_fisica = os.path.join(upload_folder, imagen_nombre)
+            
+            # ¡SI LA IMAGEN FUE BORRADA FÍSICAMENTE!
+            if not os.path.exists(ruta_fisica):
+                print(f"⚠️ La imagen '{imagen_nombre}' no existe en el disco. Seteando a NULL en el backend...")
+                
+                payload_limpieza = {
+                    "nombre_plato": plato.get("nombre_plato"),
+                    "descripcion": plato.get("descripcion"),
+                    "precio": plato.get("precio"),
+                    "estado": plato.get("estado"),
+                    "imagen": None 
+                }
+                requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
+                
+
+                plato["imagen"] = None
+        
         return render_template('gestion/editar_plato.html', plato=plato)
     
     flash("No se pudo obtener el plato.", "danger")
@@ -191,7 +240,6 @@ def editar_plato_vista(id_plato):
 @admin_bp.route("/admin/menu/editar/<int:id_plato>/procesar", methods=["POST"])
 @requiere_login()
 def editar_plato_proceso(id_plato):
-    """Recibe el formulario del Front (POST) y le manda un PATCH al Backend."""
     try:
         filename = None
         file = request.files.get("imagen")
