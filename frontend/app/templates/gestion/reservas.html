@@ -1,10 +1,18 @@
-{% extends 'gestion/base_dashboard.html' %}
+{% extends 'gestion/base_admin.html' %}
 {% block title %}Panel - Control de Reservas{% endblock %}
+
 {% block extra_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        
+            <div style="display: block !important; width: 100% !important; clear: both !important; float: none !important; position: static !important; margin-top: 50px !important; margin-bottom: 20px !important; padding-left: 15px;">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn-volver" style="position: static !important; float: none !important; display: inline-block !important;">← Volver al Dashboard</a>
+            </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -15,7 +23,7 @@
             {% endif %}
         {% endwith %}
 
-        <div class="reservas-table-wrap">
+        <div class="reservas-table-wrap" style="clear: both; margin-top: 20px;">
             <h2>Control de Reservas</h2>
             <table class="table-reservas">
                 <thead>
@@ -76,7 +84,6 @@
     </div>
 </div>
 
-<!-- Modal Detalle -->
 <div class="modal fade" id="modalDetalle" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
