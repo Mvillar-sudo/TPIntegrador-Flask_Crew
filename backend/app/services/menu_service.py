@@ -5,12 +5,13 @@ def crear_plato_service(data):
     nombre = data["nombre_plato"]
     descripcion = data["descripcion"]
     precio = data["precio"]
+    imagen = data["imagen"]
 
     query = """
-        INSERT INTO menu (nombre_plato, descripcion, precio)
-        VALUES (%s, %s, %s)
+        INSERT INTO menu (nombre_plato, descripcion, precio, imagen)
+        VALUES (%s, %s, %s, %s)
     """
-    args = (nombre, descripcion, precio)
+    args = (nombre, descripcion, precio, imagen)
 
     execute_db(query, args)
     return True
