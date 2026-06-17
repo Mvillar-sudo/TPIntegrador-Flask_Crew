@@ -55,10 +55,10 @@
                 </div>
 
                 <div class="admin-form-group-large">
-                    <label for="estado" class="admin-form-label">Estado en el Menú:</label>
-                    <select id="estado" name="estado" class="form-control admin-form-input select-clean-bg">
-                        <option value="1" {% if plato.estado|int == 1 %}selected{% endif %}>Activo</option>
-                        <option value="0" {% if plato.estado|int == 0 %}selected{% endif %}>Inactivo</option>
+                    <label for="activo" class="admin-form-label">Estado en el Menú:</label>
+                    <select id="activo" name="activo" class="form-control admin-form-input select-clean-bg">
+                        <option value="1" {% if plato.activo|int == 1 %}selected{% endif %}>Activo</option>
+                        <option value="0" {% if plato.activo|int == 0 %}selected{% endif %}>Inactivo</option>
                     </select>
                 </div>
 
