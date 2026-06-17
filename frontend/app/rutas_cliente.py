@@ -37,7 +37,7 @@ def landing():
 @cliente_bp.route('/menu', methods=['GET'])
 def menu():
     try:
-        response = requests.get(f"{BACKEND_URL}/menu")
+        response = requests.get(f"{BACKEND_URL}/api/menu")
         platos_activos = response.json() if response.status_code == 200 else []
     except Exception:
         platos_activos = []

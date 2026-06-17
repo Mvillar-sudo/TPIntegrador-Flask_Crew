@@ -119,7 +119,7 @@ def metricas_en_vivo():
 def ver_menu():
     try:
         
-        response = requests.get(f"{BACKEND_URL}/menu")
+        response = requests.get(f"{BACKEND_URL}/admin/menu")
         
         
         if response.status_code == 404:
@@ -155,7 +155,7 @@ def ver_menu():
                             "nombre_plato": plato.get("nombre_plato"),
                             "descripcion": plato.get("descripcion"),
                             "precio": plato.get("precio"),
-                            "estado": plato.get("estado"),
+                            "activo": plato.get("activo"),
                             "imagen": None  
                         }
                         
@@ -224,7 +224,7 @@ def editar_plato_vista(id_plato):
                     "nombre_plato": plato.get("nombre_plato"),
                     "descripcion": plato.get("descripcion"),
                     "precio": plato.get("precio"),
-                    "estado": plato.get("estado"),
+                    "activo": plato.get("activo"),
                     "imagen": None 
                 }
                 requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
@@ -255,7 +255,7 @@ def editar_plato_proceso(id_plato):
             "nombre_plato": str(request.form.get("nombre_plato", "")).strip(),
             "descripcion": str(request.form.get("descripcion", "")).strip(),
             "precio": float(request.form.get("precio", 0.0)),
-            "estado": int(request.form.get("estado", 1)) 
+            "activo": int(request.form.get("activo", 1))
         }
 
        
@@ -408,7 +408,7 @@ def actualizar_servicio_proceso(id_servicio):
 @requiere_login()
 def reservas():
     try:
-        r = requests.get(f"{BACKEND_URL}/api/reservas/")
+        r = requests.get(f"{BACKEND_URL}/reservas/")
         reservas_lista = r.json()
     except Exception as e:
         print(f"Error al obtener reservas: {e}")
@@ -421,7 +421,7 @@ def reservas():
 @requiere_login()
 def cancelar_reserva(id_reserva):
     try:
-        r = requests.patch(f"{BACKEND_URL}/api/reservas/{id_reserva}/cancelar")
+        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
         flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
     except Exception as e:
         flash("Error de conexión con el servidor", "danger")
@@ -436,7 +436,7 @@ def scanear_qr():
     qr_code = request.args.get('qr_code')
 
     try:
-        r = requests.post(f"{BACKEND_URL}/api/reservas/validar-qr", json={
+        r = requests.post(f"{BACKEND_URL}/reservas/validar-qr", json={
             "id_reserva": id_reserva,
             "qr_code": qr_code
         })
