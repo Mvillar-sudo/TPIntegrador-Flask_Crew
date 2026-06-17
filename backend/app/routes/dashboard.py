@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from services.servicios_service import obtener_total_servicios_activos
 from services.reservas_service import obtener_total_reservas_pendientes 
-from services.admin_menu_service import obtener_total_platos_activos
+from services.menu_service import obtener_total_platos_activos
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 

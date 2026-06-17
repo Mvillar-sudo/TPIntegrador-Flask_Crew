@@ -6,6 +6,7 @@ import db
 from extensions import mail
 
 from routes.menu import menu_bp
+from routes.admin_menu import admin_menu_bp
 from routes.resena import resenas_bp
 from routes.auth import auth_bp
 from routes.reservas import reservas_bp
@@ -36,7 +37,6 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_menu_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp)
-    
     app.register_blueprint(resenas_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
