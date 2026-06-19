@@ -421,7 +421,6 @@ def reservas():
 
 @admin_bp.route('/admin/dashboard/reservas/<int:id_reserva>/cancelar', methods=['POST'])
 @requiere_login()
-@requiere_login()
 def cancelar_reserva(id_reserva):
     try:
         r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
