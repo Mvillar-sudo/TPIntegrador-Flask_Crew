@@ -43,27 +43,23 @@
             {% endif %}
             
             {% if error %}
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="alert alert-danger text-center">
-                        {{ error }}
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="alert alert-danger text-center">
+                            {{ error }}
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% endif %}
+                {% endif %}
         
             <div class="row">
                 <div class="col-md-8 col-md-offset-2 animate-box">
-                    <form action="{{ url_for('reseñas.crear_resena') }}" method="POST" class="review-form">
+                    <form action="{{ url_for('cliente.crear_resena') }}" method="POST" class="review-form">
                         
                         <div class="row form-group">
                             <div class="col-md-6">
                                 <label for="nombre_cliente">Nombre Completo</label>
                                 <input type="text" id="nombre_cliente" name="nombre_cliente" class="form-control" placeholder="Tu nombre" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="reserva_id">ID de Reserva (opcional)</label>
-                                <input type="number" id="reserva_id" name="reserva_id" class="form-control" placeholder="Ej: 12">
                             </div>
                         </div>
 
@@ -119,32 +115,33 @@
 
             <div class="row">
                 {% if resenas %}
-                    {% for resena in resenas %}
-                        <div class="col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
-                            <div class="feature-center resena-card">
-                                <span class="icon">
-                                    <i class="ti-user"></i>
-                                </span>
-                                <h3 class="resena-autor">
-                                    {{ resena.nombre_cliente }}
-                                </h3>
-                                
-                                <div class="stars-display">
-                                    {% for i in range(resena.calificacion|int) %}
-                                        <i class="ti-star"></i>
-                                    {% endfor %}
-                                    {% for i in range(5 - resena.calificacion|int) %}
-                                        <i class="ti-star-unselected"></i>
-                                    {% endfor %}
-                                </div>
+                    {% for resena in resenas %} 
+                        {% if resena.calificacion > 2 %}
+                            <div class="col-md-4 col-sm-6 animate-box" data-animate-effect="fadeIn">
+                                <div class="feature-center resena-card">
+                                    <span class="icon">
+                                        <i class="ti-user"></i>
+                                    </span>
+                                    <h3 class="resena-autor">
+                                        {{ resena.nombre_cliente }}
+                                    </h3>
+                                    <div class="stars-display">
+                                        {% for i in range(resena.calificacion|int) %}
+                                            <i class="ti-star"></i>
+                                        {% endfor %}
+                                        {% for i in range(5 - resena.calificacion|int) %}
+                                            <i class="ti-star-unselected"></i>
+                                        {% endfor %}
+                                    </div>
 
-                                <p>"{{ resena.comentario }}"</p>
-                                
-                                {% if resena.fecha_creacion %}
-                                    <small class="text-muted resena-fecha">{{ resena.fecha_creacion }}</small>
-                                {% endif %}
+                                    <p>"{{ resena.comentario }}"</p>
+                                    
+                                    {% if resena.fecha_creacion %}
+                                        <small class="text-muted resena-fecha">{{ resena.fecha_creacion }}</small>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     <div class="col-md-12 text-center">

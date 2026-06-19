@@ -4,19 +4,6 @@ import os
 
 cliente_bp = Blueprint('cliente', __name__)
 
-#def obtener_resenas_backend():
-
-#respuesta = requests.get(BACKEND_RESENAS_URL, timeout=10)
- #  respuesta.raise_for_status()
-  #  return respuesta.json()
-
-#def render_resenas(exito, error):
- #   try:
-  #      resenas_list = obtener_resenas_backend()
-   # except Exception:
-    #    resenas_list = []
-    #return render_template('resenas.html', resenas=resenas_list, exito=exito, error=error)
-
 BACKEND_URL = "http://localhost:5000"
 
 cliente_bp = Blueprint('cliente', __name__)
@@ -43,7 +30,7 @@ def menu():
         platos_activos = response.json() if response.status_code == 200 else []
         
         ruta_static_img = os.path.join(current_app.root_path, 'static', 'img')
-        
+
         for plato in platos_activos:
             if plato.get("precio") is not None:
                 try:
@@ -66,46 +53,57 @@ def menu():
         platos_activos = []
     return render_template('menu.html', platos=platos_activos)
 
-#@cliente_bp.route('/resenas', methods=['GET', 'POST'])
-#def resenas():
-    #if request.method == 'POST':
-        #nombre_cliente = request.form.get('nombre_cliente', '').strip()
-        #calificacion   = request.form.get('calificacion', '').strip()
-        #comentario     = request.form.get('comentario', '').strip()
-        #reserva_id     = request.form.get('reserva_id', '').strip()
 
-        #payload = {
-            #"nombre_cliente": nombre_cliente,
-           # "calificacion": int(calificacion) if calificacion else None,
-          #  "comentario": comentario,
-         #   "reserva_id": int(reserva_id) if reserva_id else None,
-        #}
-
-        #try:
-           # respuesta = requests.post(f"{BACKEND_URL}/resenas/", json=payload, timeout=10)
-          #  if respuesta.status_code != 201:
-         #       error = respuesta.json().get('error', 'No se pudo crear la reseña')
-                #return render_resenas(exito=False, error=error)
-        #except Exception:
-           # return render_resenas(exito=False, error='No se pudo conectar con el servidor')
-
-        #return render_resenas(exito=True, error=None)
-
-    #return render_resenas(exito=False, error=None)
-
-@cliente_bp.route('/dejar-resena', methods=['GET'])
-def dejar_resena():
+def obtener_resenas_backend():
+    """Función auxiliar para conectarse a la API del backend."""
     try:
-        response = requests.get(f"{BACKEND_URL}/resenas/")
-        if response.status_code == 200:
-            todas_las_resenas = response.json()
-            ultimas_resenas = todas_las_resenas[:6] 
-        else:
-            ultimas_resenas = []
-    except Exception:
-        ultimas_resenas = []
-    return render_template('resenas.html', resenas=ultimas_resenas)
+        respuesta = requests.get(f"{BACKEND_URL}/api/resenas/", timeout=10)
+        if respuesta.status_code == 200:
+            return respuesta.json()
+    except Exception as e:
+        print(f"⚠️ Error al conectar al backend de reseñas: {e}")
+    return []
 
+
+@cliente_bp.route('/resenas', methods=['GET'])
+def resenas():
+    """Muestra la página de opiniones y lista todas las reseñas existentes."""
+    exito = request.args.get('exito') == 'True'
+    error = request.args.get('error')
+
+    try:
+        respuesta = requests.get(f"{BACKEND_URL}/api/resenas/", timeout=10)
+        resenas_list = respuesta.json() if respuesta.status_code == 200 else []
+    except Exception:
+        resenas_list = []
+    
+    return render_template('resenas.html', resenas=resenas_list, exito=exito, error=error)
+
+
+@cliente_bp.route('/resenas/crear', methods=['POST'])
+def crear_resena():
+    """Recibe el formulario clásico HTML de reseña y lo envía al backend."""
+    nombre_cliente = request.form.get('nombre_cliente', '').strip()
+    calificacion   = request.form.get('calificacion', '').strip()
+    comentario     = request.form.get('comentario', '').strip()
+
+    payload = {
+        "nombre_cliente": nombre_cliente,
+        "calificacion": int(calificacion) if calificacion.isdigit() else None,
+        "comentario": comentario
+    }
+
+    try:
+        respuesta = requests.post(f"{BACKEND_URL}/api/resenas/", json=payload, timeout=10)
+        
+        if respuesta.status_code == 201:
+            return redirect(url_for('cliente.resenas', exito='True'))
+        else:
+            msg_error = respuesta.json().get('error', 'No se pudo procesar la reseña.')
+            return redirect(url_for('cliente.resenas', error=msg_error))
+            
+    except Exception:
+        return redirect(url_for('cliente.resenas', error='No se pudo conectar con el servidor central.'))
 
 @cliente_bp.route('/reservas/nueva', methods=['POST'])
 def crear_reserva():

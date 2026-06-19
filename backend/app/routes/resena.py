@@ -55,4 +55,4 @@ def eliminar_resena(id_resena):
             return jsonify({"error": "Reseña no encontrada"}), 404
         return jsonify({"mensaje": "Reseña eliminada correctamente"}), 200
     except RuntimeError as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500 

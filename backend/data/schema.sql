@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS menu (
     nombre_plato VARCHAR(100) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     descripcion TEXT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    estado BOOLEAN NOT NULL DEFAULT TRUE,
     imagen VARCHAR(255) NULL
 );
 
@@ -54,7 +54,5 @@ CREATE TABLE IF NOT EXISTS resenas (
     comentario TEXT NOT NULL,
     calificacion INT NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
     nombre_cliente VARCHAR(100) NOT NULL,
-    reserva_id INT NULL,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (reserva_id) REFERENCES reservas(id_reserva) ON DELETE SET NULL
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
