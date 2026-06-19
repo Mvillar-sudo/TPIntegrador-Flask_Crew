@@ -32,7 +32,7 @@ def create_app():
     mail.init_app(app)
     mail.app = app
 
-    app.register_blueprint(menu_bp, url_prefix='/api')
+    app.register_blueprint(menu_bp)
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(admin_menu_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp)

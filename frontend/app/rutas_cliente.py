@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash
 import requests
+import os
 
 cliente_bp = Blueprint('cliente', __name__)
 
@@ -39,6 +40,28 @@ def menu():
     try:
         response = requests.get(f"{BACKEND_URL}/menu")
         platos_activos = response.json() if response.status_code == 200 else []
+        platos_activos = response.json() if response.status_code == 200 else []
+        
+        ruta_static_img = os.path.join(current_app.root_path, 'static', 'img')
+        
+        for plato in platos_activos:
+            if plato.get("precio") is not None:
+                try:
+                    plato["precio"] = float(plato["precio"])
+                except (ValueError, TypeError):
+                    plato["precio"] = 0.00
+            else:
+                plato["precio"] = 0.00
+            nombre_imagen = plato.get("imagen")
+            if nombre_imagen:
+                ruta_fisica_imagen = os.path.join(ruta_static_img, nombre_imagen)
+                
+                # Si el archivo NO existe físicamente, se cambia a None para usar la default
+                if not os.path.exists(ruta_fisica_imagen):
+                    print(f"⚠️ Alerta: La imagen '{nombre_imagen}' no existe en disco. Usando default.")
+                    plato["imagen"] = None
+
+
     except Exception:
         platos_activos = []
     return render_template('menu.html', platos=platos_activos)
