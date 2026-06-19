@@ -2353,6 +2353,8 @@ main {
 .resena-autor {
     margin-bottom: 5px !important;
     font-weight: bold !important;
+    color: #ffc107 !important;
+    text-align: center !important;
 }
 .star-rating {
     display: flex;
