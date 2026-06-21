@@ -403,6 +403,35 @@ def actualizar_servicio_proceso(id_servicio):
         flash("Error al conectar con la API", "danger")
     return redirect(url_for('admin.ver_servicios'))
 
+@admin_bp.route('/admin/dashboard/resenas')
+@requiere_login()
+def ver_resenas():
+    try:
+        response = requests.get(f"{BACKEND_URL}/resenas/")
+        resenas = response.json() if response.status_code == 200 else []
+    except Exception:
+        resenas = []
+    return render_template(
+        'gestion/resenas.html',
+        resenas=resenas,
+        titulo_pagina='Reseñas de Clientes',
+        subtitulo_pagina='Gestioná los comentarios dejados por los clientes'
+    )
+
+
+@admin_bp.route('/admin/resenas/eliminar/<int:id_resena>', methods=['POST'])
+@requiere_login()
+def eliminar_resena_vista(id_resena):
+    try:
+        response = requests.delete(f"{BACKEND_URL}/resenas/{id_resena}")
+        if response.status_code == 200:
+            flash("Reseña eliminada correctamente.", "success")
+        else:
+            flash("No se pudo eliminar la reseña.", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el backend.", "danger")
+
+    return redirect(url_for('admin.ver_resenas'))
 
 @admin_bp.route('/admin/dashboard/reservas')
 @requiere_login()

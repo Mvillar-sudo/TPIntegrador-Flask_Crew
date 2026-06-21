@@ -54,5 +54,6 @@ CREATE TABLE IF NOT EXISTS resenas (
     comentario TEXT NOT NULL,
     calificacion INT NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
     nombre_cliente VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

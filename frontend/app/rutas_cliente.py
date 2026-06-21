@@ -84,24 +84,26 @@ def resenas():
 def crear_resena():
     """Recibe el formulario clásico HTML de reseña y lo envía al backend."""
     nombre_cliente = request.form.get('nombre_cliente', '').strip()
+    email          = request.form.get('email', '').strip()
     calificacion   = request.form.get('calificacion', '').strip()
     comentario     = request.form.get('comentario', '').strip()
 
     payload = {
         "nombre_cliente": nombre_cliente,
+        "email": email,
         "calificacion": int(calificacion) if calificacion.isdigit() else None,
         "comentario": comentario
     }
 
     try:
         respuesta = requests.post(f"{BACKEND_URL}/api/resenas/", json=payload, timeout=10)
-        
+
         if respuesta.status_code == 201:
             return redirect(url_for('cliente.resenas', exito='True'))
         else:
             msg_error = respuesta.json().get('error', 'No se pudo procesar la reseña.')
             return redirect(url_for('cliente.resenas', error=msg_error))
-            
+
     except Exception:
         return redirect(url_for('cliente.resenas', error='No se pudo conectar con el servidor central.'))
 
