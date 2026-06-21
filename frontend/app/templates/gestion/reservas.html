@@ -1,111 +1,117 @@
-{% extends 'gestion/base_dashboard.html' %} 
-
+{% extends 'gestion/base_admin.html' %}
 {% block title %}Panel - Control de Reservas{% endblock %}
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
-{% set titulo_pagina = "Control de Reservas" %}
-{% set subtitulo_pagina = "Visualiza, analiza y gestiona los turnos de tus comensales." %}
-
-{% block cabecera_tabla %}
-    <th>ID</th>
-    <th>Nombre</th>
-    <th>Email</th>
-    <th>Fecha / Hora</th>
-    <th>Personas</th>
-    <th>Estado</th>
-    <th>Acciones</th>
-{% endblock %}
-
-{% block cuerpo_tabla %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <tr class="flash-row-ignore">
-                    <td colspan="7">
-                        <div class="alert alert-{{ category }} alert-flash-table">
-                            {{ message }}
-                        </div>
-                    </td>
-                </tr>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    {% for reserva in reservas %}
-    <tr>
-        <td>
-            <a href="#" class="btn-detalle"
-               data-id="{{ reserva.id_reserva }}"
-               data-nombre="{{ reserva.nombre }}"
-               data-email="{{ reserva.email }}"
-               data-telefono="{{ reserva.telefono }}"
-               data-fecha="{{ reserva.fecha }}"
-               data-hora="{{ reserva.hora }}"
-               data-personas="{{ reserva.cantidad_personas }}"
-               data-estado="{{ reserva.estado }}"
-               data-token="{{ reserva.token_cancelacion }}"
-               data-qr="{{ reserva.qr_code }}"
-               data-creacion="{{ reserva.fecha_creacion }}"
-               data-toggle="modal" data-target="#modalDetalle">
-               #{{ reserva.id_reserva }}
-            </a>
-        </td>
-        <td>{{ reserva.nombre }}</td>
-        <td>{{ reserva.email }}</td>
-        <td>{{ reserva.fecha }} a las {{ reserva.hora }} hs</td>
-        <td>{{ reserva.cantidad_personas }}</td>
-        <td>
-            <span class="badge-estado badge-{{ reserva.estado }}">
-                {{ reserva.estado }}
-            </span>
-        </td>
-        <td>
-            {% if reserva.estado != 'cancelada' and reserva.estado != 'validada' %}
-            <form action="{{ url_for('admin.cancelar_reserva', id_reserva=reserva.id_reserva) }}" method="POST"
-                  onsubmit="return confirm('¿Cancelar esta reserva?')">
-                <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
-            </form>
-            {% else %}
-                <span class="text-muted-separator">—</span>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-{% endblock %}
-
 {% block content %}
-    {{ super() }} <div class="modal fade" id="modalDetalle" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Detalle de Reserva <span id="modal-id"></span></h4>
-                </div>
-                <div class="modal-body">
-                    <table class="table">
-                        <tr><th>Nombre</th><td id="modal-nombre"></td></tr>
-                        <tr><th>Email</th><td id="modal-email"></td></tr>
-                        <tr><th>Teléfono</th><td id="modal-telefono"></td></tr>
-                        <tr><th>Fecha</th><td id="modal-fecha"></td></tr>
-                        <tr><th>Hora</th><td id="modal-hora"></td></tr>
-                        <tr><th>Personas</th><td id="modal-personas"></td></tr>
-                        <tr><th>Estado</th><td id="modal-estado"></td></tr>
-                        <tr><th>Token Cancelación</th><td id="modal-token" class="modal-text-break"></td></tr>
-                        <tr><th>Código QR</th><td id="modal-qr" class="modal-text-small"></td></tr>
-                        <tr><th>Fecha Registro</th><td id="modal-creacion"></td></tr>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                </div>
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="margin-top: 15px;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="reservas-table-wrap">
+            <h2>Control de Reservas</h2>
+            <table class="table-reservas">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Fecha / Hora</th>
+                        <th>Personas</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in reservas %}
+                    <tr>
+                        <td>
+                            <a href="#" class="btn-detalle"
+                               data-id="{{ reserva.id_reserva }}"
+                               data-nombre="{{ reserva.nombre }}"
+                               data-email="{{ reserva.email }}"
+                               data-telefono="{{ reserva.telefono }}"
+                               data-fecha="{{ reserva.fecha }}"
+                               data-hora="{{ reserva.hora }}"
+                               data-personas="{{ reserva.cantidad_personas }}"
+                               data-estado="{{ reserva.estado }}"
+                               data-token="{{ reserva.token_cancelacion }}"
+                               data-qr="{{ reserva.qr_code }}"
+                               data-creacion="{{ reserva.fecha_creacion }}"
+                               data-toggle="modal" data-target="#modalDetalle">
+                                #{{ reserva.id_reserva }}
+                            </a>
+                        </td>
+                        <td>{{ reserva.nombre }}</td>
+                        <td>{{ reserva.email }}</td>
+                        <td>{{ reserva.fecha }} a las {{ reserva.hora }} hs</td>
+                        <td>{{ reserva.cantidad_personas }}</td>
+                        <td>
+                            <span class="badge-estado badge-{{ reserva.estado }}">
+                                {{ reserva.estado }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if reserva.estado != 'cancelada' and reserva.estado != 'validada' %}
+                            <form action="{{ url_for('admin.cancelar_reserva', id_reserva=reserva.id_reserva) }}" method="POST"
+                                  onsubmit="return confirm('¿Cancelar esta reserva?')">
+                                <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+                            </form>
+                            {% else %}
+                                <span style="color: #aaa; font-size: 13px;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Detalle de Reserva <span id="modal-id"></span></h4>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <tr><th>Nombre</th><td id="modal-nombre"></td></tr>
+                    <tr><th>Email</th><td id="modal-email"></td></tr>
+                    <tr><th>Teléfono</th><td id="modal-telefono"></td></tr>
+                    <tr><th>Fecha</th><td id="modal-fecha"></td></tr>
+                    <tr><th>Hora</th><td id="modal-hora"></td></tr>
+                    <tr><th>Personas</th><td id="modal-personas"></td></tr>
+                    <tr><th>Estado</th><td id="modal-estado"></td></tr>
+                    <tr><th>Token Cancelación</th><td id="modal-token" style="word-break: break-all; font-size: 12px;"></td></tr>
+                    <tr><th>Código QR</th><td id="modal-qr" style="font-size: 12px;"></td></tr>
+                    <tr><th>Fecha Registro</th><td id="modal-creacion"></td></tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
-{% endblock %}
+</div>
 
 {% block extra_scripts %}
     <script src="{{ url_for('static', filename='js/control-reservas.js') }}"></script>
+{% endblock %}
+
 {% endblock %}

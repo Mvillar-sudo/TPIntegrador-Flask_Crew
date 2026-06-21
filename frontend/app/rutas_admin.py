@@ -437,7 +437,9 @@ def eliminar_resena_vista(id_resena):
 @requiere_login()
 def reservas():
     try:
-        r = requests.get(f"{BACKEND_URL}/api/reservas/")
+        r = requests.get(f"{BACKEND_URL}/reservas/")
+        print(f"STATUS: {r.status_code}")
+        print(f"RESPUESTA: {r.text[:200]}")
         reservas_lista = r.json()
     except Exception as e:
         print(f"Error al obtener reservas: {e}")
@@ -450,7 +452,7 @@ def reservas():
 @requiere_login()
 def cancelar_reserva(id_reserva):
     try:
-        r = requests.patch(f"{BACKEND_URL}/api/reservas/{id_reserva}/cancelar")
+        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
         flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
     except Exception as e:
         flash("Error de conexión con el servidor", "danger")
@@ -460,12 +462,11 @@ def cancelar_reserva(id_reserva):
 @admin_bp.route('/admin/dashboard/validar-qr', methods=['GET'])
 @requiere_login()
 def scanear_qr():
-    
     id_reserva = request.args.get('id_reserva')
     qr_code = request.args.get('qr_code')
 
     try:
-        r = requests.post(f"{BACKEND_URL}/api/reservas/validar-qr", json={
+        r = requests.post(f"{BACKEND_URL}/reservas/validar-qr", json={
             "id_reserva": id_reserva,
             "qr_code": qr_code
         })
@@ -475,7 +476,12 @@ def scanear_qr():
         mensaje = "Error de conexión con el servidor"
         exito = False
 
-    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje) 
+    return render_template('gestion/resultado_qr.html', exito=exito, mensaje=mensaje)
+
+@admin_bp.route('/admin/dashboard/scanear-qr', methods=['GET'])
+@requiere_login()
+def pagina_scanear_qr():
+    return render_template('gestion/scanear_qr.html') 
 
 #backup de def reservas 
 @admin_bp.route('/admin/dashboard/reservas_backup')
