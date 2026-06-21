@@ -15,7 +15,7 @@ def landing():
         response = requests.get(f"{BACKEND_URL}/api/servicios/", timeout=3)
         servicios = response.json() if response.status_code == 200 else []
     except Exception as e:
-        print(f"⚠️ Error al conectar con la API de servicios: {e}")
+        flash(f'Error al conectar la API con sericios: {e}', 'danger')
         servicios = []
         
     return render_template('landing.html', servicios=servicios)
@@ -45,7 +45,6 @@ def menu():
                 
                 # Si el archivo NO existe físicamente, se cambia a None para usar la default
                 if not os.path.exists(ruta_fisica_imagen):
-                    print(f"⚠️ Alerta: La imagen '{nombre_imagen}' no existe en disco. Usando default.")
                     plato["imagen"] = None
 
 
@@ -61,7 +60,7 @@ def obtener_resenas_backend():
         if respuesta.status_code == 200:
             return respuesta.json()
     except Exception as e:
-        print(f"⚠️ Error al conectar al backend de reseñas: {e}")
+       flash(f'Error al conectar al backend de reseñas: {e}', 'danger') 
     return []
 
 
@@ -126,7 +125,7 @@ def crear_reserva():
             error = r.json().get("mensaje", "Error al crear la reserva")
             return render_template('landing.html', error=error)
     except Exception as e:
-        print(f"Error al crear reserva: {e}")
+        flash(f'Error al crear reserva: {e}', 'danger')
         return render_template('landing.html', error="Error de conexión con el servidor")
     
 
@@ -140,5 +139,5 @@ def cancelar_reserva(token):
         else:
             return render_template('cancelacion.html', exito=False, mensaje=mensaje)
     except Exception as e:
-        print(f"Error al cancelar reserva: {e}")
+        flash(f'Error al cancelar reserva: {e}', 'danger')
         return render_template('cancelacion.html', exito=False, mensaje="Error de conexión con el servidor")

@@ -63,7 +63,7 @@ def dashboard():
             total_reservas = metricas.get("total_reservas_pendientes", 0)
             total_servicios = metricas.get("total_servicios_activos", 0)
     except requests.exceptions.RequestException as e:
-        print(f"⚠️ Error de red con métricas: {e}")
+        flash(f'Error de red: {e}', 'danger')
 
     return render_template(
         'gestion/dashboard.html', 
@@ -109,7 +109,7 @@ def metricas_en_vivo():
             })
             
     except requests.exceptions.RequestException as e:
-        print(f"⚠️ Error de red en vivo: {e}")
+        flash(f'Error de red: {e}', 'danger')
     
     return jsonify({"error": "No se pudieron obtener datos"}), 500
 
@@ -119,20 +119,10 @@ def metricas_en_vivo():
 def ver_menu():
     try:
         
-        response = requests.get(f"{BACKEND_URL}/menu")
-        
-        
-        if response.status_code == 404:
-            response = requests.get(f"{BACKEND_URL}/admin/menu")
-
-        print(f"--- STATUS BACKEND MENU: {response.status_code} ---")
-        print(f"--- DATOS RECIBIDOS: {response.text} ---")
+        response = requests.get(f"{BACKEND_URL}/admin/menu")
 
         if response.status_code == 200:
             platos = response.json() 
-            if platos and len(platos) > 0:
-                print("¡¡¡ AQUÍ ESTÁN LAS CLAVES REALES !!! ->", platos[0].keys())
-                print("PRIMER PLATO COMPLETO ->", platos[0])
         else:
             platos = []
             
@@ -147,7 +137,6 @@ def ver_menu():
                     
                     # ¡SI LA IMAGEN FUE BORRADA DEL DISCO!
                     if not os.path.exists(ruta_fisica):
-                        print(f"⚠️ La imagen '{imagen_nombre}' no existe en el disco. Limpiando en BD...")
                         
     
                         id_plato = plato.get("id_plato")
@@ -164,7 +153,6 @@ def ver_menu():
                         plato["imagen"] = None
 
     except Exception as e:
-        print(f"--- ERROR AL CONECTAR AL MENU: {e} ---")
         platos = []
         
     return render_template('gestion/menu.html', platos=platos)
@@ -218,7 +206,6 @@ def editar_plato_vista(id_plato):
             
             # ¡SI LA IMAGEN FUE BORRADA FÍSICAMENTE!
             if not os.path.exists(ruta_fisica):
-                print(f"⚠️ La imagen '{imagen_nombre}' no existe en el disco. Seteando a NULL en el backend...")
                 
                 payload_limpieza = {
                     "nombre_plato": plato.get("nombre_plato"),
@@ -265,11 +252,8 @@ def editar_plato_proceso(id_plato):
        
         url_backend = f"{BACKEND_URL}/admin/menu/{id_plato}"
         
-        print(f"--- DATOS QUE ENVIAMOS AL BACKEND: {payload} ---")
         response = requests.patch(url_backend, json=payload)
         
-        print(f"--- STATUS BACKEND AL GUARDAR: {response.status_code} ---")
-        print(f"--- RESPUESTA DEL BACKEND: {response.text} ---")
         
         if response.status_code == 200:
             flash('¡Plato actualizado con éxito!', 'success')
@@ -281,7 +265,6 @@ def editar_plato_proceso(id_plato):
             flash(f'El backend rechazó los cambios: {mensaje_error}', 'danger')
             
     except Exception as e:
-        print(f"--- ERROR CRÍTICO AL GUARDAR: {e} ---")
         flash(f'Error de conexión: {e}', 'danger')
         
     return redirect(url_for('admin.ver_menu'))
@@ -334,7 +317,6 @@ def crear_servicio_vista():
                 
         except requests.exceptions.RequestException as e:
             flash("Error de conexión con el servidor de datos.", "danger")
-            print(f"❌ Error de red: {e}")
 
     return render_template('gestion/crear_servicio.html')
 
@@ -438,11 +420,8 @@ def eliminar_resena_vista(id_resena):
 def reservas():
     try:
         r = requests.get(f"{BACKEND_URL}/reservas/")
-        print(f"STATUS: {r.status_code}")
-        print(f"RESPUESTA: {r.text[:200]}")
         reservas_lista = r.json()
     except Exception as e:
-        print(f"Error al obtener reservas: {e}")
         reservas_lista = []
     
     return render_template('gestion/reservas.html', reservas=reservas_lista)
@@ -496,6 +475,6 @@ def reservas_backup():
             reservas_lista = data_backend.get("data", []) 
             
     except requests.exceptions.RequestException as e:
-        print(f"⚠️ Error al traer reservas: {e}")
+        flash(f"{e}")
 
     return render_template('gestion/reservas.html', reservas=reservas_lista)

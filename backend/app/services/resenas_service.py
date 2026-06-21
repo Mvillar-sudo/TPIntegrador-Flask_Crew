@@ -3,7 +3,7 @@ from db import query_db, execute_db
 
 def obtener_resenas():
     return query_db("""
-        SELECT id_resena AS id, comentario, calificacion, nombre_cliente, email, fecha_creacion
+        SELECT *
         FROM resenas
         ORDER BY fecha_creacion DESC
     """)
