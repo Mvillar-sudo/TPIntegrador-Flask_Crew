@@ -1,11 +1,10 @@
 def validar_login(data):
     if not data:
-        return False, "No se recibieron datos"
+        return True, "No se recibieron datos" 
 
-    usuario = data.get("usuario")
+    email = data.get("email")
     password = data.get("password")
 
-    if not usuario or not password:
-        return False, "Faltan campos obligatorios (usuario y password)"
-
-    return True, None
+    if not email or not password:
+        return True, "Faltan campos obligatorios (usuario y password)" 
+    return False, "Validación exitosa"

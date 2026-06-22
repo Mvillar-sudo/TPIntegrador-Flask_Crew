@@ -15,11 +15,11 @@ def generar_jwt(usuario_email):
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
 def post_login(data):
-    nombre = data["username"]
+    email_usuario = data["email"] 
     password = data["password"]
 
     query = "SELECT email, password FROM usuarios WHERE email = %s AND activo = TRUE"
-    resultado = query_db(query, (nombre,))  # Aprovechamos y dejamos la tupla fija
+    resultado = query_db(query, (email_usuario,))
 
     if not resultado:
         return None
@@ -27,10 +27,7 @@ def post_login(data):
     user_db = resultado[0]
 
     if check_password_hash(user_db["password"], password):
-        # ADAPTACIÓN JWT: Generamos el token si la contraseña es correcta
         token = generar_jwt(user_db["email"])
-
-        # Devolvemos la estructura DTO (objeto limpio) + el Token para el Front
         return {
             "token": token,
             "usuario": {
@@ -40,13 +37,13 @@ def post_login(data):
     return None
 
 def post_register(data):
-    usuario = data["username"]
+    email_usuario = data["email"] 
     password = data["password"]
     password_hash = generate_password_hash(password)
 
     query = "INSERT INTO usuarios (nombre, email, password) VALUES (%s, %s, %s)"
-    nombre = usuario.split("@")[0]
-    args = (nombre, usuario, password_hash)
+    nombre = data.get("nombre") or email_usuario.split("@")[0] 
+    args = (nombre, email_usuario, password_hash)
 
     execute_db(query, args)
     return "Usuario registrado correctamente"

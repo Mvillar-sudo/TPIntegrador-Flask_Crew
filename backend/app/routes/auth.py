@@ -4,7 +4,7 @@ from validators import validar_login
 auth_bp = Blueprint('auth', __name__)
 
 
-@auth_bp.route("/login", methods=["POST"])
+@auth_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.json
     error, mensaje = validar_login(data)
@@ -21,7 +21,7 @@ def login():
                     "usuario": user["usuario"]}), 200
 
 
-@auth_bp.route("/register", methods=["POST"])
+@auth_bp.route("/api/register", methods=["POST"])
 def register():
     data = request.json
 
@@ -29,5 +29,8 @@ def register():
     if error:
         return {"mensaje": mensaje}, 400
 
-    mensaje = post_register(data)
-    return jsonify({"mensaje": mensaje}), 201
+    try:
+        mensaje = post_register(data)
+        return jsonify({"mensaje": mensaje}), 201
+    except Exception as e:
+        return jsonify({"mensaje": f"Error al registrar: {str(e)}"}), 500

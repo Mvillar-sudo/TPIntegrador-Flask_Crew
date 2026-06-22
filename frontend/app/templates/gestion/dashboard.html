@@ -50,7 +50,7 @@
                 <div class="dashboard-card text-center">
                     <h3>Scanear QR</h3>
                     <p>Verificar QR de reserva.</p>
-                    <a href="{{ url_for('admin.pagina_scanear_qr') }}" class="btn btn-primary btn-sm">Scanear</a>
+                    <a href="{{ url_for('admin.pagina_scanear_qr') }}" class="btn btn-primary btn-sm">Escanear</a>
                 </div>
             </div>
             <div class="col-md-4 col-sm-6">
@@ -60,6 +60,15 @@
                     <a href="{{ url_for('admin.ver_resenas') }}" class="btn btn-primary btn-sm">Ver Reseñas</a>
                 </div>
             </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="dashboard-card text-center">
+                    <h3>Registrar Admin</h3>
+                    <p>Crea las credenciales de acceso para nuevos miembros del equipo de gestión y soporte.</p>
+                    <a href="{{ url_for('admin.mostrar_formulario_crear') }}" class="btn btn-primary btn-sm">Registrar</a>
+                </div>
+            </div>
+        </div>
+
         </div>
 
         <div class="row metrics-row">

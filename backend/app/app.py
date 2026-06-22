@@ -1,6 +1,11 @@
 from flask import Flask, jsonify
+from pathlib import Path
 from flask_cors import CORS
 from dotenv import load_dotenv
+import os
+
+base_dir = Path(__file__).resolve().parent
+load_dotenv(os.path.join(base_dir, '.env'))
 
 import db
 from extensions import mail
@@ -13,18 +18,12 @@ from routes.servicios import servicios_bp
 from routes.admin_menu import admin_menu_bp
 from routes.dashboard import dashboard_bp
 
-from config import MAIL_SERVER, MAIL_PORT, MAIL_USE_TLS, MAIL_USERNAME, MAIL_PASSWORD
 
 def create_app():
     app = Flask(__name__)
-    load_dotenv()
 
-    app.config['MAIL_SERVER'] = MAIL_SERVER
-    app.config['MAIL_PORT'] = MAIL_PORT
-    app.config['MAIL_USE_TLS'] = MAIL_USE_TLS
-    app.config['MAIL_USE_SSL'] = False
-    app.config['MAIL_USERNAME'] = MAIL_USERNAME
-    app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+    app.config.from_object('config') 
+    
 
     CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
     
@@ -33,7 +32,7 @@ def create_app():
     mail.app = app
 
     app.register_blueprint(menu_bp)
-    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp)
     app.register_blueprint(admin_menu_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp)
     

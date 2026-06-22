@@ -2686,5 +2686,87 @@ main {
 }
 .btn-cancel-link:hover {
     background: #e0e0e0 !important;
+} 
+.form-register-wrapper {
+    padding: 40px 0;
+}
+.register-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+}
+.subtitle-register {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+.form-group-custom {
+    margin-bottom: 20px;
+}
+.form-group-custom label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+.form-control-custom {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+.form-control-custom:focus {
+    border-color: #5cb85c;
+    outline: none;
+}
+.btn-submit-register {
+    width: 100%;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+.btn-submit-register:hover {
+    background-color: #4cae4c;
+}
+.alert-message {
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.alert-error {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
+}
+.alert-exito {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+/* Limpieza del inline-style del gráfico en dashboard.html */
+.graphic-container-row {
+    margin-top: 40px;
+}
+.graphic-card {
+    background: #fff; 
+    padding: 20px; 
+    border-radius: 8px; 
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.05);
+}
+.graphic-title {
+    margin-bottom: 20px; 
+    color: #333;
 }
 /*# sourceMappingURL=style.css.map */

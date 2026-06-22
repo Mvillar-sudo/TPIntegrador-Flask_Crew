@@ -18,7 +18,7 @@ def login():
 @admin_bp.route('/admin/login_process', methods=['POST'])
 def login_process():
     payload = {
-        "username": request.form.get('username'),
+        "email": request.form.get('username'),
         "password": request.form.get('password')
     }
     try:
@@ -44,10 +44,39 @@ def logout():
     flash("Sesión cerrada.", "info")
     return redirect(url_for('admin.login'))
 
+@admin_bp.route("/admin/registrar", methods=["GET"])
+@requiere_login()
+def mostrar_formulario_crear():
+    try:
+        return render_template('gestion/registrar.html')
+        
+    except Exception as e:
+        flash(f'Error al cargar la página: {e}', 'danger')
+        return redirect(url_for('admin.dashboard')) 
 
-import requests
-from flask import Blueprint, render_template
+@admin_bp.route("/admin/registrar_usuario_proceso", methods=["POST"])
+@requiere_login()
+def registrar_usuario_proceso():
+    try:
+        payload = {
+            "nombre": request.form.get("nombre", "").strip(),
+            "email": request.form.get("email", "").strip(),
+            "password": request.form.get("password", "").strip()
+        }
 
+        response = requests.post(f"{BACKEND_URL}/register", json=payload)
+        
+        if response.status_code == 201:
+            flash('¡Administrador añadido exitosamente!', 'success')
+            return redirect(url_for('admin.dashboard')) 
+        else:
+            error_mensaje = response.json().get("mensaje", "Error al crear el usuario")
+            flash(error_mensaje, 'danger')
+            
+    except Exception as e:
+        flash(f'Error al procesar el registro: {e}', 'danger')
+        
+    return redirect(url_for('admin.mostrar_formulario_crear'))
 
 @admin_bp.route('/admin/dashboard')
 @requiere_login()
@@ -461,20 +490,3 @@ def scanear_qr():
 @requiere_login()
 def pagina_scanear_qr():
     return render_template('gestion/scanear_qr.html') 
-
-#backup de def reservas 
-@admin_bp.route('/admin/dashboard/reservas_backup')
-@requiere_login()
-def reservas_backup():
-    reservas_lista = []
-    try:
-        
-        response = requests.get(f"{BACKEND_URL}/dashboard/reservas")
-        if response.status_code == 200:
-            data_backend = response.json()
-            reservas_lista = data_backend.get("data", []) 
-            
-    except requests.exceptions.RequestException as e:
-        flash(f"{e}")
-
-    return render_template('gestion/reservas.html', reservas=reservas_lista)
