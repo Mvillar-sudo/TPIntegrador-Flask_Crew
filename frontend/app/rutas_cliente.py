@@ -114,9 +114,9 @@ def crear_reserva():
         "fecha": request.form.get("fecha"),
         "hora": request.form.get("hora"),
         "cantidad_personas": request.form.get("persons"),
-        "telefono": ""  # el form no tiene campo telefono
+        "telefono": "0000000000"  # el form no tiene campo telefono
     }
-
+    
     try:
         r = requests.post(f"{BACKEND_URL}/api/reservas/", json=data)
         if r.status_code == 201:
