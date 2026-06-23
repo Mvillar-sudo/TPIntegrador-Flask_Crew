@@ -46,4 +46,21 @@ def post_register(data):
     args = (nombre, email_usuario, password_hash)
 
     execute_db(query, args)
-    return "Usuario registrado correctamente"
+    return "Usuario registrado correctamente" 
+
+def obtener_total_usuarios():
+    try:
+        resultado = query_db("""
+            SELECT COUNT(*) as total 
+            FROM usuarios 
+            WHERE activo = 1
+        """, one=True)
+        
+        if resultado:
+            if isinstance(resultado, dict):
+                return resultado.get('total', 0)
+            return resultado[0] 
+        return 0
+    except Exception as e:
+        print(f"⚠️ Error en reservas_service al contar pendientes: {e}")
+        return 0
