@@ -63,4 +63,43 @@ def obtener_total_usuarios():
         return 0
     except Exception as e:
         print(f"⚠️ Error en reservas_service al contar pendientes: {e}")
-        return 0
+        return 0 
+    
+def obtener_usuarios():
+    return query_db("""
+        SELECT *
+        FROM usuarios
+    """) 
+
+def obtener_usuario(id_usuario):
+
+    query = "SELECT * FROM usuarios WHERE id_usuario = %s;"
+    args = (id_usuario,)
+
+    usuario = query_db(query, args) 
+
+    if usuario and isinstance(usuario, list):
+        return usuario[0]
+
+    return None
+
+def actualizar_usuario(id_usuario, data):
+
+    nombre = data.get('nombre')
+    email = data.get("email")
+    activo = 1 if data.get('activo') else 0
+
+
+    return execute_db("""
+        UPDATE usuarios
+        SET nombre = COALESCE(%s, nombre),
+            email = COALESCE(%s, email),
+            activo = %s
+        WHERE id_usuario = %s
+    """, (nombre, email, activo, id_usuario)) 
+
+def eliminar_usuario(id_usuario):
+       return execute_db(
+        "DELETE FROM usuarios WHERE id_usuario = %s",
+        (id_usuario,)
+    ) 

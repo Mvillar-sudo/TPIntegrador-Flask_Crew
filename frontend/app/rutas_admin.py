@@ -68,7 +68,7 @@ def registrar_usuario_proceso():
         
         if response.status_code == 201:
             flash('¡Administrador añadido exitosamente!', 'success')
-            return redirect(url_for('admin.dashboard')) 
+            return redirect(url_for('admin.ver_usuarios')) 
         else:
             error_mensaje = response.json().get("mensaje", "Error al crear el usuario")
             flash(error_mensaje, 'danger')
@@ -77,6 +77,66 @@ def registrar_usuario_proceso():
         flash(f'Error al procesar el registro: {e}', 'danger')
         
     return redirect(url_for('admin.mostrar_formulario_crear'))
+
+@admin_bp.route('/admin/dashboard/usuarios')
+@requiere_login()
+def ver_usuarios():
+    try:
+        response = requests.get(f"{BACKEND_URL}/admin/usuarios")
+        usuarios = response.json() if response.status_code == 200 else []
+    except Exception:
+        usuarios = []
+    return render_template('gestion/usuarios.html', usuarios=usuarios)
+
+
+@admin_bp.route('/admin/usuarios/editar/<int:id_usuario>', methods=['GET', 'POST'])
+@requiere_login() 
+def editar_usuario_vista(id_usuario):
+    if request.method == 'POST':
+        data_formulario = {
+            "nombre": request.form.get("nombre"),
+            "email": request.form.get("email"),
+            "password": request.form.get("password"),
+            "activo": int(request.form.get("activo", 0))
+        }
+        
+        try:
+            response = requests.patch(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", json=data_formulario, timeout=3)
+            
+            if response.status_code == 200:
+                flash("Usuario actualizado correctamente.", "success")
+                return redirect(url_for('admin.ver_usuarios'))
+            else:
+                error_api = response.json().get("error", "Error al actualizar")
+                flash(f"Error: {error_api}", "danger")
+        except requests.exceptions.RequestException:
+            flash("Error de conexión con el servidor de datos.", "danger")
+
+    try:
+        response = requests.get(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3)
+        if response.status_code == 200:
+            usuario = response.json()
+            return render_template('gestion/editar_usuario.html', usuario=usuario)
+        else:
+            flash("No se pudo encontrar el usuario solicitado.", "danger")
+            return redirect(url_for('admin.ver_usuarios'))
+            
+    except requests.exceptions.RequestException:
+        flash("Error al conectar con el servidor.", "danger")
+        return redirect(url_for('admin.ver_usuarios'))
+
+@admin_bp.route('/admin/usuarios/eliminar/<int:id_usuario>', methods=['POST'])
+def eliminar_usuario_vista(id_usuario):
+    try:
+        response = requests.delete(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3)
+        if response.status_code == 200:
+            flash("Usuario eliminado correctamente.", "success")
+        else:
+            flash("No se pudo eliminar el servicio.", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el backend.", "danger")
+        
+    return redirect(url_for('admin.ver_usuarios'))
 
 @admin_bp.route('/admin/dashboard')
 @requiere_login()
@@ -127,33 +187,33 @@ def metricas_en_vivo():
             
             hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
 
-            # 2. Inicializamos la estructura base de la sesión incluyendo las nuevas listas
+           
             estructura_base = {
                 "platos": [], 
                 "reservas": [], 
                 "servicios": [], 
-                "resenas_positivas": [], # <-- NUEVO
-                "resenas_negativas": [], # <-- NUEVO
-                "usuarios": [],          # <-- NUEVO
+                "resenas_positivas": [], 
+                "resenas_negativas": [], 
+                "usuarios": [],          
                 "tiempos": []
             }
             historial = session.get('grafico_historial', estructura_base)
             
-            # BLINDAJE: Si la sesión ya existía pero no tiene las nuevas claves, las creamos al vuelo
+            
             for clave in ["resenas_positivas", "resenas_negativas", "usuarios"]:
                 if clave not in historial or not isinstance(historial[clave], list):
                     historial[clave] = [0] * len(historial.get("tiempos", []))
 
-            # 3. Guardamos los nuevos valores en las listas correspondientes
+            
             historial["platos"].append(p)
             historial["reservas"].append(r)
             historial["servicios"].append(s)
-            historial["resenas_positivas"].append(rp) # <-- NUEVO
-            historial["resenas_negativas"].append(rn) # <-- NUEVO
-            historial["usuarios"].append(u)           # <-- NUEVO
+            historial["resenas_positivas"].append(rp) 
+            historial["resenas_negativas"].append(rn) 
+            historial["usuarios"].append(u)           
             historial["tiempos"].append(hora_actual)
 
-            # 4. Mantener solo los últimos 12 registros de forma segura y dinámica
+            # Mantener solo los últimos 12 registros de forma segura y dinámica
             if len(historial["tiempos"]) > 12:
                 for lista in historial.values():
                     if isinstance(lista, list) and len(lista) > 0:
@@ -162,15 +222,15 @@ def metricas_en_vivo():
             session['grafico_historial'] = historial 
             session.modified = True 
             
-            # 5. Retornamos las respuestas formateadas para el JavaScript
+            
             return jsonify({
                 "actual": {
                     "platos": p, 
                     "reservas": r, 
                     "servicios": s,
-                    "resenas_positivas": rp, # <-- NUEVO
-                    "resenas_negativas": rn, # <-- NUEVO
-                    "usuarios": u            # <-- NUEVO
+                    "resenas_positivas": rp, 
+                    "resenas_negativas": rn, 
+                    "usuarios": u            
                 },
                 "historial": historial
             })
