@@ -12,9 +12,10 @@ function cerrar_servidores {
   else
     sudo systemctl stop mysql 2>/dev/null || sudo service mysql stop 2>/dev/null
   fi
+  exit 0
 }
 # Captura SIGINT, SIGTERM y EXIT para invocar la función cerrar_servidores
-trap cerrar_servidores SIGINT SIGTERM EXIT
+trap cerrar_servidores SIGINT SIGTERM 
 
 # 0. Levantar MySQL
 echo "🗄️  Iniciando Base de Datos MySQL..."
@@ -31,7 +32,7 @@ sleep 2 # Dar tiempo a que levante la base de datos
 echo "📡 Iniciando Servidor Backend (Puerto 5000)..."
 cd backend
 source venv/bin/activate || source venv/Scripts/activate
-python app/app.py &
+python3 app/app.py &
 backend_pid=$!
 cd ..
 
@@ -39,7 +40,7 @@ cd ..
 echo "🎨 Iniciando Servidor Frontend (Puerto 3000)..."
 cd frontend
 source venv/bin/activate || source venv/Scripts/activate
-python app/app.py &
+python3 app/app.py &
 frontend_pid=$!
 cd ..
 
@@ -49,5 +50,8 @@ echo -e "\n✅ Ambos servidores iniciados con éxito:"
 echo "• Backend: http://localhost:5000"
 echo "• Frontend: http://localhost:3000"
 echo "Presiona [Ctrl+C] en esta terminal para detener ambos servidores a la vez."
-wait $backend_pid $frontend_pid
+
+while true; do
+  sleep 1
+done
 
