@@ -111,7 +111,7 @@ def crear_reserva():
             (ruta_qr, id_reserva)
         )
 
-        enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva)
+        enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva, ruta_qr)
 
         conn.commit()
         return jsonify({"mensaje": "Reserva creada correctamente"}), 201
