@@ -5,7 +5,7 @@ import json
 
 def generar_qr(id_reserva, nombre, fecha, hora, cantidad_personas, token_cancelacion):
     
-    carpeta = "frontend/app/static/qr"
+    carpeta = "app/static/qr"
     ruta = os.path.join(carpeta, f"reserva_{id_reserva}.png")
 
     contenido = json.dumps({
