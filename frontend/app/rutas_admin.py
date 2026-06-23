@@ -94,8 +94,8 @@ def dashboard():
             total_platos = metricas.get("total_platos_activos", 0)
             total_reservas = metricas.get("total_reservas_pendientes", 0)
             total_servicios = metricas.get("total_servicios_activos", 0)
-            total_resenas_positivas = metricas.get("total_res_pos", 0)
-            total_resenas_negativas = metricas.get("total_res_neg", 0)
+            total_resenas_positivas = metricas.get("total_resenas_positivas", 0)
+            total_resenas_negativas = metricas.get("total_resenas_negativas", 0)
             total_usuarios = metricas.get("total_usuarios", 0)
     except requests.exceptions.RequestException as e:
         flash(f'Error de red: {e}', 'danger')
@@ -121,28 +121,57 @@ def metricas_en_vivo():
             p = metricas.get("total_platos_activos", 0)
             r = metricas.get("total_reservas_pendientes", 0)
             s = metricas.get("total_servicios_activos", 0)
+            rp = metricas.get("total_resenas_positivas", 0)  
+            rn = metricas.get("total_resenas_negativas", 0)  
+            u = metricas.get("total_usuarios", 0)
             
             hora_actual = datetime.datetime.now().strftime("%H:%M:%S")
 
-            historial = session.get('grafico_historial', {"platos": [], "reservas": [], "servicios": [], "tiempos": []})
+            # 2. Inicializamos la estructura base de la sesión incluyendo las nuevas listas
+            estructura_base = {
+                "platos": [], 
+                "reservas": [], 
+                "servicios": [], 
+                "resenas_positivas": [], # <-- NUEVO
+                "resenas_negativas": [], # <-- NUEVO
+                "usuarios": [],          # <-- NUEVO
+                "tiempos": []
+            }
+            historial = session.get('grafico_historial', estructura_base)
             
+            # BLINDAJE: Si la sesión ya existía pero no tiene las nuevas claves, las creamos al vuelo
+            for clave in ["resenas_positivas", "resenas_negativas", "usuarios"]:
+                if clave not in historial or not isinstance(historial[clave], list):
+                    historial[clave] = [0] * len(historial.get("tiempos", []))
+
+            # 3. Guardamos los nuevos valores en las listas correspondientes
             historial["platos"].append(p)
             historial["reservas"].append(r)
             historial["servicios"].append(s)
+            historial["resenas_positivas"].append(rp) # <-- NUEVO
+            historial["resenas_negativas"].append(rn) # <-- NUEVO
+            historial["usuarios"].append(u)           # <-- NUEVO
             historial["tiempos"].append(hora_actual)
 
-            # Mantener solo los últimos 12 registros
-            if len(historial["platos"]) > 12:
-                historial["platos"].pop(0)
-                historial["reservas"].pop(0)
-                historial["servicios"].pop(0)
-                historial["tiempos"].pop(0)
+            # 4. Mantener solo los últimos 12 registros de forma segura y dinámica
+            if len(historial["tiempos"]) > 12:
+                for lista in historial.values():
+                    if isinstance(lista, list) and len(lista) > 0:
+                        lista.pop(0)
 
             session['grafico_historial'] = historial 
             session.modified = True 
             
+            # 5. Retornamos las respuestas formateadas para el JavaScript
             return jsonify({
-                "actual": {"platos": p, "reservas": r, "servicios": s},
+                "actual": {
+                    "platos": p, 
+                    "reservas": r, 
+                    "servicios": s,
+                    "resenas_positivas": rp, # <-- NUEVO
+                    "resenas_negativas": rn, # <-- NUEVO
+                    "usuarios": u            # <-- NUEVO
+                },
                 "historial": historial
             })
             
@@ -150,7 +179,6 @@ def metricas_en_vivo():
         flash(f'Error de red: {e}', 'danger')
     
     return jsonify({"error": "No se pudieron obtener datos"}), 500
-
 
 @admin_bp.route("/admin/menu", methods=["GET"])
 @requiere_login()

@@ -23,8 +23,8 @@ def get_metricas():
                 "total_platos_activos": total_platos,
                 "total_reservas_pendientes": total_reservas,
                 "total_servicios_activos": total_servicios,
-                "total_res_pos": total_res_pos,
-                "total_res_neg": total_res_neg,
+                "total_resenas_positivas": total_res_pos,
+                "total_resenas_negativas": total_res_neg,
                 "total_usuarios": total_usuarios
             }
         }), 200
