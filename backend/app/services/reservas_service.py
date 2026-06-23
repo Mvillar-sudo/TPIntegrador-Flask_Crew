@@ -8,8 +8,6 @@ def obtener_total_reservas_pendientes():
             WHERE estado = 'pendiente'
         """, one=True)
         
-        print(f"DEBUG RESERVAS - Resultado crudo de la DB: {resultado}")
-
         if resultado and isinstance(resultado, dict):
             return resultado.get('total', 0)
                 

@@ -84,6 +84,8 @@ def dashboard():
     total_platos = 0
     total_reservas = 0
     total_servicios = 0
+    total_resenas_positivas = 0
+    total_resenas_negativas = 0
     try:
         response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
         if response.status_code == 200:
@@ -91,6 +93,8 @@ def dashboard():
             total_platos = metricas.get("total_platos_activos", 0)
             total_reservas = metricas.get("total_reservas_pendientes", 0)
             total_servicios = metricas.get("total_servicios_activos", 0)
+            total_resenas_positivas = metricas.get("total_res_pos", 0)
+            total_resenas_negativas = metricas.get("total_res_neg", 0)
     except requests.exceptions.RequestException as e:
         flash(f'Error de red: {e}', 'danger')
 
@@ -98,7 +102,9 @@ def dashboard():
         'gestion/dashboard.html', 
         total_platos=total_platos, 
         total_reservas=total_reservas, 
-        total_servicios=total_servicios
+        total_servicios=total_servicios,
+        total_resenas_positivas=total_resenas_positivas,
+        total_resenas_negativas=total_resenas_negativas
     ) 
 
 @admin_bp.route('/admin/api/metricas-en-vivo')
