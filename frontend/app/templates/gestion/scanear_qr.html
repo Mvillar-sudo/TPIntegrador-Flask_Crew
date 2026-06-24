@@ -1,0 +1,34 @@
+{% extends 'gestion/base_admin.html' %}
+{% block title %}Panel - Scanear QR{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-page-wrapper">
+    <div class="gtco-container">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-default btn-sm">← Volver al Dashboard</a>
+
+        <div class="admin-table-container text-center qr-scanner-container">
+            <h2 class="qr-scanner-title">Escanear QR de Reserva</h2>
+            
+            <div id="reader" class="qr-reader-view"></div>
+
+            <div id="resultado" class="qr-result-box">
+                <h4 id="resultado-mensaje"></h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <script>
+        const URL_VALIDAR_QR = "{{ url_for('admin.dashboard') }}/validar-qr";
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/scanner-qr.js') }}"></script>
+{% endblock %}

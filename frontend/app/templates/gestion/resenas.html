@@ -1,0 +1,41 @@
+{% extends 'gestion/base_dashboard.html' %}
+{% block title %}Panel - Reseñas{% endblock %}
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+{% block cabecera_tabla %}
+    <th>ID</th>
+    <th>Cliente</th>
+    <th>Email</th>
+    <th>Calificación</th>
+    <th>Comentario</th>
+    <th>Fecha</th>
+    <th class="text-center">Acciones</th>
+{% endblock %}
+{% block cuerpo_tabla %}
+    {% for resena in resenas %}
+    <tr>
+        <td><code>#{{ resena.id_resena }}</code></td>
+        <td><strong class="text-dark">{{ resena.nombre_cliente }}</strong></td>
+        <td>{{ resena.email }}</td>
+        <td>{{ resena.calificacion }} / 5</td>
+        <td>{{ resena.comentario }}</td>
+        <td>
+            <small class="text-muted">
+                {% if resena.fecha_creacion %}
+                    {{ resena.fecha_creacion[8:10] }}/{{ resena.fecha_creacion[5:7] }}/{{ resena.fecha_creacion[0:4] }} {{ resena.fecha_creacion[11:16] }}
+                {% else %}
+                    N/A
+                {% endif %}
+            </small>
+        </td>
+        <td class="text-center">
+            <form action="{{ url_for('admin.eliminar_resena_vista', id_resena=resena.id_resena) }}" method="POST" class="form-eliminar" data-nombre="esta reseña">
+                <button type="submit" class="btn-eliminar">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="text-center text-muted py-4">No hay reseñas registradas en este momento.</td></tr>
+    {% endfor %}
+{% endblock %}

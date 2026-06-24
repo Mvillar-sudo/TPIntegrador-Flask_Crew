@@ -1,0 +1,39 @@
+{% extends 'gestion/base_admin.html' %}
+
+{% block title %}Agregar Nuevo Servicio - Admin Panel{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <h2 class="fs-3 fw-bold text-dark mb-2 font-lato">Agregar Nuevo Servicio</h2>
+                    <p class="text-muted mb-4">Introduce el nombre del nuevo servicio especial para el catálogo del restaurante.</p>
+                    
+                    <hr class="mb-4">
+
+                    <form action="{{ url_for('admin.crear_servicio_vista') }}" method="POST">
+                        
+                        <div class="form-group mb-4">
+                            <label for="nombre" class="form-label fw-semibold text-secondary">Nombre del Servicio *</label>
+                            <input type="text" class="form-control form-control-lg" id="nombre" name="nombre" required placeholder="Ej. Servicio de Catering Empresarial">
+                            <small class="text-muted">El servicio se creará en estado "Activo" de forma predeterminada.</small>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{{ url_for('admin.ver_servicios') }}" class="btn-cancelar">Cancelar</a>
+                            <button type="submit" class="btn-guardar">Guardar Servicio</button>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

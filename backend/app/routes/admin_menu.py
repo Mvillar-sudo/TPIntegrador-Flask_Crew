@@ -21,7 +21,7 @@ def crear_plato():
     if error:
         return jsonify({"mensaje": error}), 400
 
-    resultado = crear_plato_service(data)
+    crear_plato_service(data)
 
     return jsonify({"mensaje": "Plato creado"}), 201
 
@@ -36,16 +36,21 @@ def ver_menu_admin():
 #para que el admin pueda ver los detalles de un plato en especifico
 @admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["GET"])
 def ver_plato(id_plato):
-
     error = validar_id_plato(id_plato)
     if error:
         return jsonify({"mensaje": error}), 400
 
     plato = obtener_plato_service(id_plato)
-
    
     if not plato:
         return jsonify({"mensaje": "Plato no encontrado"}), 404
+
+    # si el servicio devuelve una lista con el plato adentro, saca el primero
+    if isinstance(plato, list):
+        if len(plato) > 0:
+            plato = plato[0]
+        else:
+            return jsonify({"mensaje": "Plato no encontrado"}), 404
 
     return jsonify(plato), 200
 

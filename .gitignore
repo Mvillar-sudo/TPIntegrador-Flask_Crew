@@ -16,6 +16,7 @@ __pycache__/
 instance/
 config.local.py
 
+
 # --- Base de Datos local ---
 *.sqlite
 *.db

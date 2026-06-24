@@ -1,50 +1,100 @@
 from flask import Blueprint, request, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-from db import execute_db, query_db
-auth_bp = Blueprint("auth", __name__)
+from services import post_register, post_login, obtener_usuarios, obtener_usuario, eliminar_usuario, actualizar_usuario
+from validators import validar_login
+auth_bp = Blueprint('auth', __name__)
 
 
-#para que el administrador pueda autenticarse y entrar con el rol que le permite hacer cambios en la página web
-@auth_bp.route("/login", methods=["POST"])
+@auth_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.json
+    error, mensaje = validar_login(data)
 
-    if not data or "usuario" not in data or "password" not in data:
-       return {"mensaje": "Faltan campos"}, 400
+    if error:
+        return jsonify({"mensaje": mensaje}), 400
 
-    usuario = data["usuario"]
-    password = data["password"]
-    query = "SELECT * FROM login WHERE usuario = %s AND password = %s"
-    args = (usuario, password)
-    query_db(query, args)
-
+    user = post_login(data)
     if not user:
-        return {"mensaje": "Credenciales inválidas"}, 401
-    
-    if not check_password_hash(user["contraseña"], password):
-        return {"mensaje": "Credenciales inválidas"}, 401
+        return jsonify({"mensaje": "Usuario o contraseña incorrectos"}), 401
 
-    if user["rol"] == "administrador":
-        return {"mensaje": "Login correcto", "rol": "administrador"}, 200
-    else:
-        return {"mensaje": "Login correcto", "rol": "usuario"}, 200  
-    
+    return jsonify({"mensaje": "Login exitoso",
+                    "token": user["token"],
+                    "usuario": user["usuario"]}), 200
 
-@auth_bp.route("/register", methods=["POST"])
+
+@auth_bp.route("/api/register", methods=["POST"])
 def register():
     data = request.json
 
-    if not data or "usuario" not in data or "password" not in data:
-        return {"mensaje": "Faltan campos"}, 400
+    error, mensaje = validar_login(data)
+    if error:
+        return {"mensaje": mensaje}, 400
 
-    usuario = data["usuario"]
-    password = data["password"]
-    rol = "usuario"
-    query = "INSERT INTO login (usuario, password, rol) VALUES (%s, %s, %s)",
-    args = (usuario, password, rol)
+    try:
+        mensaje = post_register(data)
+        return jsonify({"mensaje": mensaje}), 201
+    except Exception as e:
+        return jsonify({"mensaje": f"Error al registrar: {str(e)}"}), 500 
 
-    password_hash = generate_password_hash(password)
+@auth_bp.route("/api/admin/usuarios", methods=["GET"])
+def ver_usuarios_admin():
 
-    execute_db(query, args)
+    usuarios = obtener_usuarios()
 
-    return {"mensaje": "Usuario creado correctamente"}, 201    
+    return jsonify(usuarios), 200 
+
+@auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['GET'])
+def get_usuario(id_usuario):
+    try:
+        usuario = obtener_usuario(id_usuario)
+
+        if not usuario:
+            return jsonify({
+                "error": "Usuario no encontrado"
+            }), 404
+
+        return jsonify(usuario), 200
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500 
+
+@auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['PATCH'])
+def patch_usuario(id_usuario):
+    try:
+        data = request.get_json()
+
+        usuario = obtener_usuario(id_usuario)
+
+        if not usuario:
+            return jsonify({
+                "error": "Usuario no encontrado"
+            }), 404
+
+        actualizar_usuario(
+            id_usuario,
+            data
+        )
+
+        return jsonify({
+            "mensaje": "Usuario actualizado correctamente"
+        }), 200
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['DELETE'])
+def borrar_usuario(id_usuario):
+    try:
+        filas = eliminar_usuario(id_usuario)
+
+        if filas == 0:
+            return jsonify({
+                "error": "Usuario no encontrado"
+            }), 404
+
+        return jsonify({
+            "mensaje": "Usuario eliminado correctamente"
+        }), 200
+
+    except RuntimeError as e:
+        return jsonify({"error": str(e)}), 500

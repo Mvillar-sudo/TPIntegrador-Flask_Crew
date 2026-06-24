@@ -1,0 +1,63 @@
+{% extends 'gestion/base_dashboard.html' %}
+
+{% block title %}Editar Usuario - Flask Burger{% endblock %}
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper mt-4">
+    <div class="gtco-container">
+        
+        <div class="row row-pb-sm">
+            <div class="col-md-8 col-md-offset-2 text-center gtco-heading">
+                <h2 class="cursive-font primary-color">Modificar Usuario</h2>
+                <p>Actualiza la información de perfil o los permisos de acceso del usuario.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="form-container-card">
+                    
+                    <form action="{{ url_for('admin.editar_usuario_vista', id_usuario=usuario.id_usuario) }}" method="POST">
+                        
+                        <div class="form-group">
+                            <label for="nombre" class="dark-label">Nombre Completo</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario.nombre }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="dark-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activo" class="dark-label">Activo</label>
+                            <select class="form-control" id="activo" name="activo" required>
+                                <option value="1" {% if usuario.activo == 1 or usuario.activo == True %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if usuario.activo == 0 or usuario.activo == False %}selected{% endif %}>Inactivo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <small class="text-muted">Nota: La contraseña no es editable desde este módulo por políticas de encriptación.</small>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-sm">Guardar Cambios</button>
+                            <a href="{{ url_for('admin.ver_usuarios') }}" class="btn btn-default btn-sm">Cancelar</a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

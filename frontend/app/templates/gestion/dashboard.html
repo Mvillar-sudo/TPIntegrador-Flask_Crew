@@ -4,9 +4,16 @@
 
 {% block extra_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 {% endblock %}
 
 {% block content %}
+<div class="admin-page-wrapper mt-4">
+    <div class="gtco-container cerrar-dashboard">
+        <a href="{{ url_for('admin.logout') }}" class="btn-cerrar-dashboard">Cerrar Sesión</a>
+    </div>
+</div>
+
 <div class="dashboard-wrapper">
     <div class="gtco-container">
         
@@ -18,60 +25,96 @@
         </div>
 
         <div class="row">
-            
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
-                    <div class="card-icon">
-                        <i class="ti-list"></i> </div>
                     <h3>Gestión de Menú</h3>
                     <p>Modifica platos, actualiza precios, descripciones y disponibilidad de las hamburguesas.</p>
-                    <a href="{{ url_for('admin.menu') }}" class="btn btn-primary btn-sm">Ver Reporte</a>
+                    <a href="{{ url_for('admin.ver_menu') }}" class="btn btn-primary btn-sm">Ver Reporte</a>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-centerHighlight">
-                    <div class="card-icon">
-                        <i class="ti-calendar"></i>
-                    </div>
                     <h3>Reservas</h3>
                     <p>Monitorea las mesas reservadas, aprueba solicitudes y revisa los horarios pico del comedor.</p>
                     <a href="{{ url_for('admin.reservas') }}" class="btn btn-primary btn-sm">Ver Calendario</a>
                 </div>
             </div>
-
             <div class="col-md-4 col-sm-6">
                 <div class="dashboard-card text-center">
-                    <div class="card-icon">
-                        <i class="ti-package"></i>
-                    </div>
                     <h3>Servicios Extras</h3>
                     <p>Administra opciones adicionales como eventos privados, catering o zonas de delivery especial.</p>
-                    <a href="{{ url_for('admin.servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
+                    <a href="{{ url_for('admin.ver_servicios') }}" class="btn btn-primary btn-sm">Configurar</a>
                 </div>
             </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="dashboard-card text-center">
+                    <h3>Escanear QR</h3>
+                    <p>Verificar QR de reserva.</p>
+                    <a href="{{ url_for('admin.pagina_scanear_qr') }}" class="btn btn-primary btn-sm">Escanear</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="dashboard-card text-center">
+                    <h3>Reseñas</h3>
+                    <p>Revisa los comentarios y calificaciones dejados por los clientes, y elimina los que no correspondan.</p>
+                    <a href="{{ url_for('admin.ver_resenas') }}" class="btn btn-primary btn-sm">Ver Reseñas</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="dashboard-card text-center">
+                    <h3>Administrar Usuarios</h3>
+                    <p>Maneja las credenciales de acceso para miembros del equipo de gestión y soporte.</p>
+                    <a href="{{ url_for('admin.ver_usuarios') }}" class="btn btn-primary btn-sm">Ver Usuarios</a>
+                </div>
+            </div>
+        </div>
 
         </div>
 
         <div class="row metrics-row">
             <div class="col-md-4 col-sm-4 col-xs-6 text-center">
-                <span class="metric-number">142</span>
-                <span class="metric-label">Cubiertos Hoy</span>
+                <span class="metric-number">{{ total_platos }}</span>
+                <span class="metric-label">Platos activos</span>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-6 text-center">
-                <span class="metric-number">12</span>
+                <span class="metric-number">{{ total_reservas }}</span>
                 <span class="metric-label">Reservas Pendientes</span>
             </div>
             <div class="col-md-4 col-sm-4 col-xs-12 text-center">
-                <span class="metric-number">$4,250</span>
-                <span class="metric-label">Facturación Estimada</span>
+                <span class="metric-number">{{ total_servicios }}</span>
+                <span class="metric-label">Servicios activos</span>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-12 text-center">
+                <span class="metric-number">{{ total_resenas_positivas }}</span>
+                <span class="metric-label">Reseñas positivas</span>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-12 text-center">
+                <span class="metric-number">{{ total_resenas_negativas }}</span>
+                <span class="metric-label">Reseñas negativas</span>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-12 text-center">
+                <span class="metric-number">{{ total_usuarios }}</span>
+                <span class="metric-label">Usuarios activos</span>
             </div>
         </div>
 
+        <div class="row chart-dashboard-row">
+        <div class="col-md-12">
+            <div class="chart-container-box">
+                <h3 class="text-center chart-title">Evolución del Negocio</h3>
+                <div id="chart-lineas-dashboard"></div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    
+    <script> 
+        const URL_METRICAS_VIVO = "{{ url_for('admin.metricas_en_vivo') }}";
+        const HISTORIAL_INICIAL = {{ session.get('grafico_historial', {}) | tojson | safe }};
+    </script>
+     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}
