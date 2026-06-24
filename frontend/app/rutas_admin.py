@@ -96,7 +96,6 @@ def editar_usuario_vista(id_usuario):
         data_formulario = {
             "nombre": request.form.get("nombre"),
             "email": request.form.get("email"),
-            "password": request.form.get("password"),
             "activo": int(request.form.get("activo", 0))
         }
         

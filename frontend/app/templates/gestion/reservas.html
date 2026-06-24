@@ -28,8 +28,8 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nombre</th>
                         <th>Email</th>
+                        <th>Nombre</th>
                         <th>Fecha / Hora</th>
                         <th>Personas</th>
                         <th>Estado</th>
@@ -44,7 +44,6 @@
                                data-id="{{ reserva.id_reserva }}"
                                data-nombre="{{ reserva.nombre }}"
                                data-email="{{ reserva.email }}"
-                               data-telefono="{{ reserva.telefono }}"
                                data-fecha="{{ reserva.fecha }}"
                                data-hora="{{ reserva.hora }}"
                                data-personas="{{ reserva.cantidad_personas }}"
@@ -93,9 +92,8 @@
             </div>
             <div class="modal-body">
                 <table class="table">
-                    <tr><th>Nombre</th><td id="modal-nombre"></td></tr>
-                    <tr><th>Email</th><td id="modal-email"></td></tr>
-                    <tr><th>Teléfono</th><td id="modal-telefono"></td></tr>
+                    <tr><th>Email</th><td id="modal-nombre"></td></tr>
+                    <tr><th>Nombre</th><td id="modal-email"></td></tr>
                     <tr><th>Fecha</th><td id="modal-fecha"></td></tr>
                     <tr><th>Hora</th><td id="modal-hora"></td></tr>
                     <tr><th>Personas</th><td id="modal-personas"></td></tr>

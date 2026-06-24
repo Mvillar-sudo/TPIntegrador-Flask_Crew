@@ -112,7 +112,6 @@ def crear_reserva():
         "fecha": request.form.get("fecha"),
         "hora": request.form.get("hora"),
         "cantidad_personas": request.form.get("persons"),
-        "telefono": "0000000000"  # el form no tiene campo telefono
     }
     
     try:
