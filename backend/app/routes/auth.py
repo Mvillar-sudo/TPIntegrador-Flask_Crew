@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services import post_register, post_login, obtener_usuarios, obtener_usuario, eliminar_usuario, actualizar_usuario
 from validators import validar_login
+from auth_decorators import admin_required
 auth_bp = Blueprint('auth', __name__)
 
 
@@ -22,6 +23,7 @@ def login():
 
 
 @auth_bp.route("/api/register", methods=["POST"])
+@admin_required
 def register():
     data = request.json
 
@@ -36,6 +38,7 @@ def register():
         return jsonify({"mensaje": f"Error al registrar: {str(e)}"}), 500 
 
 @auth_bp.route("/api/admin/usuarios", methods=["GET"])
+@admin_required
 def ver_usuarios_admin():
 
     usuarios = obtener_usuarios()
@@ -43,6 +46,7 @@ def ver_usuarios_admin():
     return jsonify(usuarios), 200 
 
 @auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['GET'])
+@admin_required
 def get_usuario(id_usuario):
     try:
         usuario = obtener_usuario(id_usuario)
@@ -58,6 +62,7 @@ def get_usuario(id_usuario):
         return jsonify({"error": str(e)}), 500 
 
 @auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['PATCH'])
+@admin_required
 def patch_usuario(id_usuario):
     try:
         data = request.get_json()
@@ -83,6 +88,7 @@ def patch_usuario(id_usuario):
 
 
 @auth_bp.route('/api/admin/usuarios/<int:id_usuario>', methods=['DELETE'])
+@admin_required
 def borrar_usuario(id_usuario):
     try:
         filas = eliminar_usuario(id_usuario)

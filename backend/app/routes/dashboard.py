@@ -4,10 +4,12 @@ from services.reservas_service import obtener_total_reservas_pendientes
 from services.menu_service import obtener_total_platos_activos
 from services.resenas_service import obtener_total_resenas_positivas, obtener_total_resenas_negativas
 from services.auth_service import obtener_total_usuarios
+from auth_decorators import admin_required
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/api/dashboard')
 
 @dashboard_bp.route('/metricas', methods=['GET'])
+@admin_required
 def get_metricas():
     try:
         total_platos = obtener_total_platos_activos()

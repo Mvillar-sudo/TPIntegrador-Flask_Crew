@@ -4,10 +4,12 @@ from db import get_db
 from config import MAX_RESERVAS_POR_FRANJA
 from validators.qr import generar_qr
 from validators.email import enviar_email_reserva
+from auth_decorators import admin_required
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
 @reservas_bp.route('/<int:id_reserva>', methods=['GET'])
+@admin_required
 def detalle_de_una_reserva(id_reserva):
     conn = get_db()
     cursor = conn.cursor()
@@ -37,6 +39,7 @@ def detalle_de_una_reserva(id_reserva):
         cursor.close()
 
 @reservas_bp.route('/', methods=['GET'])
+@admin_required
 def listar_todas_las_reservas():
     conn = get_db()
     cursor = conn.cursor()
@@ -150,6 +153,7 @@ def cancelar_por_token(token):
 
 
 @reservas_bp.route('/validar-qr', methods=['POST'])
+@admin_required
 def validar_qr():
     data = request.json
     id_reserva = data.get("id_reserva")
