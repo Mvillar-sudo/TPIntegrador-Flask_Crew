@@ -8,7 +8,7 @@ def obtener_servicios():
                activo,
                fecha_creacion
         FROM servicios
-        ORDER BY nombre
+        ORDER BY id_servicio
     """)
 
 

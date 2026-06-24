@@ -120,6 +120,7 @@ def crear_reserva():
     try:
         r = requests.post(f"{BACKEND_URL}/api/reservas/", json=data)
         if r.status_code == 201:
+            flash('¡Una reserva ha sido creada con éxito!', 'reservas')
             return redirect(url_for('cliente.landing'))
         else:
             error = r.json().get("mensaje", "Error al crear la reserva")

@@ -5,7 +5,7 @@ def obtener_resenas():
     return query_db("""
         SELECT *
         FROM resenas
-        ORDER BY fecha_creacion DESC
+        ORDER BY calificacion DESC
     """)
 
 
