@@ -4,7 +4,7 @@ import os
 
 cliente_bp = Blueprint('cliente', __name__)
 
-BACKEND_URL = "http://localhost:5000"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000").rstrip("/")
 
 
 @cliente_bp.route('/', methods=['GET'])

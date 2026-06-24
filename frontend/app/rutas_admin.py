@@ -9,7 +9,7 @@ from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensaj
 
 admin_bp = Blueprint('admin', __name__)
 
-BACKEND_URL = "http://localhost:5000/api"
+BACKEND_URL = f"{os.getenv('BACKEND_URL', 'http://localhost:5000').rstrip('/')}/api"
 
 @admin_bp.route('/admin/login', methods=['GET'])
 def login():
@@ -42,6 +42,7 @@ def login_process():
 
 
 @admin_bp.route('/admin/logout')
+@requiere_login()
 def logout():
     limpiar_sesion()
     flash("Sesión cerrada.", "info")
@@ -128,6 +129,7 @@ def editar_usuario_vista(id_usuario):
         return redirect(url_for('admin.ver_usuarios'))
 
 @admin_bp.route('/admin/usuarios/eliminar/<int:id_usuario>', methods=['POST'])
+@requiere_login()
 def eliminar_usuario_vista(id_usuario):
     try:
         response = requests.delete(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3, headers=auth_headers())
@@ -255,6 +257,7 @@ def ver_menu():
     return render_template('gestion/menu.html', platos=platos)
 
 @admin_bp.route("/admin/menu/crear", methods=["GET"])
+@requiere_login()
 def crear_plato_vista():
     return render_template('gestion/crear_plato.html')
 
@@ -376,6 +379,7 @@ def ver_servicios():
 
 
 @admin_bp.route('/admin/servicios/nuevo', methods=['GET', 'POST'])
+@requiere_login()
 def crear_servicio_vista():
     if request.method == 'POST':
         data_formulario = {
@@ -399,6 +403,7 @@ def crear_servicio_vista():
 
 
 @admin_bp.route('/admin/servicios/eliminar/<int:id_servicio>', methods=['POST'])
+@requiere_login()
 def eliminar_servicio_vista(id_servicio):
     try:
         response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3, headers=auth_headers())
