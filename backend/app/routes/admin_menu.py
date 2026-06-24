@@ -7,11 +7,13 @@ from services import (
     actualizar_parcial_plato_service,
     cambiar_estado_plato_service,
     eliminar_plato_service)
+from auth_decorators import admin_required
 
 admin_menu_bp = Blueprint("admin_menu", __name__)
 
 #para que el admin pueda crear un plato
 @admin_menu_bp.route("/admin/menu", methods=["POST"])
+@admin_required
 def crear_plato():
 
     data = request.json
@@ -27,6 +29,7 @@ def crear_plato():
 
 #le permite al admin ver todos los platos del menu
 @admin_menu_bp.route("/admin/menu", methods=["GET"])
+@admin_required
 def ver_menu_admin():
 
     platos = obtener_menu_admin_service()
@@ -35,6 +38,7 @@ def ver_menu_admin():
 
 #para que el admin pueda ver los detalles de un plato en especifico
 @admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["GET"])
+@admin_required
 def ver_plato(id_plato):
     error = validar_id_plato(id_plato)
     if error:
@@ -56,6 +60,7 @@ def ver_plato(id_plato):
 
 #le permite al admin modificar uno o más datos de un plato
 @admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["PATCH"])
+@admin_required
 def actualizar_plato(id_plato):
 
     data = request.json
@@ -76,6 +81,7 @@ def actualizar_plato(id_plato):
 
 #para que el admin pueda desactivar o activar la visibilización de un plato
 @admin_menu_bp.route("/admin/menu/<int:id_plato>/estado", methods=["PATCH"])
+@admin_required
 def cambiar_estado(id_plato):
 
     data = request.json
@@ -97,6 +103,7 @@ def cambiar_estado(id_plato):
 
 #para que el admin pueda eliminar un plato de la base de datos
 @admin_menu_bp.route("/admin/menu/<int:id_plato>", methods=["DELETE"])
+@admin_required
 def eliminar_plato(id_plato):
     
     error = validar_id_plato(id_plato)

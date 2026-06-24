@@ -1,270 +1,417 @@
-openapi: 3.0.0
+openapi: 3.0.3
 
 info:
-  title: Contrato de API
-  version: 1.0.0
-  description: API para gestión de reservas, menú, servicios y administración.
+  title: API Flask Burger
+  version: 3.0.0
+  description: |
+    API REST para la gestion de administradores, menu, servicios,
+    reservas con QR, resenas y metricas del dashboard.
 
 servers:
   - url: http://localhost:5000
+    description: Backend local
+
+tags:
+  - name: Estado
+    description: Estado general del backend
+  - name: Auth
+    description: Autenticacion y gestion de administradores
+  - name: Menu Publico
+    description: Consulta publica del menu
+  - name: Admin Menu
+    description: Administracion de platos del menu
+  - name: Servicios
+    description: Gestion de servicios del restaurante
+  - name: Reservas
+    description: Gestion de reservas, disponibilidad y QR
+  - name: Resenas
+    description: Gestion de resenas de clientes
+  - name: Dashboard
+    description: Metricas administrativas
 
 paths:
-  /api/auth/login:
+  /:
+    get:
+      tags:
+        - Estado
+      summary: Consultar estado del backend
+      security: []
+      responses:
+        "200":
+          description: Backend disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  estado:
+                    type: string
+                    example: online
+                  mensaje:
+                    type: string
+                    example: Backend de Burger funcionando correctamente en el puerto 5000
+
+  /api/login:
     post:
-      summary: Inicio de sesión de administrador
       tags:
         - Auth
+      summary: Iniciar sesion
+      description: Autentica un administrador activo y devuelve un token JWT.
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/LoginRequest"
-
       responses:
         "200":
-          description: Inicio de sesión exitoso
+          description: Login exitoso
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginResponse"
-
+        "400":
+          description: Datos faltantes o invalidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Credenciales inválidas
+          description: Credenciales incorrectas
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/auth/logout:
+  /api/register:
     post:
-      summary: Cierre de sesión
       tags:
         - Auth
+      summary: Registrar administrador
+      description: Crea un nuevo usuario administrador. Requiere token de administrador.
       security:
-        - sessionAuth: []
-
-      responses:
-        "200":
-          description: Sesión cerrada correctamente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /api/menu:
-    get:
-      summary: Obtener menú completo
-      description: |
-        El cliente regular solo recibe productos activos.
-        El administrador recibe todos los productos.
-      tags:
-        - Menu
-
-      responses:
-        "200":
-          description: Lista de productos
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  elementos:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Producto"
-
-    post:
-      summary: Crear nuevo producto
-      tags:
-        - Menu
-      security:
-        - sessionAuth: []
-
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductoRequest"
-
+              $ref: "#/components/schemas/RegisterRequest"
       responses:
         "201":
-          description: Producto creado correctamente
+          description: Usuario registrado
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - id
-                properties:
-                  status:
-                    type: string
-                    example: success
-
-                  id:
-                    type: integer
-                    example: 15
-
+                $ref: "#/components/schemas/MessageResponse"
         "400":
-          description: Datos inválidos
+          description: Datos faltantes o invalidos
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
         "401":
-          description: No autorizado
+          description: Token ausente, invalido o expirado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Usuario no autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Error al registrar
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/menu/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-
-    patch:
-      summary: Modificar producto existente
-      tags:
-        - Menu
-      security:
-        - sessionAuth: []
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProductoUpdateRequest"
-
-      responses:
-        "200":
-          description: Producto actualizado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "404":
-          description: Producto inexistente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-    delete:
-      summary: Eliminar producto
-      tags:
-        - Menu
-      security:
-        - sessionAuth: []
-
-      responses:
-        "200":
-          description: Producto eliminado correctamente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "404":
-          description: Producto inexistente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /api/reservas:
+  /api/admin/usuarios:
     get:
-      summary: Obtener todas las reservas
       tags:
-        - Reservas
+        - Auth
+      summary: Listar administradores
       security:
-        - sessionAuth: []
-
+        - BearerAuth: []
       responses:
         "200":
-          description: Lista de reservas
+          description: Lista de usuarios administradores
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  elementos:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Reserva"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
-    post:
-      summary: Crear reserva
+  /api/admin/usuarios/{id_usuario}:
+    parameters:
+      - $ref: "#/components/parameters/IdUsuario"
+    get:
       tags:
-        - Reservas
-
+        - Auth
+      summary: Obtener administrador por ID
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Usuario"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    patch:
+      tags:
+        - Auth
+      summary: Actualizar administrador
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReservaRequest"
+              $ref: "#/components/schemas/UsuarioUpdateRequest"
+      responses:
+        "200":
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags:
+        - Auth
+      summary: Eliminar administrador
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Usuario eliminado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
+  /menu:
+    get:
+      tags:
+        - Menu Publico
+      summary: Listar menu
+      description: Devuelve los platos del menu disponibles en la base.
+      security: []
+      responses:
+        "200":
+          description: Lista de platos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plato"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/admin/menu:
+    get:
+      tags:
+        - Admin Menu
+      summary: Listar platos para administracion
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Lista completa de platos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plato"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      tags:
+        - Admin Menu
+      summary: Crear plato
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatoCreateRequest"
       responses:
         "201":
-          description: Reserva creada correctamente
+          description: Plato creado
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - reserva_id
-                properties:
-                  status:
-                    type: string
-                    example: success
-
-                  message:
-                    type: string
-                    example: Reserva creada correctamente
-
-                  reserva_id:
-                    type: integer
-                    example: 22
-
-                  qr_code:
-                    type: string
-                    description: QR en base64 o URL
-                    example: qr_reserva_22.png
-
+                $ref: "#/components/schemas/MessageResponse"
         "400":
-          description: Datos inválidos
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/admin/menu/{id_plato}:
+    parameters:
+      - $ref: "#/components/parameters/IdPlato"
+    get:
+      tags:
+        - Admin Menu
+      summary: Obtener plato por ID
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Plato encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plato"
+        "400":
+          description: ID invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Plato no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags:
+        - Admin Menu
+      summary: Actualizar plato
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatoUpdateRequest"
+      responses:
+        "200":
+          description: Plato actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Plato no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Admin Menu
+      summary: Eliminar plato
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Plato eliminado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: ID invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Plato no encontrado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/reservas/{id}:
+  /api/admin/menu/{id_plato}/estado:
     parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-
+      - $ref: "#/components/parameters/IdPlato"
     patch:
-      summary: Cancelar reserva manualmente
-      description: Baja lógica de la reserva
       tags:
-        - Reservas
+        - Admin Menu
+      summary: Cambiar estado de un plato
+      description: Activa o desactiva la visibilidad del plato.
       security:
-        - sessionAuth: []
-
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -275,42 +422,225 @@ paths:
                 - estado
               properties:
                 estado:
-                  type: string
-                  enum: [cancelada]
-                  example: cancelada
-
+                  type: boolean
+                  example: true
       responses:
         "200":
-          description: Reserva actualizada
+          description: Estado actualizado
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Falta el campo estado o ID invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Reserva inexistente
+          description: Plato no encontrado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /api/reservas/token/{token}:
-    parameters:
-      - name: token
-        in: path
-        required: true
-        schema:
-          type: string
-
+  /api/servicios/:
     get:
-      summary: Obtener reserva mediante token QR
-      description: |
-        Busca una reserva asociada al token QR.
-        No modifica el estado de la reserva.
-        Endpoint público, no requiere autenticación.
+      tags:
+        - Servicios
+      summary: Listar servicios
+      security: []
+      responses:
+        "200":
+          description: Lista de servicios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Servicio"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    post:
+      tags:
+        - Servicios
+      summary: Crear servicio
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicioCreateRequest"
+      responses:
+        "201":
+          description: Servicio creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/servicios/{id_servicio}:
+    parameters:
+      - $ref: "#/components/parameters/IdServicio"
+    get:
+      tags:
+        - Servicios
+      summary: Obtener servicio por ID
+      security: []
+      responses:
+        "200":
+          description: Servicio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Servicio"
+        "404":
+          description: Servicio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    patch:
+      tags:
+        - Servicios
+      summary: Actualizar servicio
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServicioUpdateRequest"
+      responses:
+        "200":
+          description: Servicio actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Datos invalidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Servicio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags:
+        - Servicios
+      summary: Eliminar servicio
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Servicio eliminado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Servicio no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /api/reservas/:
+    get:
       tags:
         - Reservas
+      summary: Listar reservas
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reserva"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    post:
+      tags:
+        - Reservas
+      summary: Crear reserva
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReservaCreateRequest"
+      responses:
+        "201":
+          description: Reserva creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: No hay disponibilidad o ya existe una reserva para ese horario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
+  /api/reservas/{id_reserva}:
+    parameters:
+      - $ref: "#/components/parameters/IdReserva"
+    get:
+      tags:
+        - Reservas
+      summary: Obtener reserva por ID
+      security:
+        - BearerAuth: []
       responses:
         "200":
           description: Reserva encontrada
@@ -318,249 +648,313 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Reserva"
-
-        "404":
-          description: Token inválido o reserva inexistente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /api/reservas/token/{token}/validar:
-    parameters:
-      - name: token
-        in: path
-        required: true
-        schema:
-          type: string
-
-    patch:
-      summary: Confirmar reserva mediante QR
-      description: |
-        Valida una reserva pendiente utilizando el token QR.
-        Cambia el estado de la reserva a "confirmada".
-        Requiere autenticación de administrador.
-      tags:
-        - Reservas
-      security:
-        - sessionAuth: []
-
-      responses:
-        "200":
-          description: Reserva confirmada correctamente
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "400":
-          description: La reserva no puede ser confirmada
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
         "401":
-          description: No autorizado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Token inválido o reserva inexistente
+          description: Reserva no encontrada
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
-  /api/reservas/token/{token}/cancelar:
+  /api/reservas/cancelar/{token}:
     parameters:
       - name: token
         in: path
         required: true
         schema:
           type: string
-
-    patch:
-      summary: Cancelar reserva mediante QR
-      description: |
-        Realiza la baja lógica de una reserva pendiente utilizando el token QR.
-        Cambia el estado de la reserva a "cancelada".
-        No requiere autenticación.
+        description: Token de cancelacion enviado al cliente.
+    get:
       tags:
         - Reservas
-
+      summary: Cancelar reserva por token
+      security: []
       responses:
         "200":
-          description: Reserva cancelada correctamente
+          description: Reserva cancelada
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "404":
-          description: Token inválido
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Token invalido o reserva ya cancelada
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /api/servicios:
-    get:
-      summary: Obtener servicios
-      tags:
-        - Servicios
+        "500":
+          $ref: "#/components/responses/ServerError"
 
-      responses:
-        "200":
-          description: Lista de servicios
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  elementos:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Servicio"
-
-  /api/servicios/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-
-    patch:
-      summary: Modificar servicio
-      tags:
-        - Servicios
-      security:
-        - sessionAuth: []
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ServicioUpdateRequest"
-
-      responses:
-        "200":
-          description: Servicio actualizado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-  /api/resenas:
-    get:
-      summary: Obtener reseñas
-      tags:
-        - Reseñas
-
-      responses:
-        "200":
-          description: Lista de reseñas
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  elementos:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Resena"
-
+  /api/reservas/validar-qr:
     post:
-      summary: Crear reseña
-      description: |
-        Solo pueden crear reseñas usuarios con al menos
-        una reserva previamente confirmada.
       tags:
-        - Reseñas
-
+        - Reservas
+      summary: Validar reserva por QR
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ResenaRequest"
+              $ref: "#/components/schemas/ValidarQrRequest"
+      responses:
+        "200":
+          description: QR valido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: QR invalido, reserva cancelada o ya validada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
+  /api/reservas/disponibilidad:
+    get:
+      tags:
+        - Reservas
+      summary: Consultar disponibilidad
+      security: []
+      parameters:
+        - name: fecha
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-06-24"
+        - name: hora
+          in: query
+          required: true
+          schema:
+            type: string
+            format: time
+          example: "20:30:00"
+      responses:
+        "200":
+          description: Disponibilidad de la franja horaria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disponibilidad:
+                    type: boolean
+                    example: true
+                  reservas_actuales:
+                    type: integer
+                    example: 2
+        "400":
+          description: Error al consultar disponibilidad
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/resenas/:
+    get:
+      tags:
+        - Resenas
+      summary: Listar resenas
+      security: []
+      responses:
+        "200":
+          description: Lista de resenas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resena"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    post:
+      tags:
+        - Resenas
+      summary: Crear resena
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResenaCreateRequest"
       responses:
         "201":
-          description: Reseña enviada
+          description: Resena creada
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
-        "403":
-          description: El usuario no posee reservas confirmadas
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: Datos invalidos
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
-  /api/resenas/{id}:
+  /api/resenas/{id_resena}:
     parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-
-    delete:
-      summary: Eliminar reseña
+      - $ref: "#/components/parameters/IdResena"
+    get:
       tags:
-        - Reseñas
-      security:
-        - sessionAuth: []
-
+        - Resenas
+      summary: Obtener resena por ID
+      security: []
       responses:
         "200":
-          description: Reseña eliminada correctamente
+          description: Resena encontrada
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
-
-        "401":
-          description: No autorizado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
+                $ref: "#/components/schemas/Resena"
         "404":
-          description: Reseña inexistente
+          description: Resena no encontrada
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      tags:
+        - Resenas
+      summary: Eliminar resena
+      description: Elimina una resena. Requiere token de administrador.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Resena eliminada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Resena no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
   /api/dashboard/metricas:
     get:
-      summary: Obtener métricas del dashboard
       tags:
         - Dashboard
+      summary: Obtener metricas del dashboard
       security:
-        - sessionAuth: []
-
+        - BearerAuth: []
       responses:
         "200":
-          description: Métricas obtenidas
+          description: Metricas obtenidas
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardMetricas"
+                $ref: "#/components/schemas/DashboardMetricasResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
 components:
   securitySchemes:
-    sessionAuth:
-      type: apiKey
-      in: cookie
-      name: session
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Enviar el token como "Authorization: Bearer <token>".'
+
+  parameters:
+    IdUsuario:
+      name: id_usuario
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    IdPlato:
+      name: id_plato
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    IdServicio:
+      name: id_servicio
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    IdReserva:
+      name: id_reserva
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+    IdResena:
+      name: id_resena
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  responses:
+    Unauthorized:
+      description: Token ausente, invalido o expirado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Usuario no autorizado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServerError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
 
   schemas:
     LoginRequest:
@@ -573,7 +967,6 @@ components:
           type: string
           format: email
           example: admin@mail.com
-
         password:
           type: string
           format: password
@@ -582,233 +975,382 @@ components:
     LoginResponse:
       type: object
       properties:
-        status:
-          type: string
-          example: success
-
-        message:
+        mensaje:
           type: string
           example: Login exitoso
+        token:
+          type: string
+          description: Token JWT para endpoints protegidos
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        usuario:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+              example: admin@mail.com
 
-        user:
-          $ref: "#/components/schemas/User"
-
-    User:
+    RegisterRequest:
       type: object
+      required:
+        - email
+        - password
       properties:
-        id:
-          type: integer
-          example: 1
-
         nombre:
           type: string
-          example: Juan Pérez
+          example: Administrador
+        email:
+          type: string
+          format: email
+          example: nuevo@mail.com
+        password:
+          type: string
+          format: password
+          example: admin123
 
+    Usuario:
+      type: object
+      properties:
+        id_usuario:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Administrador
         email:
           type: string
           format: email
           example: admin@mail.com
+        password:
+          type: string
+          description: Hash de la contrasena almacenada
+          readOnly: true
+        activo:
+          type: boolean
+          example: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T14:30:00"
 
-    Producto:
+    UsuarioUpdateRequest:
       type: object
       properties:
-        id:
-          type: integer
-          example: 1
-
         nombre:
           type: string
-          example: Pizza Napolitana
-
-        precio:
-          type: number
-          example: 12500
-
-        descripcion:
+          example: Nuevo nombre
+        email:
           type: string
-          example: Pizza con mozzarella y tomate
-
+          format: email
+          example: admin_actualizado@mail.com
+        password:
+          type: string
+          format: password
+          example: nuevoPassword123
         activo:
           type: boolean
           example: true
 
-    ProductoRequest:
+    Plato:
+      type: object
+      properties:
+        id_plato:
+          type: integer
+          example: 1
+        nombre_plato:
+          type: string
+          example: Pizza Napolitana
+        precio:
+          type: number
+          format: float
+          example: 12500.0
+        descripcion:
+          type: string
+          nullable: true
+          example: Pizza con mozzarella, rodajas de tomate, ajo y albahaca fresca.
+        estado:
+          type: boolean
+          example: true
+        imagen:
+          type: string
+          nullable: true
+          example: pizza_napolitana.jpg
+
+    PlatoCreateRequest:
       type: object
       required:
-        - nombre
+        - nombre_plato
+        - descripcion
         - precio
       properties:
-        nombre:
+        nombre_plato:
           type: string
-
-        precio:
-          type: number
-
+          example: Pizza Napolitana
         descripcion:
           type: string
-
-    ProductoUpdateRequest:
-      type: object
-      properties:
-        nombre:
-          type: string
-
+          example: Pizza con mozzarella y tomate fresco.
         precio:
           type: number
-
-        descripcion:
+          format: float
+          minimum: 0
+          example: 12500
+        imagen:
           type: string
+          example: pizza_napolitana.jpg
 
-        activo:
-          type: boolean
-
-    Reserva:
+    PlatoUpdateRequest:
       type: object
       properties:
-        id:
-          type: integer
-
-        email:
+        nombre_plato:
           type: string
-          format: email
-
-        fecha:
+          example: Pizza Napolitana Especial
+        descripcion:
           type: string
-          format: date
-
-        hora:
-          type: string
-          format: time
-
-        cantidad_personas:
-          type: integer
-
+          example: Pizza con mozzarella, tomate y albahaca.
+        precio:
+          type: number
+          format: float
+          minimum: 0
+          example: 13500
         estado:
+          type: boolean
+          example: true
+        imagen:
           type: string
-          enum: [pendiente, confirmada, cancelada]
-          example: pendiente
-
-        token:
-          type: string
-          description: Token QR único de la reserva
-          example: abc123xyz
-
-    ReservaRequest:
-      type: object
-      required:
-        - email
-        - fecha
-        - hora
-        - cantidad_personas
-      properties:
-        email:
-          type: string
-          format: email
-
-        fecha:
-          type: string
-          format: date
-
-        hora:
-          type: string
-          format: time
-
-        cantidad_personas:
-          type: integer
-          minimum: 1
+          example: pizza_especial.jpg
 
     Servicio:
       type: object
       properties:
-        id:
+        id_servicio:
           type: integer
-
+          example: 1
         nombre:
           type: string
-
+          example: Wifi Gratis
         activo:
           type: boolean
+          example: true
+        fecha_creacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T14:30:00"
+
+    ServicioCreateRequest:
+      type: object
+      required:
+        - nombre
+      properties:
+        nombre:
+          type: string
+          minLength: 2
+          maxLength: 50
+          example: Wifi Gratis
 
     ServicioUpdateRequest:
       type: object
       properties:
         nombre:
           type: string
-
+          minLength: 2
+          maxLength: 50
+          example: Estacionamiento
         activo:
           type: boolean
+          example: true
+
+    Reserva:
+      type: object
+      properties:
+        id_reserva:
+          type: integer
+          example: 8
+        nombre:
+          type: string
+          example: Juan Perez
+        email:
+          type: string
+          format: email
+          example: cliente@mail.com
+        fecha:
+          type: string
+          format: date
+          example: "2026-06-24"
+        hora:
+          type: string
+          format: time
+          example: "20:30:00"
+        cantidad_personas:
+          type: integer
+          minimum: 1
+          example: 4
+        estado:
+          type: string
+          enum:
+            - pendiente
+            - validada
+            - cancelada
+          example: pendiente
+        token_cancelacion:
+          type: string
+          example: Pr5eC2dZEtmQPtowHDp9Wg
+        qr_code:
+          type: string
+          nullable: true
+          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\app\\static\\qr\\reserva_8.png
+        fecha_creacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T14:30:00"
+
+    ReservaCreateRequest:
+      type: object
+      required:
+        - nombre
+        - email
+        - fecha
+        - hora
+        - cantidad_personas
+      properties:
+        nombre:
+          type: string
+          example: Juan Perez
+        email:
+          type: string
+          format: email
+          example: cliente@mail.com
+        fecha:
+          type: string
+          format: date
+          example: "2026-06-24"
+        hora:
+          type: string
+          format: time
+          example: "20:30:00"
+        cantidad_personas:
+          type: integer
+          minimum: 1
+          example: 4
+
+    ValidarQrRequest:
+      type: object
+      required:
+        - id_reserva
+        - qr_code
+      properties:
+        id_reserva:
+          type: integer
+          minimum: 1
+          example: 8
+        qr_code:
+          type: string
+          description: Ruta del QR guardada para la reserva.
+          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\app\\static\\qr\\reserva_8.png
 
     Resena:
       type: object
       properties:
+        id_resena:
+          type: integer
+          example: 1
         id:
           type: integer
-
+          description: Alias devuelto por la consulta de detalle.
+          example: 1
         comentario:
           type: string
-
+          example: Excelente atencion y muy buena comida.
         calificacion:
           type: integer
           minimum: 1
           maximum: 5
-
-    ResenaRequest:
-      type: object
-      required:
-        - email
-        - comentario
-        - calificacion
-      properties:
+          example: 5
+        nombre_cliente:
+          type: string
+          example: Juan Perez
         email:
           type: string
           format: email
+          example: cliente@mail.com
+        fecha_creacion:
+          type: string
+          format: date-time
+          example: "2026-06-24T14:30:00"
 
+    ResenaCreateRequest:
+      type: object
+      required:
+        - comentario
+        - calificacion
+        - nombre_cliente
+        - email
+      properties:
         comentario:
           type: string
-
+          minLength: 10
+          example: Excelente atencion y muy buena comida.
         calificacion:
           type: integer
           minimum: 1
           maximum: 5
+          example: 5
+        nombre_cliente:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Juan Perez
+        email:
+          type: string
+          format: email
+          example: cliente@mail.com
 
-    DashboardMetricas:
+    DashboardMetricasResponse:
       type: object
-      properties:
-        cantidad_reservas:
-          type: integer
-
-        cantidad_cancelaciones:
-          type: integer
-
-        historial_reservas:
-          type: array
-          items:
-            $ref: "#/components/schemas/Reserva"
-
-    SuccessResponse:
-      type: object
-      required:
-        - status
-        - message
       properties:
         status:
           type: string
           example: success
+        data:
+          type: object
+          properties:
+            total_platos_activos:
+              type: integer
+              example: 5
+            total_reservas_pendientes:
+              type: integer
+              example: 3
+            total_servicios_activos:
+              type: integer
+              example: 4
+            total_resenas_positivas:
+              type: integer
+              example: 8
+            total_resenas_negativas:
+              type: integer
+              example: 1
+            total_usuarios:
+              type: integer
+              example: 2
 
-        message:
+    MessageResponse:
+      type: object
+      properties:
+        mensaje:
           type: string
-          example: Operación realizada correctamente
+          example: Operacion realizada correctamente
 
     ErrorResponse:
       type: object
-      required:
-        - status
-        - message
       properties:
+        mensaje:
+          type: string
+          example: Error al procesar la solicitud
+        error:
+          type: string
+          example: Detalle tecnico del error
+        message:
+          type: string
+          example: No se pudieron obtener las metricas del dashboard.
         status:
           type: string
           example: error
-
-        message:
-          type: string
-          example: Ocurrió un error
