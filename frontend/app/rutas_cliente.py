@@ -13,7 +13,7 @@ def landing():
         response = requests.get(f"{BACKEND_URL}/api/servicios/", timeout=3)
         servicios = response.json() if response.status_code == 200 else []
     except Exception as e:
-        flash(f'Error al conectar la API con sericios: {e}', 'danger')
+        flash(f'Error al conectar la API con servicios: {e}', 'danger')
         servicios = []
         
     return render_template('landing.html', servicios=servicios)
@@ -24,7 +24,6 @@ def landing():
 def menu():
     try:
         response = requests.get(f"{BACKEND_URL}/menu")
-        platos_activos = response.json() if response.status_code == 200 else []
         platos_activos = response.json() if response.status_code == 200 else []
         
         ruta_static_img = os.path.join(current_app.root_path, 'static', 'img')

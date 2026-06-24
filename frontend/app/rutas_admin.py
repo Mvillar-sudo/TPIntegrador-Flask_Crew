@@ -136,7 +136,7 @@ def eliminar_usuario_vista(id_usuario):
         if response.status_code == 200:
             flash("Usuario eliminado correctamente.", "success")
         else:
-            flash("No se pudo eliminar el servicio.", "danger")
+            flash("No se pudo eliminar el usuario.", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el backend.", "danger")
         
@@ -266,10 +266,10 @@ def crear_plato_vista():
 def crear_plato_proceso():
     try:
         filename = None
+        upload_folder = os.path.join(current_app.root_path, 'static', 'img')
         file = request.files.get("imagen")
         if file and file.filename != '':
             filename = secure_filename(file.filename)
-            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
             
@@ -284,7 +284,8 @@ def crear_plato_proceso():
         response = requests.post(f"{BACKEND_URL}/admin/menu", json=payload, headers=auth_headers())
         if response.status_code == 201:
             flash('¡Plato añadido exitosamente!', 'success')
-            file.save(os.path.join(upload_folder, filename))
+            if file and filename:
+                file.save(os.path.join(upload_folder, filename))
         else:
             flash(response.json().get("mensaje", "Error al crear"), 'danger')
     except Exception as e:
@@ -316,7 +317,6 @@ def editar_plato_proceso(id_plato):
             upload_folder = os.path.join(current_app.root_path, 'static', 'img')
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
-            file.save(os.path.join(upload_folder, filename))
 
         payload = {
             "nombre_plato": str(request.form.get("nombre_plato", "")).strip(),
@@ -337,6 +337,7 @@ def editar_plato_proceso(id_plato):
         
         if response.status_code == 200:
             flash('¡Plato actualizado con éxito!', 'success')
+            file.save(os.path.join(upload_folder, filename))
         else:
             try:
                 mensaje_error = response.json().get("mensaje", "Error desconocido")

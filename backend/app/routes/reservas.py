@@ -16,8 +16,6 @@ def detalle_de_una_reserva(id_reserva):
     try:
         cursor.execute("SELECT id_reserva, nombre, email, fecha, hora, cantidad_personas, estado, token_cancelacion, qr_code, fecha_creacion FROM reservas WHERE id_reserva = %s" , (id_reserva,))
         resultado = cursor.fetchone()
-        print(resultado)  
-        print(type(resultado)) 
         if resultado:
             return jsonify({
                 "id_reserva": resultado[0],
