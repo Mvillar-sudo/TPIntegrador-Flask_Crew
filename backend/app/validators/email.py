@@ -34,10 +34,8 @@ def enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_ca
         subject="Confirmación de reserva",
         sender=MAIL_USERNAME,
         recipients=[email],
-        body=cuerpo, 
-        charset='utf-8'
+        body=cuerpo
     )
-    msg.body = cuerpo.encode('utf-8').decode('utf-8')
     # 4. adjuntar el QR
     try:
         with open(ruta_qr, "rb") as qr:
