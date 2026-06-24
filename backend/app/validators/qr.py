@@ -5,8 +5,9 @@ import json
 
 def generar_qr(id_reserva, nombre, fecha, hora, cantidad_personas, token_cancelacion):
     
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    carpeta = os.path.join(BASE_DIR, "frontend", "app", "static", "qr")
+   # carpeta donde se guardan los QR
+    carpeta = "app/static/qr"
+    os.makedirs(carpeta, exist_ok=True)  # crea la carpeta si no existe
     ruta_qr = os.path.join(carpeta, f"reserva_{id_reserva}.png")
 
     contenido = json.dumps({
@@ -16,7 +17,6 @@ def generar_qr(id_reserva, nombre, fecha, hora, cantidad_personas, token_cancela
 
     qr = qrcode.make(contenido)
 
-    os.makedirs(carpeta, exist_ok=True)
     qr.save(ruta_qr)
 
     return ruta_qr
