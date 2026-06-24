@@ -151,31 +151,6 @@ def cancelar_por_token(token):
     finally:
         cursor.close()
 
-        
-@reservas_bp.route('/<int:id_reserva>/cancelar', methods=['PATCH'])
-def modificar_reserva(id_reserva):
-    conn = get_db()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT estado FROM reservas WHERE id_reserva = %s", (id_reserva,))
-        resultado = cursor.fetchone()
-
-        if resultado is None:
-            return jsonify({"mensaje": "Reserva no encontrada"}), 404
-        
-        estado = resultado[0]
-        if estado == 'cancelda':
-            return jsonify({"mensaje": "La reserva ya fue cancelada anteriormente"}), 400
-        cursor.execute("UPDATE reservas SET estado = 'cancelada' WHERE id_reserva = %s", (id_reserva,))
-        conn.commit()
-        return jsonify({"mensaje": "Reserva cancelada correctamente"}), 200
-    except Exception as e:
-        conn.rollback()
-        return jsonify({"mensaje":" Error al cancelar la reserva", "error": str(e)}), 500
-    finally:
-        cursor.close()
-        
-
 
 @reservas_bp.route('/validar-qr', methods=['POST'])
 def validar_qr():

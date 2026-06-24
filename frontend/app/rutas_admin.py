@@ -298,7 +298,7 @@ def crear_plato_proceso():
             upload_folder = os.path.join(current_app.root_path, 'static', 'img')
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
-            file.save(os.path.join(upload_folder, filename))
+            
 
         payload = {
             "nombre_plato": request.form.get("nombre_plato", "").strip(),
@@ -310,6 +310,7 @@ def crear_plato_proceso():
         response = requests.post(f"{BACKEND_URL}/admin/menu", json=payload)
         if response.status_code == 201:
             flash('¡Plato añadido exitosamente!', 'success')
+            file.save(os.path.join(upload_folder, filename))
         else:
             flash(response.json().get("mensaje", "Error al crear"), 'danger')
     except Exception as e:

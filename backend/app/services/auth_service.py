@@ -62,7 +62,7 @@ def obtener_total_usuarios():
             return resultado[0] 
         return 0
     except Exception as e:
-        print(f"⚠️ Error en reservas_service al contar pendientes: {e}")
+        print(f"⚠️ Error en auth_service al contar pendientes: {e}")
         return 0 
     
 def obtener_usuarios():

@@ -6,8 +6,6 @@ cliente_bp = Blueprint('cliente', __name__)
 
 BACKEND_URL = "http://localhost:5000"
 
-cliente_bp = Blueprint('cliente', __name__)
-
 
 @cliente_bp.route('/', methods=['GET'])
 def landing():
