@@ -87,16 +87,25 @@ def actualizar_usuario(id_usuario, data):
 
     nombre = data.get('nombre')
     email = data.get("email")
-    activo = 1 if data.get('activo') else 0
 
+    # Hash password only if provided; otherwise leave unchanged
+    password_plain = data.get('password')
+    password_hash = generate_password_hash(password_plain) if password_plain else None
+
+    # Only change 'activo' if the key is present in payload. Otherwise keep current value.
+    if 'activo' in data:
+        activo_val = 1 if data.get('activo') in (True, 1, '1', 'True', 'true') else 0
+    else:
+        activo_val = None
 
     return execute_db("""
         UPDATE usuarios
         SET nombre = COALESCE(%s, nombre),
             email = COALESCE(%s, email),
-            activo = %s
+            password = COALESCE(%s, password),
+            activo = COALESCE(%s, activo)
         WHERE id_usuario = %s
-    """, (nombre, email, activo, id_usuario)) 
+    """, (nombre, email, password_hash, activo_val, id_usuario)) 
 
 def eliminar_usuario(id_usuario):
        return execute_db(
