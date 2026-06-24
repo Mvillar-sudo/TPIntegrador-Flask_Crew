@@ -35,7 +35,10 @@
         <td>
             <div class="contenedor-foto-tabla">
                 {% if plato.imagen %}
-                    <img src="{{ url_for('static', filename='img/' + plato.imagen) }}" alt="{{ plato.nombre_plato }}" class="img-plato-tabla">
+                    <img src="{{ url_for('static', filename='img/' + plato.imagen) }}" 
+                         alt="{{ plato.nombre_plato }}" 
+                         class="img-plato-tabla"
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/img_1.jpg') }}'; this.classList.add('img-placeholder');">
                 {% else %}
                     <img src="{{ url_for('static', filename='img/img_1.jpg') }}" alt="Sin imagen" class="img-plato-tabla img-placeholder">
                 {% endif %}

@@ -243,41 +243,10 @@ def metricas_en_vivo():
 @requiere_login()
 def ver_menu():
     try:
-        
         response = requests.get(f"{BACKEND_URL}/admin/menu")
-
-        if response.status_code == 200:
-            platos = response.json() 
-        else:
-            platos = []
-            
-        upload_folder = os.path.join(current_app.root_path, 'static', 'img')
-
-        if platos:
-            for plato in platos:
-                imagen_nombre = plato.get("imagen")
-                
-                if imagen_nombre:
-                    ruta_fisica = os.path.join(upload_folder, imagen_nombre)
-                    
-                    # ¡SI LA IMAGEN FUE BORRADA DEL DISCO!
-                    if not os.path.exists(ruta_fisica):
-                        
-    
-                        id_plato = plato.get("id_plato")
-                        payload_limpieza = {
-                            "nombre_plato": plato.get("nombre_plato"),
-                            "descripcion": plato.get("descripcion"),
-                            "precio": plato.get("precio"),
-                            "estado": plato.get("estado"),
-                            "imagen": None  
-                        }
-                        
-                        requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
-                        
-                        plato["imagen"] = None
-
+        platos = response.json() if response.status_code == 200 else []
     except Exception as e:
+        flash(f"Error al traer el menú: {str(e)}", "menu")
         platos = []
         
     return render_template('gestion/menu.html', platos=platos)
@@ -324,27 +293,6 @@ def editar_plato_vista(id_plato):
     
     if response.status_code == 200:
         plato = response.json()
-        imagen_nombre = plato.get("imagen")
-        
-        if imagen_nombre:
-            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
-            ruta_fisica = os.path.join(upload_folder, imagen_nombre)
-            
-            # ¡SI LA IMAGEN FUE BORRADA FÍSICAMENTE!
-            if not os.path.exists(ruta_fisica):
-                
-                payload_limpieza = {
-                    "nombre_plato": plato.get("nombre_plato"),
-                    "descripcion": plato.get("descripcion"),
-                    "precio": plato.get("precio"),
-                    "estado": plato.get("estado"),
-                    "imagen": None 
-                }
-                requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
-                
-
-                plato["imagen"] = None
-        
         return render_template('gestion/editar_plato.html', plato=plato)
     
     flash("No se pudo obtener el plato.", "danger")
