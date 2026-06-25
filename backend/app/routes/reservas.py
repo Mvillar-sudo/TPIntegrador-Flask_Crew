@@ -42,20 +42,25 @@ def listar_todas_las_reservas():
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT * FROM reservas")
+        cursor.execute("""
+            SELECT id_reserva, nombre, email, fecha, hora, cantidad_personas,
+                   estado, token_cancelacion, qr_code, fecha_creacion
+            FROM reservas
+            ORDER BY fecha DESC, hora DESC
+        """)
         resultado = cursor.fetchall()
         return jsonify([{
-    "id_reserva": fila[0],
-    "nombre": fila[1],
-    "email": fila[2],
-    "fecha": str(fila[3]),
-    "hora": str(fila[4]),
-    "cantidad_personas": fila[5],
-    "estado": fila[6],
-    "token_cancelacion": fila[7],
-    "qr_code": fila[8],
-    "fecha_creacion": str(fila[9]) if fila[9] else ""
-} for fila in resultado])
+            "id_reserva": fila[0],
+            "nombre": fila[1],
+            "email": fila[2],
+            "fecha": str(fila[3]),
+            "hora": str(fila[4]),
+            "cantidad_personas": fila[5],
+            "estado": fila[6],
+            "token_cancelacion": fila[7],
+            "qr_code": fila[8],
+            "fecha_creacion": str(fila[9]) if fila[9] else ""
+        } for fila in resultado])
     except Exception as e:
         return jsonify({"mensaje": "Error al listar las reservas", "error": str(e)}), 500
     finally:
