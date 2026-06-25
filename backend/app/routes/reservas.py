@@ -5,10 +5,12 @@ from config import MAX_RESERVAS_POR_FRANJA
 from validators.qr import generar_qr
 from validators.email import enviar_email_reserva
 from services.reservas_service import obtener_reserva_service, listar_reservas_service, crear_reserva_service, cancelar_por_token_service, cancelar_reserva_service, validar_qr_service
+from auth_decorators import admin_required
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
 @reservas_bp.route('/<int:id_reserva>', methods=['GET'])
+@admin_required
 def detalle_de_una_reserva(id_reserva):
     try:
         reserva = obtener_reserva_service(id_reserva)
@@ -20,6 +22,7 @@ def detalle_de_una_reserva(id_reserva):
         return jsonify({"mensaje": "Error al obtener la reserva", "error": str(e)}), 500
 
 @reservas_bp.route('/', methods=['GET'])
+@admin_required
 def listar_todas_las_reservas():
     try:
         reservas = listar_reservas_service()
@@ -57,6 +60,7 @@ def cancelar_reserva(id_reserva):
 
 
 @reservas_bp.route('/validar-qr', methods=['POST'])
+@admin_required
 def validar_qr():
     data = request.json
     id_reserva = data.get("id_reserva")

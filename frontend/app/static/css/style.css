@@ -383,19 +383,60 @@ h1, h2, h3, h4, h5, h6, figure {
     color: rgba(255, 255, 255, 0.6) !important;
 }
 
-
 #gtco-header .flatpickr-input {
     color: #fff !important;
 }
-
-.reservas-table-wrap { background: #fff; border-radius: 4px; border: 1px solid #e6e6e6; padding: 30px; margin-top: 20px; }
-.reservas-table-wrap h2 { font-weight: 300; margin-bottom: 25px; color: #1a1a1a; }
-.table-reservas { width: 100%; border-collapse: collapse; }
-.table-reservas thead tr { background: #f5f5f5; }
-.table-reservas th { padding: 12px 15px; text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; border-bottom: 2px solid #e6e6e6; }
-.table-reservas td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; color: #444; vertical-align: middle; }
-.table-reservas tbody tr:hover { background: #fafafa; }
-
+.reservas-table-wrap { 
+    background: #fff; 
+    border-radius: 4px; 
+    border: 1px solid #e6e6e6; 
+    padding: 30px; 
+    margin-top: 20px; 
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.reservas-table-wrap h2 { 
+    font-weight: 300; 
+    margin-bottom: 25px; 
+    color: #1a1a1a; 
+}
+.table-reservas { 
+    width: 100%; 
+    border-collapse: collapse; 
+    table-layout: auto; 
+}
+.table-reservas thead tr { 
+    background: #f5f5f5; 
+}
+.table-reservas th { 
+    padding: 12px 15px; 
+    text-align: left; 
+    font-size: 13px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em; 
+    color: #888; 
+    border-bottom: 2px solid #e6e6e6; 
+    white-space: nowrap; 
+}
+.table-reservas td { 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #f0f0f0; 
+    color: #444; 
+    vertical-align: middle;    
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.table-reservas td:first-child,
+.table-reservas td:last-child {
+    max-width: none;
+    white-space: nowrap;
+}
+.table-reservas tbody tr:hover { 
+    background: #fafafa; 
+}
 #gtco-header,
 #gtco-counter,
 .gtco-bg {

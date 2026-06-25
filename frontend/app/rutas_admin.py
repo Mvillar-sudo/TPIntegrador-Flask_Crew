@@ -3,15 +3,18 @@ import os
 import datetime
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
+from utils import auth_headers
 
 from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
 
 admin_bp = Blueprint('admin', __name__)
 
-BACKEND_URL = "http://localhost:5000/api"
+BACKEND_URL = f"{os.getenv('BACKEND_URL', 'http://localhost:5000').rstrip('/')}/api"
 
 @admin_bp.route('/admin/login', methods=['GET'])
 def login():
+    from flask import session
+    session.clear()
     return render_template('gestion/login.html')
 
 
@@ -39,6 +42,7 @@ def login_process():
 
 
 @admin_bp.route('/admin/logout')
+@requiere_login()
 def logout():
     limpiar_sesion()
     flash("Sesión cerrada.", "info")
@@ -64,7 +68,7 @@ def registrar_usuario_proceso():
             "password": request.form.get("password", "").strip()
         }
 
-        response = requests.post(f"{BACKEND_URL}/register", json=payload)
+        response = requests.post(f"{BACKEND_URL}/register", json=payload, headers=auth_headers())
         
         if response.status_code == 201:
             flash('¡Administrador añadido exitosamente!', 'success')
@@ -82,7 +86,7 @@ def registrar_usuario_proceso():
 @requiere_login()
 def ver_usuarios():
     try:
-        response = requests.get(f"{BACKEND_URL}/admin/usuarios")
+        response = requests.get(f"{BACKEND_URL}/admin/usuarios", headers=auth_headers())
         usuarios = response.json() if response.status_code == 200 else []
     except Exception:
         usuarios = []
@@ -96,12 +100,11 @@ def editar_usuario_vista(id_usuario):
         data_formulario = {
             "nombre": request.form.get("nombre"),
             "email": request.form.get("email"),
-            "password": request.form.get("password"),
             "activo": int(request.form.get("activo", 0))
         }
         
         try:
-            response = requests.patch(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", json=data_formulario, timeout=3)
+            response = requests.patch(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", json=data_formulario, timeout=3, headers=auth_headers())
             
             if response.status_code == 200:
                 flash("Usuario actualizado correctamente.", "success")
@@ -113,7 +116,7 @@ def editar_usuario_vista(id_usuario):
             flash("Error de conexión con el servidor de datos.", "danger")
 
     try:
-        response = requests.get(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3)
+        response = requests.get(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3, headers=auth_headers())
         if response.status_code == 200:
             usuario = response.json()
             return render_template('gestion/editar_usuario.html', usuario=usuario)
@@ -126,13 +129,14 @@ def editar_usuario_vista(id_usuario):
         return redirect(url_for('admin.ver_usuarios'))
 
 @admin_bp.route('/admin/usuarios/eliminar/<int:id_usuario>', methods=['POST'])
+@requiere_login()
 def eliminar_usuario_vista(id_usuario):
     try:
-        response = requests.delete(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3)
+        response = requests.delete(f"{BACKEND_URL}/admin/usuarios/{id_usuario}", timeout=3, headers=auth_headers())
         if response.status_code == 200:
             flash("Usuario eliminado correctamente.", "success")
         else:
-            flash("No se pudo eliminar el servicio.", "danger")
+            flash("No se pudo eliminar el usuario.", "danger")
     except requests.exceptions.RequestException:
         flash("Error de conexión con el backend.", "danger")
         
@@ -148,7 +152,7 @@ def dashboard():
     total_resenas_negativas = 0
     total_usuarios = 0
     try:
-        response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
+        response = requests.get(f"{BACKEND_URL}/dashboard/metricas", headers=auth_headers())
         if response.status_code == 200:
             metricas = response.json().get("data", {})
             total_platos = metricas.get("total_platos_activos", 0)
@@ -174,7 +178,7 @@ def dashboard():
 @requiere_login() 
 def metricas_en_vivo():
     try:
-        response = requests.get(f"{BACKEND_URL}/dashboard/metricas")
+        response = requests.get(f"{BACKEND_URL}/dashboard/metricas", headers=auth_headers())
         if response.status_code == 200:
             metricas = response.json().get("data", {})
             
@@ -244,46 +248,16 @@ def metricas_en_vivo():
 @requiere_login()
 def ver_menu():
     try:
-        
-        response = requests.get(f"{BACKEND_URL}/admin/menu")
-
-        if response.status_code == 200:
-            platos = response.json() 
-        else:
-            platos = []
-            
-        upload_folder = os.path.join(current_app.root_path, 'static', 'img')
-
-        if platos:
-            for plato in platos:
-                imagen_nombre = plato.get("imagen")
-                
-                if imagen_nombre:
-                    ruta_fisica = os.path.join(upload_folder, imagen_nombre)
-                    
-                    # ¡SI LA IMAGEN FUE BORRADA DEL DISCO!
-                    if not os.path.exists(ruta_fisica):
-                        
-    
-                        id_plato = plato.get("id_plato")
-                        payload_limpieza = {
-                            "nombre_plato": plato.get("nombre_plato"),
-                            "descripcion": plato.get("descripcion"),
-                            "precio": plato.get("precio"),
-                            "estado": plato.get("estado"),
-                            "imagen": None  
-                        }
-                        
-                        requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
-                        
-                        plato["imagen"] = None
-
+        response = requests.get(f"{BACKEND_URL}/admin/menu", headers=auth_headers())
+        platos = response.json() if response.status_code == 200 else []
     except Exception as e:
+        flash(f"Error al traer el menú: {str(e)}", "menu")
         platos = []
         
     return render_template('gestion/menu.html', platos=platos)
 
 @admin_bp.route("/admin/menu/crear", methods=["GET"])
+@requiere_login()
 def crear_plato_vista():
     return render_template('gestion/crear_plato.html')
 
@@ -292,13 +266,13 @@ def crear_plato_vista():
 def crear_plato_proceso():
     try:
         filename = None
+        upload_folder = os.path.join(current_app.root_path, 'static', 'img')
         file = request.files.get("imagen")
         if file and file.filename != '':
             filename = secure_filename(file.filename)
-            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
-            file.save(os.path.join(upload_folder, filename))
+            
 
         payload = {
             "nombre_plato": request.form.get("nombre_plato", "").strip(),
@@ -307,9 +281,11 @@ def crear_plato_proceso():
             "precio": float(request.form.get("precio", 0))
         }
 
-        response = requests.post(f"{BACKEND_URL}/admin/menu", json=payload)
+        response = requests.post(f"{BACKEND_URL}/admin/menu", json=payload, headers=auth_headers())
         if response.status_code == 201:
             flash('¡Plato añadido exitosamente!', 'success')
+            if file and filename:
+                file.save(os.path.join(upload_folder, filename))
         else:
             flash(response.json().get("mensaje", "Error al crear"), 'danger')
     except Exception as e:
@@ -320,31 +296,10 @@ def crear_plato_proceso():
 @requiere_login()
 def editar_plato_vista(id_plato):
     
-    response = requests.get(f"{BACKEND_URL}/admin/menu/{id_plato}")
+    response = requests.get(f"{BACKEND_URL}/admin/menu/{id_plato}", headers=auth_headers())
     
     if response.status_code == 200:
         plato = response.json()
-        imagen_nombre = plato.get("imagen")
-        
-        if imagen_nombre:
-            upload_folder = os.path.join(current_app.root_path, 'static', 'img')
-            ruta_fisica = os.path.join(upload_folder, imagen_nombre)
-            
-            # ¡SI LA IMAGEN FUE BORRADA FÍSICAMENTE!
-            if not os.path.exists(ruta_fisica):
-                
-                payload_limpieza = {
-                    "nombre_plato": plato.get("nombre_plato"),
-                    "descripcion": plato.get("descripcion"),
-                    "precio": plato.get("precio"),
-                    "estado": plato.get("estado"),
-                    "imagen": None 
-                }
-                requests.patch(f"{BACKEND_URL}/admin/menu/{id_plato}", json=payload_limpieza)
-                
-
-                plato["imagen"] = None
-        
         return render_template('gestion/editar_plato.html', plato=plato)
     
     flash("No se pudo obtener el plato.", "danger")
@@ -362,7 +317,6 @@ def editar_plato_proceso(id_plato):
             upload_folder = os.path.join(current_app.root_path, 'static', 'img')
             if not os.path.exists(upload_folder):
                 os.makedirs(upload_folder)
-            file.save(os.path.join(upload_folder, filename))
 
         payload = {
             "nombre_plato": str(request.form.get("nombre_plato", "")).strip(),
@@ -378,11 +332,12 @@ def editar_plato_proceso(id_plato):
        
         url_backend = f"{BACKEND_URL}/admin/menu/{id_plato}"
         
-        response = requests.patch(url_backend, json=payload)
+        response = requests.patch(url_backend, json=payload, headers=auth_headers())
         
         
         if response.status_code == 200:
             flash('¡Plato actualizado con éxito!', 'success')
+            file.save(os.path.join(upload_folder, filename))
         else:
             try:
                 mensaje_error = response.json().get("mensaje", "Error desconocido")
@@ -401,7 +356,7 @@ def eliminar_plato(id_plato):
     """Le avisa al Backend que tiene que eliminar el plato."""
     try:
        
-        response = requests.delete(f"{BACKEND_URL}/admin/menu/{id_plato}")
+        response = requests.delete(f"{BACKEND_URL}/admin/menu/{id_plato}", headers=auth_headers())
         
         if response.status_code == 200:
             flash('Plato eliminado correctamente.', 'success')
@@ -417,7 +372,7 @@ def eliminar_plato(id_plato):
 @requiere_login()
 def ver_servicios():
     try:
-        response = requests.get(f"{BACKEND_URL}/servicios/")
+        response = requests.get(f"{BACKEND_URL}/servicios/", headers=auth_headers())
         servicios = response.json() if response.status_code == 200 else []
     except Exception:
         servicios = []
@@ -425,6 +380,7 @@ def ver_servicios():
 
 
 @admin_bp.route('/admin/servicios/nuevo', methods=['GET', 'POST'])
+@requiere_login()
 def crear_servicio_vista():
     if request.method == 'POST':
         data_formulario = {
@@ -432,7 +388,7 @@ def crear_servicio_vista():
         }
         
         try:
-            response = requests.post(f"{BACKEND_URL}/servicios/", json=data_formulario, timeout=3)
+            response = requests.post(f"{BACKEND_URL}/servicios/", json=data_formulario, timeout=3, headers=auth_headers())
             
             if response.status_code == 201:
                 flash("¡Servicio creado con éxito!", "success")
@@ -448,9 +404,10 @@ def crear_servicio_vista():
 
 
 @admin_bp.route('/admin/servicios/eliminar/<int:id_servicio>', methods=['POST'])
+@requiere_login()
 def eliminar_servicio_vista(id_servicio):
     try:
-        response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        response = requests.delete(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3, headers=auth_headers())
         if response.status_code == 200:
             flash("Servicio eliminado correctamente.", "success")
         else:
@@ -470,7 +427,7 @@ def editar_servicio_vista(id_servicio):
         }
         
         try:
-            response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=data_formulario, timeout=3)
+            response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=data_formulario, timeout=3, headers=auth_headers())
             
             if response.status_code == 200:
                 flash("Servicio actualizado correctamente.", "success")
@@ -482,7 +439,7 @@ def editar_servicio_vista(id_servicio):
             flash("Error de conexión con el servidor de datos.", "danger")
 
     try:
-        response = requests.get(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3)
+        response = requests.get(f"{BACKEND_URL}/servicios/{id_servicio}", timeout=3, headers=auth_headers())
         if response.status_code == 200:
             servicio = response.json()
             return render_template('gestion/editar_servicio.html', servicio=servicio)
@@ -502,7 +459,7 @@ def actualizar_servicio_proceso(id_servicio):
         "activo": (request.form.get("activo") == "True")  
     }
     try:
-        response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=payload)
+        response = requests.patch(f"{BACKEND_URL}/servicios/{id_servicio}", json=payload, headers=auth_headers())
         if response.status_code == 200:
             flash('¡Servicio modificado!', 'success')
         else:
@@ -515,7 +472,7 @@ def actualizar_servicio_proceso(id_servicio):
 @requiere_login()
 def ver_resenas():
     try:
-        response = requests.get(f"{BACKEND_URL}/resenas/")
+        response = requests.get(f"{BACKEND_URL}/resenas/", headers=auth_headers())
         resenas = response.json() if response.status_code == 200 else []
     except Exception:
         resenas = []
@@ -531,7 +488,7 @@ def ver_resenas():
 @requiere_login()
 def eliminar_resena_vista(id_resena):
     try:
-        response = requests.delete(f"{BACKEND_URL}/resenas/{id_resena}")
+        response = requests.delete(f"{BACKEND_URL}/resenas/{id_resena}", headers=auth_headers())
         if response.status_code == 200:
             flash("Reseña eliminada correctamente.", "success")
         else:
@@ -545,7 +502,7 @@ def eliminar_resena_vista(id_resena):
 @requiere_login()
 def reservas():
     try:
-        r = requests.get(f"{BACKEND_URL}/reservas/")
+        r = requests.get(f"{BACKEND_URL}/reservas/", headers=auth_headers())
         reservas_lista = r.json()
     except Exception as e:
         reservas_lista = []
@@ -557,7 +514,7 @@ def reservas():
 @requiere_login()
 def cancelar_reserva(id_reserva):
     try:
-        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar")
+        r = requests.patch(f"{BACKEND_URL}/reservas/{id_reserva}/cancelar", headers=auth_headers())
         flash(r.json().get("mensaje", ""), "success" if r.status_code == 200 else "danger")
     except Exception as e:
         flash("Error de conexión con el servidor", "danger")
@@ -574,7 +531,7 @@ def scanear_qr():
         r = requests.post(f"{BACKEND_URL}/reservas/validar-qr", json={
             "id_reserva": id_reserva,
             "qr_code": qr_code
-        })
+        }, headers=auth_headers())
         mensaje = r.json().get("mensaje", "")
         exito = r.status_code == 200
     except Exception as e:

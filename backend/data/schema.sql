@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS reservas (
     id_reserva INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    telefono VARCHAR(20) NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     cantidad_personas INT NOT NULL,

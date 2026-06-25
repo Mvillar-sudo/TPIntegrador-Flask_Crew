@@ -1,4 +1,4 @@
-from db import execute_db, query_db
+from db import execute_db, query_db, get_db
 
 def crear_plato_service(data):
 
@@ -102,8 +102,10 @@ def eliminar_plato_service(id_plato):
     return True 
 
 def obtener_total_platos_activos():
-    resultado = query_db("SELECT COUNT(*) as total FROM menu WHERE activo = 1", one=True)
-    if resultado:
-        if isinstance(resultado, dict): return resultado.get('total', 0)
-        return resultado[0]
-    return 0
+    resultado = query_db(""" 
+        SELECT COUNT(*) as total
+        FROM menu
+        WHERE estado = 1
+    """, one=True)
+    return resultado.get("total", 0) if resultado else 0
+    

@@ -10,4 +10,4 @@ app.register_blueprint(cliente_bp)
 app.register_blueprint(admin_bp)
 
 if __name__ == '__main__':
-    app.run(port=3000, debug=True)
+    app.run(port=3000, debug=False)

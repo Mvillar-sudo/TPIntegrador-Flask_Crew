@@ -41,7 +41,7 @@ def obtener_total_resenas_positivas():
                 
         return 0
     except Exception as e:
-        print(f"⚠️ Error en reservas_service al contar pendientes: {e}")
+        print(f"⚠️ Error en resenas_service al contar positivas: {e}")
         return 0 
 
 def obtener_total_resenas_negativas():
@@ -58,5 +58,5 @@ def obtener_total_resenas_negativas():
                 
         return 0
     except Exception as e:
-        print(f"⚠️ Error en reservas_service al contar pendientes: {e}")
+        print(f"⚠️ Error en resenas_service al contar negativas: {e}")
         return 0

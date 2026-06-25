@@ -38,12 +38,15 @@
                         {% set clase_placeholder = "img-placeholder" %}
                     {% endif %}
 
-                    <a href="{{ ruta_imagen }}" class="fh5co-card-item image-popup">
+                    {% set placeholder_default = url_for('static', filename='img/img_1.jpg') %}
+
+                    <a href="{{ ruta_imagen }}" id="link-plato-{{ loop.index }}" class="fh5co-card-item image-popup">
                         <figure>
                             <div class="overlay"></div>
                             <img src="{{ ruta_imagen }}" 
                                  alt="{{ plato.nombre_plato }}" 
-                                 class="img-responsive img-plato-tabla {{ clase_placeholder }}">
+                                 class="img-responsive img-plato-tabla {{ clase_placeholder }}"
+                                 onerror="this.onerror=null; this.src='{{ placeholder_default }}'; document.getElementById('link-plato-{{ loop.index }}').href='{{ placeholder_default }}'; this.classList.add('img-placeholder');">
                         </figure>
                         <div class="fh5co-text">
                             <h2>{{ plato.nombre_plato if plato.nombre_plato else "Plato sin nombre" }}</h2>
@@ -52,7 +55,9 @@
                         </div>
                     </a>
                 </div>
-                {% endif %}  {% endfor %} </div>
+                {% endif %}
+                {% endfor %} 
+            </div>
         </div>
     </div>
 {% endblock %}

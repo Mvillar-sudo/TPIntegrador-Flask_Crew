@@ -7,7 +7,7 @@ from services import (
     actualizar_servicio_db,
     eliminar_servicio_db
 )
-
+from auth_decorators import admin_required
 from validators import validar_servicio
 
 
@@ -42,6 +42,7 @@ def get_servicio(id_servicio):
 
 # POST
 @servicios_bp.route('/', methods=['POST'])
+@admin_required
 def crear_servicio():
     try:
         data = request.get_json()
@@ -65,6 +66,7 @@ def crear_servicio():
 
 # patch
 @servicios_bp.route('/<int:id_servicio>', methods=['PATCH'])
+@admin_required
 def actualizar_servicio(id_servicio):
     try:
         data = request.get_json()
@@ -101,6 +103,7 @@ def actualizar_servicio(id_servicio):
 
 # delete
 @servicios_bp.route('/<int:id_servicio>', methods=['DELETE'])
+@admin_required
 def eliminar_servicio(id_servicio):
     try:
         filas = eliminar_servicio_db(id_servicio)

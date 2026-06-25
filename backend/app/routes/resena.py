@@ -6,6 +6,7 @@ from services import (
     eliminar_resena_db
 )
 from validators import validar_resena
+from auth_decorators import admin_required
 
 resenas_bp = Blueprint('resenas', __name__, url_prefix='/api/resenas')
 
@@ -48,6 +49,7 @@ def crear_resena():
 # privada (admin)
 
 @resenas_bp.route('/<int:id_resena>', methods=['DELETE'])
+@admin_required
 def eliminar_resena(id_resena):
     try:
         filas = eliminar_resena_db(id_resena)
