@@ -8,21 +8,20 @@ def obtener_reserva_service(id_reserva):
     conn = get_db()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id_reserva, nombre, email, telefono, fecha, hora, cantidad_personas, estado, token_cancelacion, qr_code, fecha_creacion FROM reservas WHERE id_reserva = %s", (id_reserva,))
+        cursor.execute("SELECT id_reserva, nombre, email, fecha, hora, cantidad_personas, estado, token_cancelacion, qr_code, fecha_creacion FROM reservas WHERE id_reserva = %s", (id_reserva,))
         resultado = cursor.fetchone()
         if resultado:
             return {
                 "id_reserva": resultado[0],
                 "nombre": resultado[1],
                 "email": resultado[2],
-                "telefono": resultado[3],
-                "fecha": str(resultado[4]),
-                "hora": str(resultado[5]),
-                "cantidad_personas": resultado[6],
-                "estado": resultado[7],
-                "token_cancelacion": resultado[8],
-                "qr_code": resultado[9],
-                "fecha_creacion": str(resultado[10]) if resultado[10] else ""
+                "fecha": str(resultado[3]),
+                "hora": str(resultado[4]),
+                "cantidad_personas": resultado[5],
+                "estado": resultado[6],
+                "token_cancelacion": resultado[7],
+                "qr_code": resultado[8],
+                "fecha_creacion": str(resultado[9]) if resultado[9] else ""
             }
         return None
     finally:
@@ -38,14 +37,13 @@ def listar_reservas_service():
             "id_reserva": fila[0],
             "nombre": fila[1],
             "email": fila[2],
-            "telefono": fila[3],
-            "fecha": str(fila[4]),
-            "hora": str(fila[5]),
-            "cantidad_personas": fila[6],
-            "estado": fila[7],
-            "token_cancelacion": fila[8],
-            "qr_code": fila[9],
-            "fecha_creacion": str(fila[10]) if fila[10] else ""
+            "fecha": str(fila[3]),
+            "hora": str(fila[4]),
+            "cantidad_personas": fila[5],
+            "estado": fila[6],
+            "token_cancelacion": fila[7],
+            "qr_code": fila[8],
+            "fecha_creacion": str(fila[9]) if fila[9] else ""
         } for fila in resultado]
     finally:
         cursor.close()
@@ -53,7 +51,6 @@ def listar_reservas_service():
 def crear_reserva_service(data):
     email = data.get("email")
     nombre = data.get("nombre")
-    telefono = data.get("telefono")
     fecha = data["fecha"]
     hora = data["hora"]
     cantidad_personas = data["cantidad_personas"]
@@ -80,9 +77,9 @@ def crear_reserva_service(data):
 
         cursor.execute(
             """INSERT INTO reservas 
-            (nombre, email, telefono, fecha, hora, cantidad_personas, token_cancelacion) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (nombre, email, telefono, fecha, hora, cantidad_personas, token_cancelacion)
+            (nombre, email, fecha, hora, cantidad_personas, token_cancelacion) 
+            VALUES (%s, %s, %s, %s, %s, %s)""",
+            (nombre, email, fecha, hora, cantidad_personas, token_cancelacion)
         )
 
         id_reserva = cursor.lastrowid
@@ -168,6 +165,9 @@ def validar_qr_service(id_reserva, qr_code):
 
         if estado == 'cancelada':
             return {"status": "cancelada"}
+        
+        if estado == 'validada':
+            return {"status": "validada"}
 
         if qr_code != qr_code_almacenado:
             return {"status": "qr_invalido"}

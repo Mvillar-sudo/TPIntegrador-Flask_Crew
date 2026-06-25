@@ -73,6 +73,8 @@ def validar_qr():
             return jsonify({"mensaje": "Reserva no encontrada"}), 404
         elif resultado["status"] == "cancelada":
             return jsonify({"mensaje": "La reserva ha sido cancelada"}), 400
+        elif resultado["status"] == "validada":
+            return jsonify({"mensaje": "La reserva ha sido validada anteriormente"}), 400
         elif resultado["status"] == "qr_invalido":
             return jsonify({"mensaje": "QR inválido, acceso denegado"}), 400
         else:
