@@ -501,11 +501,16 @@ def eliminar_resena_vista(id_resena):
 @admin_bp.route('/admin/dashboard/reservas')
 @requiere_login()
 def reservas():
+    reservas_lista = []
     try:
-        r = requests.get(f"{BACKEND_URL}/reservas/", headers=auth_headers())
-        reservas_lista = r.json()
-    except Exception as e:
-        reservas_lista = []
+        r = requests.get(f"{BACKEND_URL}/reservas/", headers=auth_headers(), timeout=3)
+        if r.status_code == 200:
+            data = r.json()
+            reservas_lista = data if isinstance(data, list) else []
+        else:
+            flash("No se pudieron cargar las reservas.", "danger")
+    except requests.exceptions.RequestException:
+        flash("Error de conexión con el servidor de reservas.", "danger")
     
     return render_template('gestion/reservas.html', reservas=reservas_lista)
 
