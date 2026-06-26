@@ -53,7 +53,7 @@ def obtener_total_usuarios():
         resultado = query_db("""
             SELECT COUNT(*) as total 
             FROM usuarios 
-            WHERE activo = 1
+            WHERE activo = True
         """, one=True)
         
         if resultado:
