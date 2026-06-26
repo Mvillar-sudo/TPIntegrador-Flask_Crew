@@ -1,13 +1,13 @@
 from flask_mail import Message
 from flask import current_app
-from config import MAIL_USERNAME
-from extensions import mail
+from ..config import MAIL_USERNAME, FRONTEND_URL
+from ..extensions import mail
 import os
 
 def enviar_email_reserva(email, nombre, fecha, hora, cantidad_personas, token_cancelacion, id_reserva, ruta_qr):
 
     # 1. armar el link de cancelación
-    link_cancelacion = f"http://localhost:3000/reservas/cancelar/{token_cancelacion}"
+    link_cancelacion = f"{FRONTEND_URL}/reservas/cancelar/{token_cancelacion}"
 
     # 2. armar el cuerpo del email (texto plano)
     cuerpo = f"""

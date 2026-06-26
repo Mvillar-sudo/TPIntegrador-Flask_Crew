@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from services import post_register, post_login, obtener_usuarios, obtener_usuario, eliminar_usuario, actualizar_usuario
-from validators import validar_login
-from auth_decorators import admin_required
+from ..services import post_register, post_login, obtener_usuarios, obtener_usuario, eliminar_usuario, actualizar_usuario
+from ..validators import validar_login
+from ..auth_decorators import admin_required
 auth_bp = Blueprint('auth', __name__)
 
 

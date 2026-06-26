@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
-from services import (
+from ..services import (
     obtener_resenas,
     obtener_resena_id,
     crear_resena_db,
     eliminar_resena_db
 )
-from validators import validar_resena
-from auth_decorators import admin_required
+from ..validators import validar_resena
+from ..auth_decorators import admin_required
 
 resenas_bp = Blueprint('resenas', __name__, url_prefix='/api/resenas')
 

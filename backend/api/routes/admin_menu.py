@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify
-from validators import validar_id_plato, validar_crear_plato
-from services import (
+from ..validators import validar_id_plato, validar_crear_plato
+from ..services import (
     crear_plato_service,
     obtener_menu_admin_service,
     obtener_plato_service,
     actualizar_parcial_plato_service,
     cambiar_estado_plato_service,
     eliminar_plato_service)
-from auth_decorators import admin_required
+from ..auth_decorators import admin_required
 
 admin_menu_bp = Blueprint("admin_menu", __name__)
 

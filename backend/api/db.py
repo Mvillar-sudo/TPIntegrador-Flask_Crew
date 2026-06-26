@@ -1,6 +1,6 @@
 import mysql.connector
 from flask import g
-from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT
+from .config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, SCHEMA_SQL_PATH
 
 def get_db():
     if 'db' not in g or not g.db.is_connected():
@@ -23,7 +23,7 @@ def init_db():
     db = get_db()
     cursor = db.cursor()
 
-    with open('data/schemas.sql', encoding='utf-8') as f:
+    with open(SCHEMA_SQL_PATH, encoding='utf-8') as f:
         sql = f.read()
 
     for result in cursor.execute(sql, multi=True):

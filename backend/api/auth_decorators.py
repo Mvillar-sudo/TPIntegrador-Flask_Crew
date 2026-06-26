@@ -1,8 +1,8 @@
 from functools import wraps
 from flask import request, jsonify
 import jwt
-from db import query_db
-from services.auth_service import JWT_SECRET
+from .db import query_db
+from .services.auth_service import JWT_SECRET
 
 
 def obtener_usuario_por_email(email):

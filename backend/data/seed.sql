@@ -18,10 +18,10 @@ INSERT INTO servicios (nombre, activo) VALUES
 ON DUPLICATE KEY UPDATE nombre=nombre;
 
 -- 3. Insertar platillos iniciales del menú (productos)
-INSERT INTO menu (nombre, precio, descripcion, activo) VALUES
+INSERT INTO menu (nombre_plato, precio, descripcion, estado) VALUES
 ('Pizza Napolitana', 12500.00, 'Pizza con mozzarella, rodajas de tomate, ajo y albahaca fresca.', TRUE),
 ('Milanesa con Papas Fritas', 11000.00, 'Clásica milanesa de carne acompañada de papas fritas crujientes.', TRUE),
 ('Hamburguesa Completa', 9500.00, 'Hamburguesa casera con queso, lechuga, tomate, huevo y jamón, con papas.', TRUE),
 ('Ensalada César', 8500.00, 'Lettuce romana, croutons, queso parmesano y aderezo César.', TRUE),
 ('Tiramisú', 4500.00, 'Postre clásico italiano con café y mascarpone.', TRUE)
-ON DUPLICATE KEY UPDATE nombre=nombre;
+ON DUPLICATE KEY UPDATE nombre_plato=nombre_plato;

@@ -7,26 +7,26 @@ import os
 base_dir = Path(__file__).resolve().parent
 load_dotenv(os.path.join(base_dir, '.env'))
 
-import db
-from extensions import mail
-
-from routes.menu import menu_bp
-from routes.resena import resenas_bp
-from routes.auth import auth_bp
-from routes.reservas import reservas_bp
-from routes.servicios import servicios_bp
-from routes.admin_menu import admin_menu_bp
-from routes.dashboard import dashboard_bp
+from . import db
+from .extensions import mail
+from .routes import (
+    menu_bp,
+    resenas_bp,
+    auth_bp,
+    reservas_bp,
+    servicios_bp,
+    admin_menu_bp,
+    dashboard_bp
+)
 
 
 def create_app():
     app = Flask(__name__)
 
-    app.config.from_object('config') 
-    
+    app.config.from_object('api.config')
 
-    CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
-    
+    CORS(app, origins=[app.config.get('FRONTEND_URL', 'http://localhost:3000')], supports_credentials=True)
+
     db.init_app(app)
     mail.init_app(app)
     mail.app = app
@@ -35,7 +35,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_menu_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp)
-    
+
     app.register_blueprint(resenas_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(servicios_bp)
@@ -53,7 +53,3 @@ def create_app():
         return jsonify({"error": "Error interno del servidor"}), 500
 
     return app
-
-if __name__ == '__main__':
-    app = create_app()
-    app.run(port=5000, debug=False)

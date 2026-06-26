@@ -661,6 +661,41 @@ paths:
         "500":
           $ref: "#/components/responses/ServerError"
 
+  /api/reservas/{id_reserva}/cancelar:
+    parameters:
+      - $ref: "#/components/parameters/IdReserva"
+    patch:
+      tags:
+        - Reservas
+      summary: Cancelar reserva desde administrador
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Reserva cancelada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          description: La reserva ya estaba cancelada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Reserva no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
   /api/reservas/cancelar/{token}:
     parameters:
       - name: token
@@ -1197,7 +1232,7 @@ components:
         qr_code:
           type: string
           nullable: true
-          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\app\\static\\qr\\reserva_8.png
+          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\api\\static\\qr\\reserva_8.png
         fecha_creacion:
           type: string
           format: date-time
@@ -1245,7 +1280,7 @@ components:
         qr_code:
           type: string
           description: Ruta del QR guardada para la reserva.
-          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\app\\static\\qr\\reserva_8.png
+          example: D:\\ADMIN\\TPIntegrador-Flask_Crew\\frontend\\api\\static\\qr\\reserva_8.png
 
     Resena:
       type: object

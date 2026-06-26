@@ -3,9 +3,9 @@ import os
 import datetime
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash, current_app, session
 from werkzeug.utils import secure_filename
-from utils import auth_headers
+from .utils import auth_headers
 
-from utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
+from .utils import requiere_login, guardar_sesion, limpiar_sesion, extraer_mensajes_error
 
 admin_bp = Blueprint('admin', __name__)
 
