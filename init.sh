@@ -1,34 +1,56 @@
 #!/bin/bash
-echo "🚀 === INICIALIZANDO ENTORNO DEL PROYECTO ==="
 
-# Verificar si Python 3 está instalado
-if ! command -v python3 &> /dev/null
-then
-    echo "❌ Error: Python 3 no está instalado en este sistema."
-    echo "Por favor instalalo antes de continuar (ej: 'sudo apt install python3 python3-venv' en Ubuntu/Debian)."
-    exit 1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "=== INICIALIZANDO ENTORNO DEL PROYECTO ==="
+
+find_python() {
+  if command -v python3 >/dev/null 2>&1; then
+    command -v python3
+  elif command -v python >/dev/null 2>&1; then
+    command -v python
+  elif command -v py >/dev/null 2>&1; then
+    echo "py -3"
+  else
+    echo ""
+  fi
+}
+
+PYTHON_CMD="$(find_python)"
+
+if [[ -z "$PYTHON_CMD" ]]; then
+  echo "Error: no se encontro Python en este sistema."
+  echo "Instalalo antes de continuar."
+  exit 1
 fi
 
-# 1. Configurar el Backend
-echo -e "\n📦 1/2. Configurando el Backend..."
-cd backend
-python3 -m venv venv
-source venv/bin/activate || source venv/Scripts/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-deactivate
-cd ..
+setup_component() {
+  local component_dir="$1"
+  local label="$2"
+  local requirements_file="$component_dir/requirements.txt"
 
-# 2. Configurar el Frontend
-echo -e "\n🎨 2/2. Configurando el Frontend (Jinja/JS)..."
-cd frontend
-python3 -m venv venv
-source venv/bin/activate || source venv/Scripts/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-deactivate
-cd ..
+  echo -e "\nConfigurando $label..."
+  cd "$component_dir" || exit 1
 
-echo -e "\n✅ === ¡ENTORNO LISTO! ==="
-echo "• Para correr el Back: cd backend && source venv/bin/activate && python app/app.py"
-echo "• Para correr el Front: cd frontend && source venv/bin/activate && python app/app.py"
+  if [[ "$PYTHON_CMD" == "py -3" ]]; then
+    py -3 -m venv --clear venv
+  else
+    "$PYTHON_CMD" -m venv --clear venv
+  fi
+
+  if [[ -f "venv/Scripts/python.exe" ]]; then
+    VENV_PY="venv/Scripts/python.exe"
+  else
+    VENV_PY="venv/bin/python"
+  fi
+
+  "$VENV_PY" -m pip install --upgrade pip
+  "$VENV_PY" -m pip install -r "$requirements_file"
+}
+
+setup_component "$SCRIPT_DIR/backend" "Backend"
+setup_component "$SCRIPT_DIR/frontend" "Frontend"
+
+echo -e "\n=== ENTORNO LISTO ==="
+echo "Para correr el backend: cd backend && python -m api.run"
+echo "Para correr el frontend: cd frontend && python -m webapp.run"
