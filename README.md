@@ -51,13 +51,13 @@ cd backend
 source venv/bin/activate
 
 # Iniciar la aplicación
-python app/app.py
+python -m api.run
 ```
 
 **O en una sola línea:**
 
 ```bash
-cd backend && source venv/bin/activate && python app/app.py
+cd backend && source venv/bin/activate && python -m api.run
 ```
 
 ### 2. Levantar el Frontend (UI)
@@ -74,13 +74,13 @@ cd frontend
 source venv/bin/activate
 
 # Iniciar la aplicación
-python app/app.py
+python -m webapp.run
 ```
 
 **O en una sola línea:**
 
 ```bash
-cd frontend && source venv/bin/activate && python app/app.py
+cd frontend && source venv/bin/activate && python -m webapp.run
 ```
 
 ---
