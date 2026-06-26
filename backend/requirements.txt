@@ -6,3 +6,4 @@ Flask-Mail==0.9.1
 werkzeug==3.0.0
 qrcode==7.4.2
 PyJWT==2.9.0
+gunicorn==22.0.0
