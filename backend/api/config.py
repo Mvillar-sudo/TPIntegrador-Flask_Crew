@@ -20,3 +20,7 @@ MAIL_ASCII_ATTACHMENTS = False
 
 MAX_RESERVAS_POR_FRANJA = 10
 
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+QR_FOLDER = os.getenv('QR_FOLDER', 'api/static/qr')
+SCHEMA_SQL_PATH = os.getenv('SCHEMA_SQL_PATH', 'data/schemas.sql')
+
