@@ -1,11 +1,14 @@
-import secrets
 from flask import Blueprint, jsonify, request
-from db import get_db
-from config import MAX_RESERVAS_POR_FRANJA
-from validators.qr import generar_qr
-from validators.email import enviar_email_reserva
-from services.reservas_service import obtener_reserva_service, listar_reservas_service, crear_reserva_service, cancelar_por_token_service, cancelar_reserva_service, validar_qr_service
-from auth_decorators import admin_required
+from ..services.reservas_service import (
+    obtener_reserva_service,
+    listar_reservas_service,
+    crear_reserva_service,
+    cancelar_por_token_service,
+    cancelar_reserva_service,
+    validar_qr_service,
+    verificar_disponibilidad_service
+)
+from ..auth_decorators import admin_required
 
 reservas_bp = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
@@ -36,7 +39,9 @@ def crear_reserva():
     data = request.json
     try:
         resultado = crear_reserva_service(data)
-        return jsonify(resultado["mensaje"]), resultado["status"]
+        if resultado["estado"] == "creada":
+            return jsonify(resultado["mensaje"]), 201
+        return jsonify(resultado["mensaje"]), 400
     except Exception as e:
         return jsonify({"mensaje": "Error al crear la reserva", "error": str(e)}), 500
 
@@ -44,16 +49,23 @@ def crear_reserva():
 def cancelar_por_token(token):
     try:
         resultado = cancelar_por_token_service(token)
-        return jsonify(resultado["mensaje"]), resultado["status"]
+        if resultado["estado"] == "cancelada":
+            return jsonify(resultado["mensaje"]), 200
+        return jsonify(resultado["mensaje"]), 400
     except Exception as e:
         return jsonify({"mensaje": "Error al cancelar la reserva", "error": str(e)}), 500
 
         
 @reservas_bp.route('/<int:id_reserva>/cancelar', methods=['PATCH'])
+@admin_required
 def cancelar_reserva(id_reserva):
     try:
         resultado = cancelar_reserva_service(id_reserva)
-        return jsonify(resultado["mensaje"]), resultado["status"]
+        if resultado["estado"] == "cancelada":
+            return jsonify(resultado["mensaje"]), 200
+        if resultado["estado"] == "no_encontrada":
+            return jsonify(resultado["mensaje"]), 404
+        return jsonify(resultado["mensaje"]), 400
     except Exception as e:
         return jsonify({"mensaje": "Error al cancelar la reserva", "error": str(e)}), 500
         
@@ -69,37 +81,32 @@ def validar_qr():
     try:
         resultado = validar_qr_service(id_reserva, qr_code)
 
-        if resultado["status"] == "no_encontrada":
+        if resultado["estado"] == "no_encontrada":
             return jsonify({"mensaje": "Reserva no encontrada"}), 404
-        elif resultado["status"] == "cancelada":
+        elif resultado["estado"] == "cancelada":
             return jsonify({"mensaje": "La reserva ha sido cancelada"}), 400
-        elif resultado["status"] == "validada":
+        elif resultado["estado"] == "validada":
             return jsonify({"mensaje": "La reserva ha sido validada anteriormente"}), 400
-        elif resultado["status"] == "qr_invalido":
+        elif resultado["estado"] == "qr_invalido":
             return jsonify({"mensaje": "QR inválido, acceso denegado"}), 400
         else:
             return jsonify({"mensaje": "QR válido, acceso permitido"}), 200
     except Exception as e:
         return jsonify({"mensaje": "Error al validar el QR", "error": str(e)}), 500
 
+
 @reservas_bp.route('/disponibilidad', methods=['GET'])
 def verificar_disponibilidad():
     fecha = request.args.get("fecha")
     hora = request.args.get("hora")
 
-    conn = get_db()
-    cursor = conn.cursor()
+    if not fecha or not hora:
+        return jsonify({"mensaje": "Faltan parámetros requeridos: fecha y hora"}), 400
+
     try:
-        cursor.execute("""
-                       SELECT COUNT(*) FROM reservas
-                       WHERE fecha = %s AND hora = %s AND estado != 'cancelada'
-                       """, (fecha, hora)
-                       )
-        resultado = cursor.fetchone()
-        total_reservas = resultado[0] if resultado is not None else 0
-        disponibilidad = total_reservas < MAX_RESERVAS_POR_FRANJA
-        return jsonify({"disponibilidad": disponibilidad, "reservas_actuales": total_reservas})
-    except Exception as e:
-        return jsonify({"mensaje": "Error al consultar la disponibilidad"}), 400
-    finally:
-        cursor.close()
+        resultado = verificar_disponibilidad_service(fecha, hora)
+
+        return jsonify(resultado), 200
+
+    except Exception:
+        return jsonify({"mensaje": "Error al procesar la solicitud de disponibilidad"}), 500
