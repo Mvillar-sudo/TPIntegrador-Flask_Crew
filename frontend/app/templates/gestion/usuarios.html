@@ -62,7 +62,7 @@
                                 <td class="text-center">
                                     <a href="{{ url_for('admin.editar_usuario_vista', id_usuario=usuario.id_usuario) }}" class="btn btn-warning btn-xs">Editar</a>
                                     
-                                    <form action="{{ url_for('admin.eliminar_usuario_vista', id_usuario=usuario.id_usuario) }}" method="POST" class="form-eliminar">
+                                    <form action="{{ url_for('admin.eliminar_usuario_vista', id_usuario=usuario.id_usuario) }}" method="POST" class="form-eliminar" data-nombre="este usuario">
                                         <button type="submit" class="btn btn-danger btn-xs">Borrar</button>
                                     </form>
                                 </td>
